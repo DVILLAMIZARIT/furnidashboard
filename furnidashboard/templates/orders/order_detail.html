@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Order -- {{object}}{% endblock %}
+
+{% block page_title %}Order Details - {{object}}{% endblock page_title %}
+
+{% block content %}
+  <div>{{order.number}}</div>
+  <div>{{order.created}}</div>
+  <div>{{order.customer}}</div>
+  <div>{{order.status}}</div>
+  <div>{{order.deposit_balance}}</div>
+  <div>{{order.associate}}</div>
+{% endblock content %}

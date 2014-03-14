@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Modify Order{% endblock %}
+
+{% block page_title %}Modify Order {{order}}{% endblock page_title %}
+
+{% block content %}
+
+<!--<div>
+  <form action="" method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Update" />
+  </form>
+</div>-->
+
+<form action="" method="POST">
+  {% csrf_token %}
+  {{ form.as_p }} 
+
+  <!--<fieldset class="formset">
+    <legend>Customer Info</legend>
+    {{ customer_form.management_form }}
+    {% for subform in customer_form %}
+      {{ subform.errors }}
+      <div class="form-row inline">
+        {{ subform }}
+      </div>
+    {% endfor %}
+  </fieldset>-->
+
+  <fieldset class="formset">
+    <legend>Commissions</legend>
+    {{ commission_form.management_form }}
+    {{ commission_form.non_form_errors }}
+    {% for com_form in commission_form %}
+      <div class="form-row inline">
+        {{ com_form.as_p }}
+      </div>
+    {% endfor %}
+  </fieldset>
+
+  <input type="submit" value="Save"/>
+
+</form>
+
+{% endblock content %}
