@@ -22,8 +22,8 @@ class OrderListView(LoginRequiredMixin, ListView):
   def get_context_data(self, **kwargs):
     context = super(OrderListView, self).get_context_data(**kwargs)
     table = OrderTable(context['order_list'])
-    context['table'] = table
     RequestConfig(self.request).configure(table)
+    context['table'] = table
     return context
 
 class OrderDetailView(LoginRequiredMixin, DetailView):
