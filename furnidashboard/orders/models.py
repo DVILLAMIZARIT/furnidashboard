@@ -18,11 +18,11 @@ class Order(models.Model):
   modified = models.DateTimeField(auto_now=True)
   customer = models.ForeignKey(Customer, default=0, blank=True, null=True)
   status = models.CharField(max_length=5, choices=ORDER_STATUSES)
-  deposit_balance = models.FloatField()
-  subtotal_after_discount = models.FloatField()
-  tax = models.FloatField()
-  shipping = models.FloatField()
-  comments = models.TextField()
+  deposit_balance = models.FloatField(blank=True, default=0.0)
+  subtotal_after_discount = models.FloatField(blank=True, default=0.0)
+  tax = models.FloatField(blank=True, default=0.0)
+  shipping = models.FloatField(blank=True, default=0.0)
+  comments = models.TextField(blank=True)
   store = models.ForeignKey(Store)
 
   @property

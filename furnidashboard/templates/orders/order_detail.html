@@ -5,6 +5,10 @@
 {% block page_title %}Order Details - {{object}}{% endblock page_title %}
 
 {% block content %}
+  
+  <div><a href="{% url 'order_edit' object.pk %}" title="Edit Order">Edit Info</a></div>
+  <hr/>
+  
   <div>{{order.number}}</div>
   <div>{{order.created}}</div>
   <div>{{order.customer}}</div>

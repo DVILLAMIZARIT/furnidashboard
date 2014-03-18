@@ -11,4 +11,4 @@ class OrderTable(tables.Table):
   class Meta:
     model = Order
     attrs = {"class": "paleblue"}
-    fields = ("number", "created", "modified", "customer", "status", "edit")
+    fields = ("number", "created", "customer", "grand_total", "status","modified", "edit")
