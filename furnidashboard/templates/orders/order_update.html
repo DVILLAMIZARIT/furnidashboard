@@ -17,7 +17,7 @@
   {% csrf_token %}
   {{ form.as_p }} 
 
-  <!--<fieldset class="formset">
+  <fieldset class="formset">
     <legend>Customer Info</legend>
     {{ customer_form.management_form }}
     {% for subform in customer_form %}
@@ -26,7 +26,7 @@
         {{ subform }}
       </div>
     {% endfor %}
-  </fieldset>-->
+  </fieldset>
 
   <fieldset class="formset">
     <legend>Commissions</legend>
