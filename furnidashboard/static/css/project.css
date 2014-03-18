@@ -1,1 +1,23 @@
-/*! project specific CSS goes here. */
+.field-wrapper {
+  margin-right:25px;
+}
+.field-wrapper.inline {
+  float:left;
+}
+.inline {
+  display:inline;
+}
+.clear {
+  clear:both;
+}
+.fieldset-inline {
+  display:inline;
+}
+#customer-info .field-wrapper {
+  float: left;
+}
+#new-customer-form {
+  float: left;
+  margin-left: 35px;
+  width: 50px;
+}

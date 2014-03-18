@@ -1,7 +1,7 @@
 from django.views.generic import ListView, DetailView, UpdateView
 from django.views.generic.edit import CreateView, DeleteView
 from .models import Order
-from .tables import OrderTable
+from .tables import OrderTable, UnplacedOrdersTable
 from .forms import OrderForm, CommissionFormSet, CustomerFormSet
 from customers.models import Customer
 from django.core.urlresolvers import reverse_lazy, reverse
@@ -21,9 +21,13 @@ class OrderListView(LoginRequiredMixin, ListView):
 
   def get_context_data(self, **kwargs):
     context = super(OrderListView, self).get_context_data(**kwargs)
-    table = OrderTable(context['order_list'])
-    RequestConfig(self.request).configure(table)
-    context['table'] = table
+    recent_orders_table = OrderTable(context['order_list'])
+    unplaced_orders = Order.objects.filter(status__in=('SP', 'ST'), vendor_order_no=None)
+    unplaced_orders_table = UnplacedOrdersTable(unplaced_orders)
+    RequestConfig(self.request).configure(recent_orders_table)
+    RequestConfig(self.request).configure(unplaced_orders_table)
+    context['recent_orders_table'] = recent_orders_table
+    context['unplaced_orders_table'] = unplaced_orders_table
     return context
 
 class OrderDetailView(LoginRequiredMixin, DetailView):
@@ -36,11 +40,6 @@ class OrderDeleteView(LoginRequiredMixin, DeleteView):
   context_object_name = "order"
   success_url = reverse_lazy("order_list")
 
-class OrderUpdateView(LoginRequiredMixin, UpdateView):
-  model = Order
-  context_object_name = "order"
-  template_name = "orders/order_update.html"
-  form_class = OrderForm
 
 class OrderUpdateView(LoginRequiredMixin, UpdateView):
   model = Order
@@ -56,7 +55,7 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
     self.object = self.get_object()
     form_class = self.get_form_class()
     form = self.get_form(form_class)
-    customer_form = CustomerFormSet(queryset=Customer.objects.filter(pk=self.object.customer_id))
+    customer_form = CustomerFormSet(queryset=Customer.objects.none()) #filter(pk=self.object.customer_id))
     commission_form = CommissionFormSet(instance=self.object)
     context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form)
     return self.render_to_response(context)
@@ -84,12 +83,13 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
     """
     self.object = form.save(commit=False)
 
-    if form.cleaned_data['customer'] is None:
-      if customer_form.is_valid():
+    if customer_form.has_changed():
+      if customer_form.is_valid() and len(customer_form[0].cleaned_data['first_name'].strip()) > 0 and len(customer_form[0].cleaned_data['last_name'].strip()) > 0:
         cust = customer_form[0].save()
         self.object.customer = cust
       else:
-        return self.form_invald(form=form, commission_form=commission_form, customer_form=customer_form)
+        messages.error(self.request, "Please enter customer information")
+        return self.form_invalid(form=form, commission_form=commission_form, customer_form=customer_form)
 
     #customer_form.instance = self.object
     #customer_form.save()
@@ -102,59 +102,9 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
     """
     Called if any of the forms on order page is invalid. Returns a response with an invalid form in the context
     """
-    messages.error(self.request, "Error saving the commissions information")
+    messages.error(self.request, "Error saving the data")
     context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form)
     return self.render_to_response(context)
-
-#    if form.is_valid():
-#      context = self.get_context_data(form=form)
-#      commission_form = context['commission_formset']
-#      customer_form = context['customer_formset'][0]
-#      self.object = form.save()
-#      if commission_form.is_valid():
-#        commission_form.save()
-#      else:
-#        messages.error(self.request, "Error saving the order information")
-#        return self.form_invalid(form)
-#
-#      if customer_form.is_valid():
-#        customer = customer_form.save()
-#        self.object.customer = customer
-#      else:
-#        messages.error(self.request, "Error saving the customer information")
-#        return self.form_invalid(form)
-#
-#      return super(OrderUpdateView, self).form_valid(form)
-#
-#  def post(self, request, *args, **kwargs):
-#    self.object = self.get_object()
-#    form_class = self.get_form_class()
-#    form = self.get_form(form_class)
-#    if form.is_valid():
-#      context = self.get_context_data(form=form)
-#      commission_form = context['commission_formset']
-#      #self.object = form.save()
-#      if commission_form.is_valid():
-#        commission_form.save()
-#      else:
-#        messages.error(self.request, "Error saving the order information")
-#        return self.form_invalid(form)
-#
-#      return self.form_valid(form)
-#
-#    else:
-#      return self.form_invalid(form)
-#
-#  def get_context_data(self, **kwargs):
-#    context = super(OrderUpdateView, self).get_context_data(**kwargs)
-#    if self.request.POST:
-#      context['commission_formset'] = CommissionFormSet(self.request.POST, instance=self.object)
-#      context['customer_formset'] = CustomerFormSet(self.request.POST)
-#    else:
-#      context['commission_formset'] = CommissionFormSet(instance=self.object)
-#      context['customer_formset'] = CustomerFormSet(queryset=Customer.objects.filter(pk=self.object.customer.pk))
-#
-#    return context
 
   def get_success_url(self):
     return self.get_object().get_absolute_url() #reverse('order_detail', kwargs={'pk': self.object.pk})
@@ -228,50 +178,6 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
   def get_success_url(self):
     return reverse('order_detail', kwargs={'pk': self.object.pk})
 
-#  def form_valid(self, form):
-#    if form.is_valid():
-#      context = self.get_context_data(form=form)
-#      customer_form = context['customer_formset'][0]
-#      self.object = form.save()
-#      if customer_form.is_valid():
-#        customer = customer_form.save()
-#        customer.save()
-#        self.object.customer = customer
-#      else:
-#        messages.error(self.request, "Error saving the customer information")
-#        return self.form_invalid(form)
-#
-#      return super(OrderCreateView, self).form_valid(form)
-
-#  def post(self, request, *args, **kwargs):
-#    self.object = None #self.get_object()
-#    form_class = self.get_form_class()
-#    form = self.get_form(form_class)
-#    if form.is_valid():
-#      context = self.get_context_data(form=form)
-#      customer_form = context['customer_formset']
-#      #self.object = form.save()
-#      if customer_form.is_valid():
-#        customer = customer_form.save()
-#        self.object = form.save()
-#        object.customer = customer
-#      else:
-#        messages.error(self.request, "Error saving the customer information")
-#        return self.form_invalid(form)
-#
-#      return self.form_valid(form)
-#
-#    else:
-#      return self.form_invalid(form)
-#
-#  def get_context_data(self, **kwargs):
-#    context = super(OrderCreateView, self).get_context_data(**kwargs)
-#    if self.request.POST:
-#      context['customer_formset'] = CustomerFormSet(self.request.POST)
-#    else:
-#      context['customer_formset'] = CustomerFormSet(queryset=Customer.objects.none())
-#
-#    return context
 
 class OrderDeleteView(LoginRequiredMixin, DeleteView):
   model = Order

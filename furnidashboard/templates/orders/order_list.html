@@ -5,7 +5,7 @@
 
 {% block title %}Order List{% endblock %}
 
-{% block page_title %}All Orders{% endblock page_title %}
+{% block page_title %}Orders Dashboard{% endblock page_title %}
 
 {% block content %}
   <!--<ul>
@@ -13,7 +13,15 @@
     <li>{{ order }} <a href="{% url "order_detail" order.pk %}" title="View order detail">View</a> | <a href="{% url "order_edit" order.pk %}" title="Edit order">Edit</a> | <a href="{% url "order_delete" order.pk %}" title="Delete Order">Delete</a> </li>
     {% endfor %}
   </ul>-->
-  
-  {% render_table table  %}
+
+  <div>
+    <h2>Unsubmitted Special Orders</h2>
+    {% render_table unplaced_orders_table  %}
+  </div>
+  <hr/>
+  <div>
+    <h2>Recent Orders</h2>
+    {% render_table recent_orders_table  %}
+  </div>
 
 {% endblock content %}

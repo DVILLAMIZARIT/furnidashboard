@@ -24,6 +24,8 @@ class Order(models.Model):
   shipping = models.FloatField(blank=True, default=0.0)
   comments = models.TextField(blank=True)
   store = models.ForeignKey(Store)
+  vendor_order_no = models.CharField(max_length=50, blank=True, null=True)
+  vendor_placed_order_date = models.DateTimeField(null=True, blank=True)
 
   @property
   def balance_due(self):

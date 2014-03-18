@@ -15,18 +15,95 @@
 
 <form action="" method="POST">
   {% csrf_token %}
-  {{ form.as_p }} 
+  
+  <!--{{ form.as_p }}-->
 
-  <fieldset class="formset">
-    <legend>Customer Info</legend>
-    {{ customer_form.management_form }}
-    {% for subform in customer_form %}
-      {{ subform.errors }}
-      <div class="form-row inline">
-        {{ subform }}
-      </div>
-    {% endfor %}
+  {{ form.non_field_errors }} 
+
+  <fieldset id="order-info">
+    <legend>Order info</legend>
+
+     <div class="field-wrapper inline">
+       {{ form.number.errors }}
+       <label for="id_number">Order #</label>
+       {{ form.number }}
+     </div>
+     <div class="field-wrapper inline">
+       {{ form.status.errors }}
+       <label for="id_status">Status</label>
+       {{ form.status }}
+     </div>
+     <div class="field-wrapper inline clear">
+       {{ form.vendor_order_no.errors }}
+       <label for="id_vendor_order_no">Vendor  Order #</label>
+       {{ form.vendor_order_no }}
+     </div>
+     <div class="field-wrapper inline">
+       {{ form.vendor_placed_order_date.errors }}
+       <label for="id_vendor_placed_order_date">Date Order Placed with Vendor</label>
+       {{ form.vendor_placed_order_date}}
+     </div>
+
+     <div class="field-wrapper clear">
+       {{ form.store.errors }}
+       <label for="id_store">Store</label>
+       {{ form.store }}
+     </div>
+
   </fieldset>
+
+  <fieldset id="customer-info">
+    <legend>Customer Info</legend>
+    <div class="customer-selection">
+      <h5>Select existing or create a customer</h5>
+      <div class="field-wrapper">
+        {{ form.customer.errors }}
+        <label for="id_customer">Customer</label>
+        {{ form.customer }}
+      </div>
+      <fieldset id="new-customer-form" class="fieldset-inline">
+        <legend>Create a customer</legend>
+        {{ customer_form.management_form }}
+        {% for subform in customer_form %}
+          {{ subform.non_field_errors }}
+          <div class="form-row inline">
+            {{ subform }}
+          </div>
+        {% endfor %}
+      </fieldset>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Payment Information</legend>
+    <div class="field-wrapper">
+      {{ form.subtotal_after_discount.errors }}
+      <label for="id_subtotal_after_discount">Subtotal After Discount</label>
+      {{ form.subtotal_after_discount }}
+    </div>
+    <div class="field-wrapper">
+      {{ form.deposit_balance.errors }}
+      <label for="id_deposit_balance">Deposit Balance</label>
+      {{ form.deposit_balance }}
+    </div>
+    <div class="field-wrapper">
+      {{ form.tax.errors }}
+      <label for="id_tax">Tax</label>
+      {{ form.tax }}
+    </div>
+    <div class="field-wrapper">
+      {{ form.shipping.errors }}
+      <label for="id_shipping">Shipping</label>
+      {{ form.shipping }}
+    </div>
+  </fieldset>
+
+  <div class="field-wrapper">
+    {{ form.comments.errors }}
+    <label for="id_comments">Comments</label>
+    {{ form.comments }}
+  </div>
+
 
   <fieldset class="formset">
     <legend>Commissions</legend>
