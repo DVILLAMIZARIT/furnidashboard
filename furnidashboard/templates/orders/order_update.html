@@ -97,6 +97,17 @@
       {{ form.shipping }}
     </div>
   </fieldset>
+  
+  <fieldset>
+    <legend>Sold Items</legend>
+    {{ items_form.management_form }}
+    {{ items_form.non_field_errors }}    
+    {% for item_form in items_form %}
+      <div class="form-row inline">
+        {{ item_form }}
+      </div>
+    {% endfor %}
+  </fieldset>
 
   <div class="field-wrapper">
     {{ form.comments.errors }}

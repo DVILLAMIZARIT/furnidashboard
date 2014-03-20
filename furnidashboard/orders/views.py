@@ -2,7 +2,7 @@ from django.views.generic import ListView, DetailView, UpdateView
 from django.views.generic.edit import CreateView, DeleteView
 from .models import Order, OrderItem, OrderDelivery
 from .tables import OrderTable, UnplacedOrdersTable
-from .forms import OrderForm, CommissionFormSet, CustomerFormSet, ItemsFormSet
+from .forms import OrderForm, CommissionFormSet, CustomerFormSet, ItemFormSet
 from customers.models import Customer
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.exceptions import ValidationError
@@ -22,7 +22,7 @@ class OrderListView(LoginRequiredMixin, ListView):
   def get_context_data(self, **kwargs):
     context = super(OrderListView, self).get_context_data(**kwargs)
     recent_orders_table = OrderTable(context['order_list'])
-    unplaced_orders = Order.objects.filter(item_set__po_num=None)
+    unplaced_orders = Order.objects.filter(orderitem__po_num=None)
     unplaced_orders_table = UnplacedOrdersTable(unplaced_orders)
     RequestConfig(self.request).configure(recent_orders_table)
     RequestConfig(self.request).configure(unplaced_orders_table)
@@ -57,7 +57,7 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
     form = self.get_form(form_class)
     customer_form = CustomerFormSet(queryset=Customer.objects.none()) #filter(pk=self.object.customer_id))
     commission_form = CommissionFormSet(instance=self.object)
-    items_form = ItemsFormSet(instance=self.object)
+    items_form = ItemFormSet(instance=self.object)
     context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form, items_form=items_form)
     return self.render_to_response(context)
 
@@ -72,7 +72,7 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
     #self.object = form.save(commit=False)
     customer_form = CustomerFormSet(self.request.POST)
     commission_form = CommissionFormSet(self.request.POST, instance=self.object)
-    items_form = ItemsFormSet(self.request.POST, instance=self.object)
+    items_form = ItemFormSet(self.request.POST, instance=self.object)
     if form.is_valid() and commission_form.is_valid() and items_form.is_valid():
       return self.form_valid(form, commission_form, customer_form, items_form)
     else:
@@ -128,7 +128,7 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
     form = self.get_form(form_class)
     customer_form = CustomerFormSet(queryset=Customer.objects.none())
     commission_form = CommissionFormSet()
-    items_form = ItemsFormSet()
+    items_form = ItemFormSet()
     context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form, items_form=items_form)
     return self.render_to_response(context)
 
@@ -143,7 +143,7 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
     #self.object = form.save(commit=False)
     customer_form = CustomerFormSet(self.request.POST)
     commission_form = CommissionFormSet(self.request.POST)
-    items_form = ItemsFormSet(self.request.POST)
+    items_form = ItemFormSet(self.request.POST)
     if form.is_valid() and commission_form.is_valid() and items_form.is_valid(): 
       return self.form_valid(form, commission_form, customer_form, items_form)
     else:
@@ -179,7 +179,7 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
     commission_form.instance = self.object
     commission_form.save()
     items_form.instance = self.object
-    itemsform.save()
+    items_form.save()
     self.object.save()
     return HttpResponseRedirect(self.get_success_url())
 

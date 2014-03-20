@@ -7,7 +7,7 @@ from django.forms.models import inlineformset_factory, modelformset_factory
 
 CommissionFormSet = inlineformset_factory(Order, Commission, extra=1, max_num=1, can_delete=False)
 CustomerFormSet = modelformset_factory(Customer, extra=1, max_num=1)
-ItemFormSet = modelformset_factory(OrderItem, extra=1)
+ItemFormSet = inlineformset_factory(Order, OrderItem, extra=1)
 
 class OrderForm(forms.ModelForm):
   class Meta:
