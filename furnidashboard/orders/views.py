@@ -1,8 +1,8 @@
 from django.views.generic import ListView, DetailView, UpdateView
 from django.views.generic.edit import CreateView, DeleteView
-from .models import Order
+from .models import Order, OrderItem, OrderDelivery
 from .tables import OrderTable, UnplacedOrdersTable
-from .forms import OrderForm, CommissionFormSet, CustomerFormSet
+from .forms import OrderForm, CommissionFormSet, CustomerFormSet, ItemsFormSet
 from customers.models import Customer
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.exceptions import ValidationError
@@ -22,7 +22,7 @@ class OrderListView(LoginRequiredMixin, ListView):
   def get_context_data(self, **kwargs):
     context = super(OrderListView, self).get_context_data(**kwargs)
     recent_orders_table = OrderTable(context['order_list'])
-    unplaced_orders = Order.objects.filter(status__in=('SP', 'ST'), vendor_order_no=None)
+    unplaced_orders = Order.objects.filter(item_set__po_num=None)
     unplaced_orders_table = UnplacedOrdersTable(unplaced_orders)
     RequestConfig(self.request).configure(recent_orders_table)
     RequestConfig(self.request).configure(unplaced_orders_table)
@@ -57,7 +57,8 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
     form = self.get_form(form_class)
     customer_form = CustomerFormSet(queryset=Customer.objects.none()) #filter(pk=self.object.customer_id))
     commission_form = CommissionFormSet(instance=self.object)
-    context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form)
+    items_form = ItemsFormSet(instance=self.object)
+    context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form, items_form=items_form)
     return self.render_to_response(context)
 
   def post(self, request, *args, **kwargs):
@@ -71,12 +72,13 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
     #self.object = form.save(commit=False)
     customer_form = CustomerFormSet(self.request.POST)
     commission_form = CommissionFormSet(self.request.POST, instance=self.object)
-    if form.is_valid() and commission_form.is_valid():
-      return self.form_valid(form, commission_form, customer_form)
+    items_form = ItemsFormSet(self.request.POST, instance=self.object)
+    if form.is_valid() and commission_form.is_valid() and items_form.is_valid():
+      return self.form_valid(form, commission_form, customer_form, items_form)
     else:
-      return self.form_invalid(form, commission_form, customer_form)
+      return self.form_invalid(form, commission_form, customer_form, items_form)
 
-  def form_valid(self, form, commission_form, customer_form):
+  def form_valid(self, form, commission_form, customer_form, items_form):
     """
     Called if all forms are valid. Creates an Order instance along with associated Customer and Commission instances
     and then redirects to a success page
@@ -95,15 +97,17 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
     #customer_form.save()
     commission_form.instance = self.object
     commission_form.save()
+    items_form.instance = self.object
+    items_form.save()
     self.object.save()
     return HttpResponseRedirect(self.get_success_url())
 
-  def form_invalid(self, form, commission_form, customer_form):
+  def form_invalid(self, form, commission_form, customer_form, items_form):
     """
     Called if any of the forms on order page is invalid. Returns a response with an invalid form in the context
     """
     messages.error(self.request, "Error saving the data")
-    context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form)
+    context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form, items_form=items_form)
     return self.render_to_response(context)
 
   def get_success_url(self):
@@ -124,7 +128,8 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
     form = self.get_form(form_class)
     customer_form = CustomerFormSet(queryset=Customer.objects.none())
     commission_form = CommissionFormSet()
-    context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form)
+    items_form = ItemsFormSet()
+    context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form, items_form=items_form)
     return self.render_to_response(context)
 
   def post(self, request, *args, **kwargs):
@@ -138,20 +143,21 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
     #self.object = form.save(commit=False)
     customer_form = CustomerFormSet(self.request.POST)
     commission_form = CommissionFormSet(self.request.POST)
-    if form.is_valid() and commission_form.is_valid(): 
-      return self.form_valid(form, commission_form, customer_form)
+    items_form = ItemsFormSet(self.request.POST)
+    if form.is_valid() and commission_form.is_valid() and items_form.is_valid(): 
+      return self.form_valid(form, commission_form, customer_form, items_form)
     else:
-      return self.form_invalid(form, commission_form, customer_form)
+      return self.form_invalid(form, commission_form, customer_form, items_form)
 
-  def form_invalid(self, form, commission_form, customer_form):
+  def form_invalid(self, form, commission_form, customer_form, items_form):
     """
     Called if any of the forms on order page is invalid. Returns a response with an invalid form in the context
     """
     messages.error(self.request, "Error saving the commissions information")
-    context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form, messages=messages)
+    context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form, items_form=items_form, messages=messages)
     return self.render_to_response(context)
 
-  def form_valid(self, form, commission_form, customer_form):
+  def form_valid(self, form, commission_form, customer_form, items_form):
     """
     Called if all forms are valid. Creates an Order instance along with associated Customer and Commission instances
     and then redirects to a success page
@@ -172,6 +178,8 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
     #customer_form.save()
     commission_form.instance = self.object
     commission_form.save()
+    items_form.instance = self.object
+    itemsform.save()
     self.object.save()
     return HttpResponseRedirect(self.get_success_url())
 

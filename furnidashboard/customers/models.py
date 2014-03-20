@@ -11,8 +11,9 @@ class Customer(models.Model):
 
   first_name = models.CharField(max_length=200, blank=False)
   last_name = models.CharField(max_length=200, blank=True)
-  phone = models.CharField(max_length=30, blank=True)
-  email  = models.EmailField(blank=True)
+  phone = models.CharField(max_length=30, blank=True, null=True)
+  email  = models.EmailField(blank=True, null=True)
+  address  = models.TextField(blank=True, null=True)
 
   class Meta:
     db_table = "customers"

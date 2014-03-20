@@ -8,9 +8,13 @@ class Order(models.Model):
   A model class representing Order data
   """
   ORDER_STATUSES = (
-    ('SP', 'Special Order'),
-    ('SO', 'Sold Order'),
-    ('ST', 'Sold/Special Order'),
+    ('N', 'New'),
+    ('C', 'Closed'),
+    ('H', 'On Hold'),
+    ('P', 'In Production'),
+    ('T', 'In Transit'),
+    ('S', 'Scheduled for Delivery'),
+    ('D', 'Delivered'),
   )
 
   number = models.CharField(max_length=50)
@@ -24,8 +28,6 @@ class Order(models.Model):
   shipping = models.FloatField(blank=True, default=0.0)
   comments = models.TextField(blank=True)
   store = models.ForeignKey(Store)
-  vendor_order_no = models.CharField(max_length=50, blank=True, null=True)
-  vendor_placed_order_date = models.DateTimeField(null=True, blank=True)
 
   @property
   def balance_due(self):
@@ -46,3 +48,47 @@ class Order(models.Model):
 
   def get_absolute_url(self):
     return reverse("order_detail", kwargs={"pk":self.pk})
+
+class OrderItem(models.Model):
+  """
+  A model class representing Items Ordered (stock items, special order items, etc).
+  """
+  ITEM_STATUSES = (
+    ('P', 'Pending'),
+    ('O', 'Ordered'),
+    ('R', 'Received'),
+    ('D', 'Delivered'),
+  )
+
+  order = models.ForeignKey(Order)
+  in_stock = models.BooleanField(default=True, blank=True)
+  description = models.CharField(max_length=255)
+  po_num = models.CharField(max_length=125)
+  po_date = models.DateField(blank=True, null=True)
+  ack_num = models.CharField(max_length=125)
+  ack_date = models.DateField(blank=True, null=True)
+  eta = models.DateField(blank=True, null=True)
+
+  class Meta:
+    db_table = "order_items"
+  
+class OrderDelivery(models.Model):
+  """
+  A model class representing deliveries  tracking for Orders 
+  """
+
+  DELIVERY_TYPES = (
+      ('SELF', 'Self Pickup'),
+      ('RFD', 'Roberts Furniture Delivery'),
+      ('MGL', 'Miguel'),
+      ('CUSTOM', 'Other'),
+  )
+
+  order = models.ForeignKey(Order)
+  delivery_date = models.DateField(null=True, blank=True)
+  pickup_from = models.ForeignKey(Store)
+  delivery_slip = models.FileField(upload_to='deliveries/%Y/%m')
+  comments = models.TextField(blank=True, null=True)
+
+  class Meta:
+    db_table = "deliveries"
