@@ -98,16 +98,22 @@
     </div>
   </fieldset>
   
-  <fieldset id="order-items-fieldset>
+  <fieldset id="order-items-fieldset" class="accordion">
     <legend>Sold Items</legend>
     {{ items_form.management_form }}
     {{ items_form.non_field_errors }}    
     {% for item_form in items_form %}
-      <div class="items-form form-row inline">
-        {% for item_field in item_form %}
-          <div class="{{ ">
-          {{ item_field }}
-        {% endfor %}
+      <div class="accordion-group items-form form-row">
+        <div class="accordion-heading">
+          <a class="accordion-toggle" data-toggle="collapse" data-parent="#order-items-fieldset" href="#collapse{{forloop.counter}}">
+            Item
+          </a>
+        </div>
+        <div id="collapse{{forloop.counter}}" class="accordion-body collapse in">
+          <div class="accordion-inner">
+            {{ item_form }}
+          </div>
+        </div>       
       </div>
     {% endfor %}
   </fieldset>
