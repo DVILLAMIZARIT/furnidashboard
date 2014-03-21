@@ -98,13 +98,16 @@
     </div>
   </fieldset>
   
-  <fieldset>
+  <fieldset id="order-items-fieldset>
     <legend>Sold Items</legend>
     {{ items_form.management_form }}
     {{ items_form.non_field_errors }}    
     {% for item_form in items_form %}
-      <div class="form-row inline">
-        {{ item_form }}
+      <div class="items-form form-row inline">
+        {% for item_field in item_form %}
+          <div class="{{ ">
+          {{ item_field }}
+        {% endfor %}
       </div>
     {% endfor %}
   </fieldset>

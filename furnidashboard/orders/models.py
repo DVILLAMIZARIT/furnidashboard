@@ -63,9 +63,9 @@ class OrderItem(models.Model):
   order = models.ForeignKey(Order)
   in_stock = models.BooleanField(default=True, blank=True)
   description = models.CharField(max_length=255)
-  po_num = models.CharField(max_length=125)
+  po_num = models.CharField(max_length=125, blank=True)
   po_date = models.DateField(blank=True, null=True)
-  ack_num = models.CharField(max_length=125)
+  ack_num = models.CharField(max_length=125, blank=True)
   ack_date = models.DateField(blank=True, null=True)
   eta = models.DateField(blank=True, null=True)
 
