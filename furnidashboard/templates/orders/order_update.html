@@ -4,20 +4,41 @@
 
 {% block page_title %}Modify Order {{order}}{% endblock page_title %}
 
-{% block content %}
+{% block extra_js %}
+<script type="text/javascript">
+    $(function() {
+      $(document).ready(function() {
+        
+        $("#order-items-fieldset").find("div.accordion-body").eq(0).addClass("in"); //expand first item
 
-<!--<div>
-  <form action="" method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Update" />
-  </form>
-</div>-->
+        $('#order-items-fieldset div.items-form').formset({
+            prefix: '{{items_form.prefix}}',
+            added: function($form) {
+              var accordions = $form.parent().find('div.accordion-group');
+              var form_ind = accordions.length - 1;
+              $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapseordered_items-" + form_ind).text("Item " + (form_ind + 1));
+              $form.find("div.accordion-body").attr("id", "collapseordered_items-" + form_ind);
+              $("#order-items-fieldset").find("div.accordion-body").removeClass("in");
+              $form.find("div.accordion-heading a").click();
+            }
+        });
+      });
+    })
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style type="text/css">
+    .delete-row {
+        margin-left:5px;
+    }   
+</style>
+{% endblock %}
+
+{% block content %}
 
 <form action="" method="POST">
   {% csrf_token %}
-  
-  <!--{{ form.as_p }}-->
-
   {{ form.non_field_errors }} 
 
   <fieldset id="order-info">
@@ -32,16 +53,6 @@
        {{ form.status.errors }}
        <label for="id_status">Status</label>
        {{ form.status }}
-     </div>
-     <div class="field-wrapper inline clear">
-       {{ form.vendor_order_no.errors }}
-       <label for="id_vendor_order_no">Vendor  Order #</label>
-       {{ form.vendor_order_no }}
-     </div>
-     <div class="field-wrapper inline">
-       {{ form.vendor_placed_order_date.errors }}
-       <label for="id_vendor_placed_order_date">Date Order Placed with Vendor</label>
-       {{ form.vendor_placed_order_date}}
      </div>
 
      <div class="field-wrapper clear">
@@ -61,16 +72,24 @@
         <label for="id_customer">Customer</label>
         {{ form.customer }}
       </div>
-      <fieldset id="new-customer-form" class="fieldset-inline">
-        <legend>Create a customer</legend>
+      <div id="new-customer-form-wrapper" >
         {{ customer_form.management_form }}
         {% for subform in customer_form %}
-          {{ subform.non_field_errors }}
-          <div class="form-row inline">
-            {{ subform }}
+          <div class="accordion-group items-form form-row" id="{{ customer_form.prefix }}-row">
+            <div class="accordion-heading">
+              <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#new-customer-form-wrapper" href="#collapse{{ customer_form.prefix }}">
+                New Customer
+              </a>
+            </div>
+            <div id="collapse{{ customer_form.prefix }}" class="accordion-body collapse">
+              <div class="accordion-inner">
+                {{ subform.non_field_errors }}
+                {{ subform }}
+              </div>
+            </div>       
           </div>
         {% endfor %}
-      </fieldset>
+      </div>
     </div>
   </fieldset>
 
@@ -103,13 +122,13 @@
     {{ items_form.management_form }}
     {{ items_form.non_field_errors }}    
     {% for item_form in items_form %}
-      <div class="accordion-group items-form form-row">
+      <div class="accordion-group items-form form-row" id="{{ item_form.prefix }}-row">
         <div class="accordion-heading">
-          <a class="accordion-toggle" data-toggle="collapse" data-parent="#order-items-fieldset" href="#collapse{{forloop.counter}}">
-            Item
+          <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#order-items-fieldset" href="#collapse{{ item_form.prefix }}">
+           Item {{ forloop.counter }}
           </a>
         </div>
-        <div id="collapse{{forloop.counter}}" class="accordion-body collapse in">
+        <div id="collapse{{ item_form.prefix }}" class="accordion-body collapse">
           <div class="accordion-inner">
             {{ item_form }}
           </div>

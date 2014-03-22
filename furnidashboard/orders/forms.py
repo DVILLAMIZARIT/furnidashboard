@@ -32,5 +32,5 @@ class OrderForm(forms.ModelForm):
     model = Order
     #fields=('number', 'status', 'deposit_balance', 'subtotal_after_discount', 'tax', 'shipping', 'comments', 'store')
 
-ItemFormSet = inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=3)
+ItemFormSet = inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=1, max_num=100)
 

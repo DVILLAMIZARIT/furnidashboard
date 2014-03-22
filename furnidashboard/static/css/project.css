@@ -13,14 +13,6 @@
 .fieldset-inline {
   display:inline;
 }
-#customer-info .field-wrapper {
-  float: left;
-}
-#new-customer-form {
-  float: left;
-  margin-left: 35px;
-  width: 50px;
-}
 
 /* ORDER ITEMS FORM */
 #order-items-fieldset 
