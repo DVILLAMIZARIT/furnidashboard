@@ -4,13 +4,19 @@ from django.views.generic import TemplateView, ListView
 from orders.models import Order
 from customers.models import Customer
 from orders.views import OrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView
+from django.views.generic.edit import FormView
+from orders.forms import OrderForm
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    url(r'^$', TemplateView.as_view(template_name='base.html')),
+    
+    #home page template
+    url(r'^$', TemplateView.as_view(template_name='base.html')),  
+    #url(r'^$', FormView.as_view(form_class=OrderForm, template_name = 'orders/form.html')),    
+    
     url(
         regex= r'^orders/$', 
         view=OrderListView.as_view(),
@@ -44,4 +50,5 @@ urlpatterns = patterns('',
 
     # administration URLs 
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^ajax_select/', include('ajax_select.urls')),
 )

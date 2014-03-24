@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load bootstrap_toolkit %}
+
 {% block title %}Modify Order{% endblock %}
 
 {% block page_title %}Modify Order {{order}}{% endblock page_title %}
@@ -25,6 +27,9 @@
       });
     })
 </script>
+
+  {{ form.media }}
+  
 {% endblock %}
 
 {% block extra_css %}
@@ -130,7 +135,7 @@
         </div>
         <div id="collapse{{ item_form.prefix }}" class="accordion-body collapse">
           <div class="accordion-inner">
-            {{ item_form }}
+            {{ item_form|as_bootstrap }}
           </div>
         </div>       
       </div>

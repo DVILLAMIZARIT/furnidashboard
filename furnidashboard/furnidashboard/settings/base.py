@@ -195,7 +195,9 @@ DJANGO_APPS = (
 THIRD_PARTY_APPS = (
     # Database migration helpers:
     'south',
-    "django_tables2",
+    'django_tables2',
+    'ajax_select',
+    'bootstrap_toolkit',
 )
 
 # Apps specific for this project go here.
@@ -252,3 +254,12 @@ LOGGING = {
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
 WSGI_APPLICATION = '%s.wsgi.application' % SITE_NAME
 ########## END WSGI CONFIGURATION
+
+AJAX_LOOKUP_CHANNELS = {
+    # the simplest case, pass a DICT with the model and field to search against :
+    'customer' : dict(model='customers.customer', search_field='first_name'),
+
+    # or write a custom search channel and specify that using a TUPLE
+    # 'contact' : ('peoplez.lookups', 'ContactLookup'),
+    # this specifies to look for the class `ContactLookup` in the `peoplez.lookups` module
+}

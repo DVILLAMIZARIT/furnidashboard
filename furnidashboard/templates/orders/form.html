@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Modify Order{% endblock %}
+
+{% block page_title %}Modify Order {{order}}{% endblock page_title %}
+
+{% block extra_js %}
+  {{ form.media }}
+{% endblock %}
+
+{% block content %}
+
+<form action="" method="POST">
+  {% csrf_token %}
+  {{ form.non_field_errors }} 
+
+  {{ form.as_p }}
+  
+  <input type="submit" value="Save"/>
+
+</form>
+
+{% endblock content %}

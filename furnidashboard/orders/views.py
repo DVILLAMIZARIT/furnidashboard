@@ -2,7 +2,7 @@ from django.views.generic import ListView, DetailView, UpdateView
 from django.views.generic.edit import CreateView, DeleteView
 from .models import Order, OrderItem, OrderDelivery
 from .tables import OrderTable, UnplacedOrdersTable
-from .forms import OrderForm, CommissionFormSet, CustomerFormSet, ItemFormSet
+from .forms import OrderForm, CommissionFormSet, CustomerFormSet, ItemFormSet, get_ordered_items_formset
 from customers.models import Customer
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.exceptions import ValidationError
@@ -57,7 +57,8 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
     form = self.get_form(form_class)
     customer_form = CustomerFormSet(queryset=Customer.objects.none(), prefix="customers") #filter(pk=self.object.customer_id))
     commission_form = CommissionFormSet(instance=self.object, prefix="commissions")
-    items_form = ItemFormSet(instance=self.object, prefix="ordered_items")
+    SoldItemsFormSet = get_ordered_items_formset(extra=0, max_num=100)
+    items_form = SoldItemsFormSet(instance=self.object, prefix="ordered_items")
     context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form, items_form=items_form)
     return self.render_to_response(context)
 
@@ -140,7 +141,6 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
     self.object = None
     form_class = self.get_form_class()
     form = self.get_form(form_class)
-    #self.object = form.save(commit=False)
     customer_form = CustomerFormSet(self.request.POST, prefix="customers")
     commission_form = CommissionFormSet(self.request.POST, prefix="commissions")
     items_form = ItemFormSet(self.request.POST, prefix="ordered_items")
