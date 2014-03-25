@@ -1,14 +1,11 @@
 from stores.models import Store
-from .models import Order, OrderItem
+from .models import Order, OrderItem, OrderDelivery
 from commissions.models import Commission
 from customers.models import Customer
 from django import forms
 from django.forms.models import inlineformset_factory, modelformset_factory
 from ajax_select.fields import AutoCompleteSelectField
 from bootstrap_toolkit.widgets import BootstrapDateInput
-
-CommissionFormSet = inlineformset_factory(Order, Commission, extra=1, max_num=1, can_delete=False)
-CustomerFormSet = modelformset_factory(Customer, extra=1, max_num=1)
 
 class OrderItemForm(forms.ModelForm):
 
@@ -36,13 +33,36 @@ class OrderForm(forms.ModelForm):
   
   def __init__(self, *args, **kwargs):
     super(OrderForm, self).__init__(*args, **kwargs)
-    
-    
+
   class Meta:
-    pass
     model = Order
 
-ItemFormSet = inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=1, max_num=100)
+class CommissionForm(forms.ModelForm):
+
+  def __init__(self, *args, **kwargs):
+    super(CommissionForm, self).__init__(*args, **kwargs)
+    self.fields['paid_date'].widget = BootstrapDateInput()
+
+  class Meta:
+     model = Commission
+
+class OrderDeliveryForm(forms.ModelForm):
+
+  def __init__(self, *args, **kwargs):
+    super(OrderDeliveryForm, self).__init__(*args, **kwargs)
+    self.fields['scheduled_delivery_date'].widget = BootstrapDateInput()
+    self.fields['delivered_date'].widget = BootstrapDateInput()
+  
+  class Meta:
+    model = OrderDelivery
 
 def get_ordered_items_formset(extra=1, max_num=1000):
   return inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=extra, max_num=max_num)
+
+def get_deliveries_formset(extra=1, max_num=1000):
+  return inlineformset_factory(Order, OrderDelivery, form=OrderDeliveryForm, extra=extra, max_num=max_num)
+
+ItemFormSet = inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=1, max_num=100)
+DeliveryFormSet = inlineformset_factory(Order, OrderDelivery, form=OrderDeliveryForm, extra=1, max_num=100)
+CommissionFormSet = inlineformset_factory(Order, Commission, form=CommissionForm, extra=1, max_num=1, can_delete=False)
+CustomerFormSet = modelformset_factory(Customer, extra=1, max_num=1)

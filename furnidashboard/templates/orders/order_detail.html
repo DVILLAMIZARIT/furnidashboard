@@ -6,7 +6,7 @@
 
 {% block content %}
   
-  <div><a href="{% url 'order_edit' object.pk %}" title="Edit Order">Edit Order</a></div>
+<div class="well"><a href="{% url 'order_edit' object.pk %}" title="Edit Order">Edit Order</a>  |  <a href="{% url 'order_delete' object.pk %}" title="Delete Order">Delete Order</a></div>
   <hr/>
   
   <div>{{order.number}}</div>
@@ -15,9 +15,7 @@
   <div>{{order.status}}</div>
   <div>{{order.deposit_balance}}</div>
   <div>{{order.associate}}</div>
-  {% if order.vendor_order_no %}
-    <div>{{order.vendor_order_no}}</div>
-  {% else %}
+  {% if object.not_placed %}
     <div class="message error">Order has not been placed with the vendor!</div>
   {% endif %}
 {% endblock content %}

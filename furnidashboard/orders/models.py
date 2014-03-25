@@ -30,6 +30,11 @@ class Order(models.Model):
   store = models.ForeignKey(Store)
 
   @property
+  def not_placed(self):
+           # no status        'new'                 'any item, which is not in stock, and does not have po#
+    return not self.status or self.status == 'N' or any([item for item in self.orderitem_set if not item.in_stock and not item.po_num])
+
+  @property
   def balance_due(self):
     "Balance due after the deposits"
     return self.grand_total - self.deposit_balance
@@ -85,10 +90,12 @@ class OrderDelivery(models.Model):
   )
 
   order = models.ForeignKey(Order)
-  delivery_date = models.DateField(null=True, blank=True)
+  scheduled_delivery_date = models.DateField(null=True, blank=True)
+  delivered_date = models.DateField(null=True, blank=True)
   pickup_from = models.ForeignKey(Store)
   delivery_slip = models.FileField(upload_to='deliveries/%Y/%m')
   comments = models.TextField(blank=True, null=True)
 
   class Meta:
     db_table = "deliveries"
+

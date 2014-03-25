@@ -29,6 +29,9 @@
 </script>
 
   {{ form.media }}
+  {{ items_form.media }}
+  {{ commission_form.media }}
+  {{ delivery_form.media }}
   
 {% endblock %}
 
@@ -135,7 +138,7 @@
         </div>
         <div id="collapse{{ item_form.prefix }}" class="accordion-body collapse">
           <div class="accordion-inner">
-            {{ item_form|as_bootstrap }}
+            {{ item_form | as_bootstrap }}
           </div>
         </div>       
       </div>
@@ -155,7 +158,18 @@
     {{ commission_form.non_form_errors }}
     {% for com_form in commission_form %}
       <div class="form-row inline">
-        {{ com_form.as_p }}
+        {{ com_form | as_bootstrap}}
+      </div>
+    {% endfor %}
+  </fieldset>
+
+  <fieldset class="formset">
+    <legend>Deliveries</legend>
+    {{ delivery_form.management_form }}
+    {{ delivery_form.non_form_errors }}
+    {% for form in delivery_form %}
+      <div class="form-row inline">
+        {{ form | as_bootstrap}}
       </div>
     {% endfor %}
   </fieldset>
