@@ -66,6 +66,7 @@ class OrderItem(models.Model):
   )
 
   order = models.ForeignKey(Order)
+  status = models.CharField(max_length=15, choices=ITEM_STATUSES, blank=True, null=True)
   in_stock = models.BooleanField(default=True, blank=True)
   description = models.CharField(max_length=255)
   po_num = models.CharField(max_length=125, blank=True)
@@ -90,6 +91,7 @@ class OrderDelivery(models.Model):
   )
 
   order = models.ForeignKey(Order)
+  delivery_type =  models.CharField(max_length=25, choices=DELIVERY_TYPES, blank=True, null=True)
   scheduled_delivery_date = models.DateField(null=True, blank=True)
   delivered_date = models.DateField(null=True, blank=True)
   pickup_from = models.ForeignKey(Store)

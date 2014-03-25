@@ -11,6 +11,11 @@
     $(function() {
       $(document).ready(function() {
         
+        $('#tabs a').click(function (e) {
+          e.preventDefault();
+          $(this).tab('show');
+        })
+        
         $("#order-items-fieldset").find("div.accordion-body").eq(0).addClass("in"); //expand first item
 
         $('#order-items-fieldset div.items-form').formset({
@@ -48,131 +53,161 @@
 <form action="" method="POST">
   {% csrf_token %}
   {{ form.non_field_errors }} 
-
-  <fieldset id="order-info">
-    <legend>Order info</legend>
-
-     <div class="field-wrapper inline">
-       {{ form.number.errors }}
-       <label for="id_number">Order #</label>
-       {{ form.number }}
-     </div>
-     <div class="field-wrapper inline">
-       {{ form.status.errors }}
-       <label for="id_status">Status</label>
-       {{ form.status }}
-     </div>
-
-     <div class="field-wrapper clear">
-       {{ form.store.errors }}
-       <label for="id_store">Store</label>
-       {{ form.store }}
-     </div>
-
-  </fieldset>
-
-  <fieldset id="customer-info">
-    <legend>Customer Info</legend>
-    <div class="customer-selection">
-      <h5>Select existing or create a customer</h5>
-      <div class="field-wrapper">
-        {{ form.customer.errors }}
-        <label for="id_customer">Customer</label>
-        {{ form.customer }}
-      </div>
-      <div id="new-customer-form-wrapper" >
-        {{ customer_form.management_form }}
-        {% for subform in customer_form %}
-          <div class="accordion-group items-form form-row" id="{{ customer_form.prefix }}-row">
-            <div class="accordion-heading">
-              <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#new-customer-form-wrapper" href="#collapse{{ customer_form.prefix }}">
-                New Customer
-              </a>
-            </div>
-            <div id="collapse{{ customer_form.prefix }}" class="accordion-body collapse">
-              <div class="accordion-inner">
-                {{ subform.non_field_errors }}
-                {{ subform }}
-              </div>
-            </div>       
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-  </fieldset>
-
-  <fieldset>
-    <legend>Payment Information</legend>
-    <div class="field-wrapper">
-      {{ form.subtotal_after_discount.errors }}
-      <label for="id_subtotal_after_discount">Subtotal After Discount</label>
-      {{ form.subtotal_after_discount }}
-    </div>
-    <div class="field-wrapper">
-      {{ form.deposit_balance.errors }}
-      <label for="id_deposit_balance">Deposit Balance</label>
-      {{ form.deposit_balance }}
-    </div>
-    <div class="field-wrapper">
-      {{ form.tax.errors }}
-      <label for="id_tax">Tax</label>
-      {{ form.tax }}
-    </div>
-    <div class="field-wrapper">
-      {{ form.shipping.errors }}
-      <label for="id_shipping">Shipping</label>
-      {{ form.shipping }}
-    </div>
-  </fieldset>
   
-  <fieldset id="order-items-fieldset" class="accordion">
-    <legend>Sold Items</legend>
-    {{ items_form.management_form }}
-    {{ items_form.non_field_errors }}    
-    {% for item_form in items_form %}
-      <div class="accordion-group items-form form-row" id="{{ item_form.prefix }}-row">
-        <div class="accordion-heading">
-          <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#order-items-fieldset" href="#collapse{{ item_form.prefix }}">
-           Item {{ forloop.counter }}
-          </a>
-        </div>
-        <div id="collapse{{ item_form.prefix }}" class="accordion-body collapse">
-          <div class="accordion-inner">
-            {{ item_form | as_bootstrap }}
+  <div class="tabbable tabs-left">
+  
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" id="tabs">
+      <li class="active"><a href="#order-info" data-toggle="tab">Order info</a></li>
+      <li><a href="#customer-info" data-toggle="tab">Customer</a></li>
+      <li><a href="#payment-info" data-toggle="tab">Payment</a></li>
+      <li><a href="#order-items-fieldset" data-toggle="tab">Items</a></li>
+      <li><a href="#commissions" data-toggle="tab">Commissions</a></li>
+      <li><a href="#deliveries" data-toggle="tab">Deliveries</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">  
+      <div class="tab-pane active" id="order-info">
+        <fieldset>
+          <legend>Order info</legend>
+      
+           <div class="field-wrapper inline">
+             {{ form.number.errors }}
+             <label for="id_number">Order #</label>
+             {{ form.number }}
+           </div>
+           <div class="field-wrapper inline">
+             {{ form.status.errors }}
+             <label for="id_status">Status</label>
+             {{ form.status }}
+           </div>
+      
+           <div class="field-wrapper clear">
+             {{ form.store.errors }}
+             <label for="id_store">Store</label>
+             {{ form.store }}
+           </div>
+           
+           <div class="field-wrapper">
+            {{ form.comments.errors }}
+            <label for="id_comments">Comments</label>
+            {{ form.comments }}
+           </div>
+      
+        </fieldset>
+      </div>
+    
+      <div class="tab-pane" id="customer-info">
+        <fieldset>
+          <legend>Customer Info</legend>
+          <div class="customer-selection">
+            <h5>Select existing or create a customer</h5>
+            <div class="field-wrapper">
+              {{ form.customer.errors }}
+              <label for="id_customer">Customer</label>
+              {{ form.customer }}
+            </div>
+            <div id="new-customer-form-wrapper" >
+              {{ customer_form.management_form }}
+              {% for subform in customer_form %}
+                <div class="accordion-group items-form form-row" id="{{ customer_form.prefix }}-row">
+                  <div class="accordion-heading">
+                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#new-customer-form-wrapper" href="#collapse{{ customer_form.prefix }}">
+                      New Customer
+                    </a>
+                  </div>
+                  <div id="collapse{{ customer_form.prefix }}" class="accordion-body collapse">
+                    <div class="accordion-inner">
+                      {{ subform.non_field_errors }}
+                      {{ subform }}
+                    </div>
+                  </div>       
+                </div>
+              {% endfor %}
+            </div>
           </div>
-        </div>       
+        </fieldset>
       </div>
-    {% endfor %}
-  </fieldset>
-
-  <div class="field-wrapper">
-    {{ form.comments.errors }}
-    <label for="id_comments">Comments</label>
-    {{ form.comments }}
+    
+      <div class="tab-pane" id="payment-info">
+        <fieldset>
+          <legend>Payment Information</legend>
+          <div class="field-wrapper">
+            {{ form.subtotal_after_discount.errors }}
+            <label for="id_subtotal_after_discount">Subtotal After Discount</label>
+            {{ form.subtotal_after_discount }}
+          </div>
+          <div class="field-wrapper">
+            {{ form.deposit_balance.errors }}
+            <label for="id_deposit_balance">Deposit Balance</label>
+            {{ form.deposit_balance }}
+          </div>
+          <div class="field-wrapper">
+            {{ form.tax.errors }}
+            <label for="id_tax">Tax</label>
+            {{ form.tax }}
+          </div>
+          <div class="field-wrapper">
+            {{ form.shipping.errors }}
+            <label for="id_shipping">Shipping</label>
+            {{ form.shipping }}
+          </div>
+        </fieldset>
+      </div>
+      
+      <div class="tab-pane" id="order-items-fieldset">
+        <fieldset class="accordion">
+          <legend>Sold Items</legend>
+          {{ items_form.management_form }}
+          {{ items_form.non_field_errors }}    
+          {% for item_form in items_form %}
+            <div class="accordion-group items-form form-row" id="{{ item_form.prefix }}-row">
+              <div class="accordion-heading">
+                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#order-items-fieldset" href="#collapse{{ item_form.prefix }}">
+                 Item {{ forloop.counter }}
+                </a>
+              </div>
+              <div id="collapse{{ item_form.prefix }}" class="accordion-body collapse">
+                <div class="accordion-inner">
+                  {{ item_form | as_bootstrap }}
+                </div>
+              </div>       
+            </div>
+          {% endfor %}
+        </fieldset>
+      </div>
+    
+    
+      <div class="tab-pane" id="commissions">
+        <fieldset class="formset">
+          <legend>Commissions</legend>
+          {{ commission_form.management_form }}
+          {{ commission_form.non_form_errors }}
+          {% for com_form in commission_form %}
+            <div class="form-row inline">
+              {{ com_form | as_bootstrap}}
+            </div>
+          {% endfor %}
+        </fieldset>
+      </div>
+    
+      <div class="tab-pane" id="deliveries">
+        <fieldset class="formset">
+          <legend>Deliveries</legend>
+          {{ delivery_form.management_form }}
+          {{ delivery_form.non_form_errors }}
+          {% for form in delivery_form %}
+            <div class="form-row inline">
+              {{ form | as_bootstrap}}
+            </div>
+          {% endfor %}
+        </fieldset>
+      </div>
+    
+    </div>
+  
   </div>
-
-
-  <fieldset class="formset">
-    <legend>Commissions</legend>
-    {{ commission_form.management_form }}
-    {{ commission_form.non_form_errors }}
-    {% for com_form in commission_form %}
-      <div class="form-row inline">
-        {{ com_form | as_bootstrap}}
-      </div>
-    {% endfor %}
-  </fieldset>
-
-  <fieldset class="formset">
-    <legend>Deliveries</legend>
-    {{ delivery_form.management_form }}
-    {{ delivery_form.non_form_errors }}
-    {% for form in delivery_form %}
-      <div class="form-row inline">
-        {{ form | as_bootstrap}}
-      </div>
-    {% endfor %}
-  </fieldset>
 
   <input type="submit" value="Save"/>
 

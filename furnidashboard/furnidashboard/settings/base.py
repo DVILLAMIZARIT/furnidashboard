@@ -257,7 +257,7 @@ WSGI_APPLICATION = '%s.wsgi.application' % SITE_NAME
 
 AJAX_LOOKUP_CHANNELS = {
     # the simplest case, pass a DICT with the model and field to search against :
-    'customer' : dict(model='customers.customer', search_field='first_name'),
+    'customer' : ('customers.lookups', 'CustomerLookup'), #dict(model='customers.customer', search_field='first_name'),
 
     # or write a custom search channel and specify that using a TUPLE
     # 'contact' : ('peoplez.lookups', 'ContactLookup'),
