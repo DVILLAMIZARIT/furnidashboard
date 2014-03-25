@@ -1,0 +1,24 @@
+
+{% extends "base.html" %}
+
+{% block title %}Week {{week|date:'W'}}{% endblock %}
+
+{% block page_title %}Orders for Week {{week|date:'W'}}{% endblock page_title %}
+
+{% block content %}
+<ul>
+  {% for order in object_list %}
+    <li>{{ order.created|date:"F j, Y" }}: {{ order }}</li>
+  {% endfor %}
+</ul>
+
+<p>
+  {% if previous_week %}
+    <a href="{% url 'archive_week' year=previous_week.year week=previous_week|date:'W' %}">Previous Week: {{ previous_week|date:"F Y" }}</a>
+  {% endif %}
+
+  {% if next_week %}
+    <a href="{% url 'archive_week' year=next_week.year week=next_week|date:'W' %}">Next Week: {{ next_week|date:"F Y" }}</a>
+  {% endif %}
+</p>
+{% endblock %}

@@ -1,5 +1,6 @@
 from django.views.generic import ListView, DetailView, UpdateView
 from django.views.generic.edit import CreateView, DeleteView
+from django.views.generic.dates import MonthArchiveView, WeekArchiveView
 from .models import Order, OrderItem, OrderDelivery
 from .tables import OrderTable, UnplacedOrdersTable
 from .forms import OrderForm, CommissionFormSet, CustomerFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset
@@ -66,7 +67,6 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
     # specify at least 1 extra of no items are set
     # order_item_set = OrderItem.objects.filter(order=self.object)
     extra = 0
-    # import pdb; pdb.set_trace()
     if self.object.orderitem_set.count() == 0:
       extra = 1
 
@@ -209,3 +209,18 @@ class OrderDeleteView(LoginRequiredMixin, DeleteView):
   model = Order
   success_url = reverse_lazy("order_list")
 
+class OrderMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
+  queryset = Order.objects.all()
+  date_field = "created"
+  make_object_list = True
+  allow_future = True
+  template_name = "orders/order_archive_month.html"
+  month_format = '%b'
+
+class OrderWeekArchiveView(LoginRequiredMixin, WeekArchiveView):
+  queryset = Order.objects.all()
+  date_field = "created"
+  make_object_list = True
+  allow_future = True
+  template_name = "orders/order_archive_week.html"
+  month_format = '%W'
