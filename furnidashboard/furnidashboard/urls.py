@@ -65,7 +65,7 @@ urlpatterns = patterns('',
     url(
         # /this-week
         regex = r'^orders/this-week/$', 
-        view=OrderWeekArchiveView.as_view(year=str(date.today().year), week=str(date.today().isocalendar()[1])),
+        view=OrderWeekArchiveView.as_view(year=str(date.today().year), week=str(int(date.today().isocalendar()[1]) - 1)),
         name="archive_this_week",
     ),
     url(

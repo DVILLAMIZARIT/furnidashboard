@@ -3,7 +3,7 @@
 
 {% block title %}Week {{week|date:'W'}}{% endblock %}
 
-{% block page_title %}Orders for Week {{week|date:'W'}}{% endblock page_title %}
+{% block page_title %}Orders for week from {{week|date:'j F Y'}} - {{next_week|date:'j F Y'}}{% endblock page_title %}
 
 {% block content %}
 <ul>

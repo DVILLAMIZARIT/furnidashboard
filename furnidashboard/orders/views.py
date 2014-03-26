@@ -12,6 +12,7 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django_tables2 import RequestConfig
 from django.db.models import Q
+from datetime import timedelta, date
 
 class OrderListView(LoginRequiredMixin, ListView):
   model = Order
@@ -222,5 +223,20 @@ class OrderWeekArchiveView(LoginRequiredMixin, WeekArchiveView):
   date_field = "created"
   make_object_list = True
   allow_future = True
+  allow_empty = True
   template_name = "orders/order_archive_week.html"
-  month_format = '%W'
+  week_format = '%W'
+
+  def get_context_data(self, **kwargs):
+    context = super(OrderWeekArchiveView, self).get_context_data(**kwargs)
+    #import pdb; pdb.set_trace()
+    #context['date_from'], context['date_to'] = self.get_week_boundaries(self.year, self.week) 
+    
+    return context
+
+  def get_week_boundaries(self, year, week):
+    startOfYear = date(year, 1, 1)
+    week0 = startOfYear - timedelta(days=startOfYear.isoweekday())
+    sun = week0 + timedelta(weeks=week)
+    sat = sun + timedelta(days=6)
+    return sun, sat
