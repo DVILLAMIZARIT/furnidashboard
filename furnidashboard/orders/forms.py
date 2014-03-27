@@ -13,6 +13,7 @@ class OrderItemForm(forms.ModelForm):
     super(OrderItemForm, self).__init__(*args, **kwargs)
     self.fields['in_stock'].widget.attrs['class'] = "order-item-in-stock"
     self.fields['description'].widget.attrs['class'] = "order-item-desc"
+    self.fields['description'].required = True
     self.fields['po_num'].widget.attrs['class'] = "order-item-po"
     self.fields['po_date'].widget.attrs['class'] = "order-item-po-date"
     self.fields['ack_num'].widget.attrs['class'] = "order-item-ack-num"

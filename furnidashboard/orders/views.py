@@ -154,7 +154,6 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
     items_form = ItemFormSet(prefix="ordered_items")
     extra_forms = {
       'form':form,
-      #'commission_form':commission_form, 
       'customer_form':customer_form,
       'items_form':items_form,
     }
@@ -180,12 +179,7 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
       'items_form':items_form,
     }
 
-    BR_checked = True
-    if not form.data['status'] or form.data['status'] != 'N':
-      messages.error(self.request, "New orders must have a status 'New'")
-      BR_checked = False
-
-    if BR_checked and form.is_valid() and items_form.is_valid(): 
+    if form.is_valid() and items_form.is_valid(): 
       return self.form_valid(**forms)
     else:
       return self.form_invalid(**forms)
@@ -194,7 +188,7 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
     """
     Called if any of the forms on order page is invalid. Returns a response with an invalid form in the context
     """
-    messages.error(self.request, "Error saving form information")
+    messages.error(self.request, "Error saving order form information")
     context = self.get_context_data(messages=messages)
     context.update(kwargs)
     return self.render_to_response(context)
@@ -206,21 +200,68 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
     """
     form = kwargs['form']
     customer_form = kwargs['customer_form']
-    items_form = kwargs['customer_form']
+    items_form = kwargs['items_form']
 
     self.object = form.save(commit=False)
-
-    if form.cleaned_data['customer'] is None:
-      if customer_form.is_valid():
-        cust = customer_form[0].save()
-        self.object.customer = cust
-      else:
-        return self.form_invald(**kwargs)
     
-    self.object.save()
-    items_form.instance = self.object
-    items_form.save()
-    return HttpResponseRedirect(self.get_success_url())
+    # flags
+    BR_passed = True
+    new_customer=False
+
+    # import pdb; pdb.set_trace()
+
+    if not form.data['status'] or form.data['status'] != 'N':
+      messages.error(self.request, "New orders must have a status 'New'")
+      BR_passed = False
+
+    # validate customer
+    if BR_passed:
+      if form.cleaned_data['customer'] is None:
+        if customer_form.is_valid():
+          # check that first and last name are filled
+          try:
+            if not customer_form[0].cleaned_data['first_name'] or not customer_form[0].cleaned_data['last_name']:
+              messages.error(self.request, "Please select existing customer or fill in new customer information!")
+              BR_passed = False
+            else:
+              new_customer = True
+          except KeyError: 
+            messages.error(self.request, "Please select existing customer or fill in new customer information!")
+            BR_passed = False
+        else:
+          messages.error(self.request, "Error saving customer form information!")
+          BR_passed = False
+  
+    # validate items
+    if BR_passed: 
+      for ind in xrange(items_form.total_form_count()):
+        try:
+          if items_form.cleaned_data[ind]['description'] is None:
+            BR_passed = False
+        except KeyError:
+          BR_passed = False
+
+      if not BR_passed:
+        messages.error(self.request, "Please enter sold item(s) description")
+
+
+
+    if BR_passed: 
+      
+      #save order
+      self.object.save()
+      
+      # save customer
+      if new_customer:
+          cust = customer_form[0].save()
+          self.object.customer = cust
+
+      # save items
+      items_form.instance = self.object
+      items_form.save()
+      return HttpResponseRedirect(self.get_success_url())
+    else:
+      return self.form_invalid(**kwargs)
 
   def get_form(self, request=None, **kwargs):
     self.exclude = []
