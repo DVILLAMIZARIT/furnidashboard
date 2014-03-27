@@ -62,8 +62,8 @@
       <li><a href="#customer-info" data-toggle="tab">Customer</a></li>
       <li><a href="#payment-info" data-toggle="tab">Payment</a></li>
       <li><a href="#order-items-fieldset" data-toggle="tab">Items</a></li>
-      <li><a href="#commissions" data-toggle="tab">Commissions</a></li>
       <li><a href="#deliveries" data-toggle="tab">Deliveries</a></li>
+      <li><a href="#commissions" data-toggle="tab">Commissions</a></li>
     </ul>
 
     <!-- Tab panes -->
@@ -87,12 +87,6 @@
              {{ form.store.errors }}
              <label for="id_store">Store</label>
              {{ form.store }}
-           </div>
-           
-           <div class="field-wrapper">
-            {{ form.comments.errors }}
-            <label for="id_comments">Comments</label>
-            {{ form.comments }}
            </div>
       
         </fieldset>
@@ -178,35 +172,48 @@
         </fieldset>
       </div>
     
+      <div class="tab-pane" id="deliveries">
+        <fieldset class="formset">
+          <legend>Deliveries</legend>
+          {{ delivery_form.management_form }}
+          {% if delivery_form %}
+            {{ delivery_form.non_form_errors }}
+            {% for form in delivery_form %}
+              <div class="form-row inline">
+                {{ form | as_bootstrap}}
+              </div>
+            {% endfor %}
+          {% else %}
+            No deliveries are available.
+          {% endif %}
+        </fieldset>
+      </div>
     
       <div class="tab-pane" id="commissions">
         <fieldset class="formset">
           <legend>Commissions</legend>
           {{ commission_form.management_form }}
-          {{ commission_form.non_form_errors }}
-          {% for com_form in commission_form %}
-            <div class="form-row inline">
-              {{ com_form | as_bootstrap}}
-            </div>
-          {% endfor %}
-        </fieldset>
-      </div>
-    
-      <div class="tab-pane" id="deliveries">
-        <fieldset class="formset">
-          <legend>Deliveries</legend>
-          {{ delivery_form.management_form }}
-          {{ delivery_form.non_form_errors }}
-          {% for form in delivery_form %}
-            <div class="form-row inline">
-              {{ form | as_bootstrap}}
-            </div>
-          {% endfor %}
+          {% if commission_form %}
+            {{ commission_form.non_form_errors }}
+            {% for com_form in commission_form %}
+              <div class="form-row inline">
+                {{ com_form | as_bootstrap}}
+              </div>
+            {% endfor %}
+          {% else %}
+              No commissions info available.
+          {% endif %}
         </fieldset>
       </div>
     
     </div>
   
+  </div>
+
+  <div class="field-wrapper">
+    {{ form.comments.errors }}
+    <label for="id_comments">Comments</label>
+    {{ form.comments }}
   </div>
 
   <input type="submit" value="Save"/>

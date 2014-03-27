@@ -3,7 +3,7 @@
 
 {% block title %}Week {{week|date:'W'}}{% endblock %}
 
-{% block page_title %}Orders for week from {{week|date:'j F Y'}} - {{next_week|date:'j F Y'}}{% endblock page_title %}
+{% block page_title %}Orders for week from {{week|date:'F j, Y'}} - {{this_week_sun|date:'F j,Y'}}{% endblock page_title %}
 
 {% block content %}
 <ul>
@@ -12,13 +12,13 @@
   {% endfor %}
 </ul>
 
-<p>
+<p class="well">
   {% if previous_week %}
-    <a href="{% url 'archive_week' year=previous_week.year week=previous_week|date:'W' %}">Previous Week: {{ previous_week|date:"F Y" }}</a>
+  <a href="{% url 'archive_week' year=previous_week.year week=prev_week_num %}">Previous Week: {{ previous_week|date:"F j"}} - {{ week|date:"F j, Y" }}</a>
   {% endif %}
 
   {% if next_week %}
-    <a href="{% url 'archive_week' year=next_week.year week=next_week|date:'W' %}">Next Week: {{ next_week|date:"F Y" }}</a>
+  <a href="{% url 'archive_week' year=next_week.year week=next_week_num %}">Next Week: {{ next_week|date:"F j"}} - {{ next_week_sun|date:"F j, Y" }}</a>
   {% endif %}
 </p>
 {% endblock %}

@@ -33,6 +33,7 @@ class OrderForm(forms.ModelForm):
   
   def __init__(self, *args, **kwargs):
     super(OrderForm, self).__init__(*args, **kwargs)
+    self.fields['status'].initial='N'
 
   class Meta:
     model = Order

@@ -146,10 +146,20 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
     self.object = None 
     form_class = self.get_form_class()
     form = self.get_form(form_class)
+
+    # initialize form defaults
+    form.fields['status'].widget.attrs['readonly'] = True
+
     customer_form = CustomerFormSet(queryset=Customer.objects.none(), prefix="customers")
-    commission_form = CommissionFormSet(prefix="commissions")
     items_form = ItemFormSet(prefix="ordered_items")
-    context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form, items_form=items_form)
+    extra_forms = {
+      'form':form,
+      #'commission_form':commission_form, 
+      'customer_form':customer_form,
+      'items_form':items_form,
+    }
+    context = self.get_context_data()
+    context.update(extra_forms)
     return self.render_to_response(context)
 
   def post(self, request, *args, **kwargs):
@@ -160,47 +170,66 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
     self.object = None
     form_class = self.get_form_class()
     form = self.get_form(form_class)
-    customer_form = CustomerFormSet(self.request.POST, prefix="customers")
-    commission_form = CommissionFormSet(self.request.POST, prefix="commissions")
-    items_form = ItemFormSet(self.request.POST, prefix="ordered_items")
-    if form.is_valid() and commission_form.is_valid() and items_form.is_valid(): 
-      return self.form_valid(form, commission_form, customer_form, items_form)
-    else:
-      return self.form_invalid(form, commission_form, customer_form, items_form)
 
-  def form_invalid(self, form, commission_form, customer_form, items_form):
+    customer_form = CustomerFormSet(self.request.POST, prefix="customers")
+    items_form = ItemFormSet(self.request.POST, prefix="ordered_items")
+
+    forms = {
+      'form':form,
+      'customer_form':customer_form,
+      'items_form':items_form,
+    }
+
+    BR_checked = True
+    if not form.data['status'] or form.data['status'] != 'N':
+      messages.error(self.request, "New orders must have a status 'New'")
+      BR_checked = False
+
+    if BR_checked and form.is_valid() and items_form.is_valid(): 
+      return self.form_valid(**forms)
+    else:
+      return self.form_invalid(**forms)
+
+  def form_invalid(self, *args, **kwargs): 
     """
     Called if any of the forms on order page is invalid. Returns a response with an invalid form in the context
     """
-    messages.error(self.request, "Error saving the commissions information")
-    context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form, items_form=items_form, messages=messages)
+    messages.error(self.request, "Error saving form information")
+    context = self.get_context_data(messages=messages)
+    context.update(kwargs)
     return self.render_to_response(context)
 
-  def form_valid(self, form, commission_form, customer_form, items_form):
+  def form_valid(self, *args, **kwargs):
     """
     Called if all forms are valid. Creates an Order instance along with associated Customer and Commission instances
     and then redirects to a success page
     """
+    form = kwargs['form']
+    customer_form = kwargs['customer_form']
+    items_form = kwargs['customer_form']
 
     self.object = form.save(commit=False)
-
-    import pdb; pdb.set_trace()
 
     if form.cleaned_data['customer'] is None:
       if customer_form.is_valid():
         cust = customer_form[0].save()
         self.object.customer = cust
       else:
-        return self.form_invald(form=form, commission_form=commission_form, customer_form=customer_form)
+        return self.form_invald(**kwargs)
     
-    #customer_form.instance = self.object
-    #customer_form.save()
     self.object.save()
-    commission_form.instance = self.object
-    commission_form.save()
     items_form.instance = self.object
     items_form.save()
     return HttpResponseRedirect(self.get_success_url())
+
+  def get_form(self, request=None, **kwargs):
+    self.exclude = []
+    #if not request.user.is_superuser:
+    #  self.exclude.append(field_to_hide)
+    
+    #self.initial = {'status':'N'}
+
+    return super(OrderCreateView, self).get_form(request, **kwargs)
 
   def get_success_url(self):
     return reverse('order_detail', kwargs={'pk': self.object.pk})
@@ -227,16 +256,19 @@ class OrderWeekArchiveView(LoginRequiredMixin, WeekArchiveView):
   template_name = "orders/order_archive_week.html"
   week_format = '%W'
 
-  def get_context_data(self, **kwargs):
-    context = super(OrderWeekArchiveView, self).get_context_data(**kwargs)
-    #import pdb; pdb.set_trace()
-    #context['date_from'], context['date_to'] = self.get_week_boundaries(self.year, self.week) 
+  def get(self, request, *args, **kwargs):
+    self.date_list, self.object_list, extra_content = self.get_dated_items()
+    context = self.get_context_data(object_list=self.object_list, date_list=self.date_list)
+    context.update(extra_content)
     
-    return context
+    # extra fields for cur. week, prev, and next week
+    extra = {
+      'next_week_num': context['next_week'].isocalendar()[1] - 1,
+      'prev_week_num': context['previous_week'].isocalendar()[1] - 1,
+      'next_week_sun': context['next_week'] + timedelta(days=7),
+      'this_week_sun': context['week'] + timedelta(days=6),
+    }
+    context.update(extra)
 
-  def get_week_boundaries(self, year, week):
-    startOfYear = date(year, 1, 1)
-    week0 = startOfYear - timedelta(days=startOfYear.isoweekday())
-    sun = week0 + timedelta(weeks=week)
-    sat = sun + timedelta(days=6)
-    return sun, sat
+    return self.render_to_response(context)
+
