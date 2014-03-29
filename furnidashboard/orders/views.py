@@ -89,44 +89,108 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
     commission_form = CommissionFormSet(self.request.POST, instance=self.object, prefix="commissions")
     items_form = ItemFormSet(self.request.POST, instance=self.object, prefix="ordered_items")
     delivery_form = DeliveryFormSet(self.request.POST, instance=self.object, prefix="deliveries")
+    forms = {
+      'form':form,
+      'customer_form':customer_form,
+      'items_form':items_form,
+      'commission_form':commission_form,
+      'delivery_form':delivery_form,
+    }
     if form.is_valid() and commission_form.is_valid() and items_form.is_valid() and delivery_form.is_valid():
-      return self.form_valid(form, commission_form, customer_form, items_form, delivery_form)
+      return self.form_valid(**forms)
     else:
-      return self.form_invalid(form, commission_form, customer_form, items_form, delivery_form)
+      return self.form_invalid(**forms)
 
-  def form_valid(self, form, commission_form, customer_form, items_form, delivery_form):
+  def form_valid(self, *args, **kwargs):
     """
     Called if all forms are valid. Creates an Order instance along with associated Customer and Commission instances
     and then redirects to a success page
     """
+    form = kwargs['form']
+    customer_form = kwargs['customer_form']
+    items_form = kwargs['items_form']
+    commission_form = kwargs['commission_form']
+    delivery_form = kwargs['delivery_form']
+
     self.object = form.save(commit=False)
 
-    if customer_form.has_changed():
-      if customer_form.is_valid() and len(customer_form[0].cleaned_data['first_name'].strip()) > 0 and len(customer_form[0].cleaned_data['last_name'].strip()) > 0:
+    # flags
+    BR_passed = True
+    new_customer=False
+
+    # import pdb; pdb.set_trace()
+
+    if not form.data['status'] :
+      messages.error(self.request, "Please enter order status'")
+      BR_passed = False
+
+    # validate customer
+    if BR_passed:
+      if form.cleaned_data['customer'] is None:
+        if customer_form.is_valid():
+          # check that first and last name are filled
+          try:
+            if not customer_form[0].cleaned_data['first_name'] or not customer_form[0].cleaned_data['last_name']:
+              messages.error(self.request, "Please select existing customer or fill in new customer information!")
+              BR_passed = False
+            else:
+              new_customer = True
+          except KeyError: 
+            messages.error(self.request, "Please select existing customer or fill in new customer information!")
+            BR_passed = False
+        else:
+          messages.error(self.request, "Error saving customer form information!")
+          BR_passed = False
+  
+    # validate items
+    if BR_passed: 
+      for ind in xrange(items_form.total_form_count()):
+        try:
+          if items_form.cleaned_data[ind]['description'] is None:
+            BR_passed = False
+        except KeyError:
+          BR_passed = False
+
+      if not BR_passed:
+        messages.error(self.request, "Please enter sold item(s) description")
+
+    if BR_passed: 
+      
+      #save order
+      self.object.save()
+      
+      # save customer
+      if new_customer:
         cust = customer_form[0].save()
         self.object.customer = cust
-      else:
-        messages.error(self.request, "Please enter customer information")
-        return self.form_invalid(form=form, commission_form=commission_form, customer_form=customer_form)
 
-    #customer_form.instance = self.object
-    #customer_form.save()
-    self.object.save()
-    commission_form.instance = self.object
-    commission_form.save()
-    items_form.instance = self.object
-    items_form.save()
-    delivery_form.instance = self.object
-    delivery_form.save()
+      # save items
+      if items_form.has_changed():
+        items_form.instance = self.object
+        items_form.save()
 
-    return HttpResponseRedirect(self.get_success_url())
+      # save commissions
+      if commission_form.has_changed():
+        commission_form.instance = self.object
+        commission_form.save()
 
-  def form_invalid(self, form, commission_form, customer_form, items_form, delivery_form):
+      # save deliveries
+      if delivery_form.has_changed():
+        delivery_form.instance = self.object
+        delivery_form.save()
+
+      return HttpResponseRedirect(self.get_success_url())
+    else:
+      return self.form_invalid(**kwargs)
+
+
+  def form_invalid(self, *args, **kwargs):
     """
     Called if any of the forms on order page is invalid. Returns a response with an invalid form in the context
     """
     messages.error(self.request, "Error saving the data")
-    context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form, items_form=items_form, delivery_form=delivery_form)
+    context = self.get_context_data()
+    context.update(kwargs)
 
     return self.render_to_response(context)
 
@@ -243,8 +307,6 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
 
       if not BR_passed:
         messages.error(self.request, "Please enter sold item(s) description")
-
-
 
     if BR_passed: 
       

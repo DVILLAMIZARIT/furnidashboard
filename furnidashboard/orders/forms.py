@@ -15,9 +15,14 @@ class OrderItemForm(forms.ModelForm):
     self.fields['description'].widget.attrs['class'] = "order-item-desc"
     self.fields['description'].required = True
     self.fields['po_num'].widget.attrs['class'] = "order-item-po"
+    self.fields['po_num'].label = "PO #"
+    self.fields['po_date'].widget = BootstrapDateInput()
+    self.fields['po_date'].label = "PO placed date"
     self.fields['po_date'].widget.attrs['class'] = "order-item-po-date"
     self.fields['ack_num'].widget.attrs['class'] = "order-item-ack-num"
+    self.fields['ack_num'].label = "Acknowledgement #"
     self.fields['ack_date'].widget=BootstrapDateInput()
+    self.fields['ack_date'].label = "Acknowl. date"
     self.fields['ack_date'].widget.attrs['class'] = "order-item-ack-date"
     
     self.fields['eta'].widget=BootstrapDateInput()    
