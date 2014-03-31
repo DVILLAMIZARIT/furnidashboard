@@ -16,8 +16,8 @@
           $(this).tab('show');
         })
         
+        // items formset
         $("#order-items-fieldset").find("div.accordion-body").eq(0).addClass("in"); //expand first item
-
         $('#order-items-fieldset div.items-form').formset({
             prefix: '{{items_form.prefix}}',
             added: function($form) {
@@ -26,6 +26,20 @@
               $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapseordered_items-" + form_ind).text("Item " + (form_ind + 1));
               $form.find("div.accordion-body").attr("id", "collapseordered_items-" + form_ind);
               $("#order-items-fieldset").find("div.accordion-body").removeClass("in");
+              $form.find("div.accordion-heading a").click();
+            }
+        });
+
+        // commissions formset
+        $("#order-commissions-fieldset").find("div.accordion-body:first").addClass("in"); //expand first item
+        $('#order-commissions-fieldset div.commissions-form').formset({
+            prefix: '{{commission_form.prefix}}',
+            added: function($form) {
+              var accordions = $form.parent().find('div.accordion-group');
+              var form_ind = accordions.length - 1;
+              $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapsecommissions-" + form_ind).text("Commissions " + (form_ind + 1));
+              $form.find("div.accordion-body").attr("id", "collapsecommissions-" + form_ind);
+              $("#order-commissions-fieldset").find("div.accordion-body").removeClass("in");
               $form.find("div.accordion-heading a").click();
             }
         });
@@ -63,7 +77,7 @@
       <li><a href="#payment-info" data-toggle="tab">Payment</a></li>
       <li><a href="#order-items-fieldset" data-toggle="tab">Items</a></li>
       <li><a href="#deliveries" data-toggle="tab">Deliveries</a></li>
-      <li><a href="#commissions" data-toggle="tab">Commissions</a></li>
+      <li><a href="#order-commissions-fieldset" data-toggle="tab">Commissions</a></li>
     </ul>
 
     <!-- Tab panes -->
@@ -189,20 +203,30 @@
         </fieldset>
       </div>
     
-      <div class="tab-pane" id="commissions">
-        <fieldset class="formset">
+      <div class="tab-pane" id="order-commissions-fieldset">
+        <fieldset class="formset accordion">
           <legend>Commissions</legend>
           {{ commission_form.management_form }}
           {% if commission_form %}
-            {{ commission_form.non_form_errors }}
-            {% for com_form in commission_form %}
-              <div class="form-row inline">
-                {{ com_form | as_bootstrap}}
+            {{ commission_form.non_field_errors }}    
+            {% for comm_form in commission_form %}
+              <div class="accordion-group commissions-form form-row" id="{{ commission_form.prefix }}-{{forloop.counter}}-row">
+                <div class="accordion-heading">
+                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#order-commissions-fieldset" href="#collapse{{ commission_form.prefix }}">
+                   Commissions {{ forloop.counter }}
+                  </a>
+                </div>
+                <div id="collapse{{ commission_form.prefix }}" class="accordion-body collapse">
+                  <div class="accordion-inner">
+                    {{ comm_form | as_bootstrap }}
+                  </div>
+                </div>       
               </div>
             {% endfor %}
           {% else %}
               No commissions info available.
           {% endif %}
+
         </fieldset>
       </div>
     

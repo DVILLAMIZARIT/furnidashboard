@@ -63,13 +63,23 @@ class OrderDeliveryForm(forms.ModelForm):
   class Meta:
     model = OrderDelivery
 
+class CustomerForm(forms.ModelForm):
+  def __init__(self, *args, **kwargs):
+    super(CustomerForm, self).__init__(*args, **kwargs)
+
+  class Meta:
+    model = Customer
+
 def get_ordered_items_formset(extra=1, max_num=1000):
   return inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=extra, max_num=max_num)
 
 def get_deliveries_formset(extra=1, max_num=1000):
   return inlineformset_factory(Order, OrderDelivery, form=OrderDeliveryForm, extra=extra, max_num=max_num)
 
+def get_commissions_formset(extra=1, max_num=1000):
+  return inlineformset_factory(Order, Commission, form=CommissionForm, extra=extra, max_num=max_num, can_delete=False)
+
 ItemFormSet = inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=1, max_num=100)
 DeliveryFormSet = inlineformset_factory(Order, OrderDelivery, form=OrderDeliveryForm, extra=1, max_num=100)
-CommissionFormSet = inlineformset_factory(Order, Commission, form=CommissionForm, extra=1, max_num=1, can_delete=False)
-CustomerFormSet = modelformset_factory(Customer, extra=1, max_num=1)
+CommissionFormSet = inlineformset_factory(Order, Commission, form=CommissionForm, extra=1, max_num=100, can_delete=False)
+CustomerFormSet = modelformset_factory(Customer, form=CustomerForm, extra=1, max_num=1)

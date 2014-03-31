@@ -3,7 +3,7 @@ from django.views.generic.edit import CreateView, DeleteView
 from django.views.generic.dates import MonthArchiveView, WeekArchiveView
 from .models import Order, OrderItem, OrderDelivery
 from .tables import OrderTable, UnplacedOrdersTable
-from .forms import OrderForm, CommissionFormSet, CustomerFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset
+from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset
 from customers.models import Customer
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.exceptions import ValidationError
@@ -59,7 +59,12 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
     form_class = self.get_form_class()
     form = self.get_form(form_class)
     customer_form = CustomerFormSet(queryset=Customer.objects.none(), prefix="customers") #filter(pk=self.object.customer_id))
-    commission_form = CommissionFormSet(instance=self.object, prefix="commissions")
+
+    extra = 0
+    if self.object.commission_set.count() == 0:
+      extra = 1
+    SpecialCommissionFormSet = get_commissions_formset(extra=extra, max_num=3)
+    commission_form = SpecialCommissionFormSet(instance=self.object, prefix="commissions")
     
     DeliveriesFormSet = get_deliveries_formset(extra=1, max_num=100)
     delivery_form = DeliveriesFormSet(instance = self.object, prefix="deliveries")

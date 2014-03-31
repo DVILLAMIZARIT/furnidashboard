@@ -13,7 +13,8 @@ class Customer(models.Model):
   last_name = models.CharField(max_length=200, blank=True)
   phone = models.CharField(max_length=30, blank=True, null=True)
   email  = models.EmailField(blank=True, null=True)
-  address  = models.TextField(blank=True, null=True)
+  shipping_address  = models.TextField(blank=True, null=True)
+  billing_address  = models.TextField(blank=True, null=True)
   
   @property
   def full_name(self):
