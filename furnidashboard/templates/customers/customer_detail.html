@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% load bootstrap_toolkit %}
+
+{% block title %} Customer Info{% endblock %}
+
+{% block page_title %} Customer: {{customer}}{% endblock page_title %}
+{% block extra_js %}
+  {{ form.media }}
+{% endblock extra_js %}
+
+{% block content %}
+
+  <div class="well"><a href="{% url 'customer_edit' object.pk %}" title="Edit Customer">Edit Customer</a></div>
+  <hr/>
+
+  <form action="" method="POST">
+    {{customer_details_form.as_ul}}
+  </form>
+
+{% endblock content %}

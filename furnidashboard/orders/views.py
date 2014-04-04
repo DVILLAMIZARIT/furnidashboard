@@ -2,7 +2,7 @@ from django.views.generic import ListView, DetailView, UpdateView
 from django.views.generic.edit import CreateView, DeleteView
 from django.views.generic.dates import MonthArchiveView, WeekArchiveView
 from .models import Order, OrderItem, OrderDelivery
-from .tables import OrderTable, UnplacedOrdersTable
+from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable
 from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset
 from customers.models import Customer
 from django.core.urlresolvers import reverse_lazy, reverse
@@ -12,7 +12,7 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django_tables2 import RequestConfig
 from django.db.models import Q
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 
 class OrderListView(LoginRequiredMixin, ListView):
   model = Order
@@ -22,15 +22,25 @@ class OrderListView(LoginRequiredMixin, ListView):
   def dispatch(self, *args, **kwargs):
     return super(OrderListView, self).dispatch(*args, **kwargs)
 
+  def get_queryset(self):
+    return Order.objects.select_related().all() # super(OrderListView, self).get_queryset().select_related()
+
   def get_context_data(self, **kwargs):
     context = super(OrderListView, self).get_context_data(**kwargs)
     recent_orders_table = OrderTable(context['order_list'])
     unplaced_orders = context['object_list'].filter(Q(status=None) | Q(status='N') | (Q(orderitem__in_stock=False) & (Q(orderitem__po_num__isnull=True) | Q(orderitem__po_num="")))).distinct()
     unplaced_orders_table = UnplacedOrdersTable(unplaced_orders)
+
+    now = datetime.now()
+    sales_by_assoc_data = _calc_sales_by_assoc(now.year, now.month) #[{'associate':'Lana', 'sales':5000}, {'associate':'Pearl', 'sales':10000}]
+    sales_by_assoc = SalesByAssociateTable(sales_by_assoc_data)
+
     RequestConfig(self.request).configure(recent_orders_table)
     RequestConfig(self.request).configure(unplaced_orders_table)
+    RequestConfig(self.request).configure(sales_by_assoc)
     context['recent_orders_table'] = recent_orders_table
     context['unplaced_orders_table'] = unplaced_orders_table
+    context['sales_by_associate'] = sales_by_assoc 
     return context
 
 class OrderDetailView(LoginRequiredMixin, DetailView):
@@ -380,3 +390,25 @@ class OrderWeekArchiveView(LoginRequiredMixin, WeekArchiveView):
 
     return self.render_to_response(context)
 
+def _calc_sales_by_assoc(year, month):
+  res = {}
+  month_start = datetime(int(year), int(month), 1)
+  month_end = month_start + timedelta(35)
+  month_end = datetime(month_end.year, month_end.month, 1)
+  orders = Order.objects.filter(Q(created__gte=month_start) & Q(created__lt=month_end))
+  
+  for o in orders:
+    split_num = o.commission_set.count()
+    comm_queryset = o.commission_set.select_related().all() 
+    for com in comm_queryset:
+      commission_amount = o.subtotal_after_discount / split_num
+      if res.has_key(com.associate.first_name):
+        res[com.associate.first_name] += commission_amount 
+      else:
+        res[com.associate.first_name] =  commission_amount
+  
+  sales_list = []
+  for associate, amount in res.items():
+    sales_list.append({'associate':associate, 'sales':amount })
+
+  return sales_list

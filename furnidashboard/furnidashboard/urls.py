@@ -4,6 +4,7 @@ from django.views.generic import TemplateView, ListView
 from orders.models import Order
 from customers.models import Customer
 from orders.views import OrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderMonthArchiveView, OrderWeekArchiveView
+from customers.views import CustomerCreateView, CustomerUpdateView, CustomerDetailView
 from django.views.generic.edit import FormView
 from orders.forms import OrderForm
 from datetime import date
@@ -74,11 +75,35 @@ urlpatterns = patterns('',
         view=OrderWeekArchiveView.as_view(),
         name="archive_week",
     ),
+
+    # Customer links
     url(r'customers/$', login_required(ListView.as_view(model=Customer, template_name="customers/customer_list.html")), name="customer_list"),
+    url(
+        regex = r'^customers/(?P<pk>\d+)/edit/$', 
+        view=CustomerUpdateView.as_view(),
+        name="customer_edit",
+    ),
+    url(
+        regex = r'^customers/add/$', 
+        view=CustomerCreateView.as_view(),
+        name="customer_add",
+    ),
+    url(
+        regex = r'^customers/(?P<pk>\d+)/$', 
+        view=CustomerDetailView.as_view(),
+        name="customer_detail",
+    ),
 
     # authentication-related URLs
     (r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
     url(r'^accounts/', include('django.contrib.auth.urls')),
+
+    # search
+    url(
+        regex = r'^search/$',
+        view = 'core.views.search',
+        name = "search",
+    ),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

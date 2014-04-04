@@ -3,7 +3,7 @@ from django.conf import settings
 from orders.models import Order
 
 class Commission(models.Model):
-  associate = models.ForeignKey(settings.AUTH_USER_MODEL, default=0, blank=True, null=True)
+  associate = models.ForeignKey(settings.AUTH_USER_MODEL, default=0, null=True)
   order = models.ForeignKey(Order)
   paid = models.BooleanField(default=False, blank=True)
   paid_date = models.DateField(null=True, blank=True)

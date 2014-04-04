@@ -2,20 +2,90 @@
 
 {% block title %}Order -- {{object}}{% endblock %}
 
-{% block page_title %}Order Details - {{object}}{% endblock page_title %}
+{% block page_title %}Order # {{order.number}}{% endblock page_title %}
 
 {% block content %}
   
-<div class="well"><a href="{% url 'order_edit' object.pk %}" title="Edit Order">Edit Order</a>  |  <a href="{% url 'order_delete' object.pk %}" title="Delete Order">Delete Order</a></div>
+  <div class="well"><a href="{% url 'order_edit' object.pk %}" title="Edit Order">Edit Order</a>  |  <a href="{% url 'order_delete' object.pk %}" title="Delete Order">Delete Order</a></div>
   <hr/>
-  
-  <div>{{order.number}}</div>
-  <div>{{order.created}}</div>
-  <div>{{order.customer}}</div>
-  <div>{{order.status}}</div>
-  <div>{{order.deposit_balance}}</div>
-  <div>{{order.associate}}</div>
+
   {% if object.not_placed %}
     <div class="message error">Order has not been placed with the vendor!</div>
   {% endif %}
+
+  <h3>Order Info</h3>
+  <table id="order-detail-table" cell-spacing="0" cell-padding="0">
+    <tr>
+      <td>Order#</td><td>{{order.number}}</td>
+    </tr>
+    <tr>
+      <td>Placed Date:</td><td>{{order.created|date:'j F, Y'}}</td>
+    </tr>
+    <tr>
+      <td>Last Modified:</td><td>{{order.modified|date:'j F, Y'}}</td>
+    </tr>
+    <tr>
+      <td>Status:</td><td>{{order.get_status_display|upper}}</td>
+    </tr>
+    <tr>
+      <td>Store:</td><td>{{order.store}}</td>
+    </tr>
+    <tr>
+      <td>Associate:</td>
+      <td>
+        {% for commission in order.commission_set.all %}
+          {{ commission.associate.first_name }} <br/> 
+        {% endfor %}
+      </td>
+    <tr>
+      <td>Customer:</td><td>{{order.customer}}</td>
+    </tr>
+    <tr>
+      <td>Customer Contact Details:</td>
+      <td>
+        Phone: {{order.customer.phone}}<br/>
+        Email: {{order.customer.email}}
+      </td>
+    </tr>
+    <tr>
+      <td>Billing Address:</td>
+      <td>{{order.customer.billing_address}}</td>
+    </tr>
+    <tr>
+      <td>Shipping Address:</td>
+      <td>{{order.customer.shipping_address}}</td>
+    </tr>
+  </table>
+
+  <h3>Order Payment Info</h3>
+  <table id="order-payments-table" cell-spacing="0" cell-padding="0">
+    <tr>
+      <td>Subtotal After Discount</td><td>{{order.subtotal_after_discount}}</td>
+    </tr>
+    <tr>
+      <td>Tax</td><td>{{order.tax}}</td>
+    </tr>
+    <tr>
+      <td>Shipping</td><td>{{order.shipping}}</td>
+    </tr>
+    <tr>
+      <td>Grand Total</td><td>{{order.grand_total}}</td>
+    </tr>
+    <tr>
+      <td>Deposit Balance</td><td>{{order.deposit_balance}}</td>
+    </tr>
+    <tr>
+      <td>Balance Due</td><td>{{order.balance_due}}</td>
+    </tr>
+  </table>
+
+  <h3>Additional</h3>
+  <table id="order-addnl-table" cell-spacing="0" cell-padding="0">
+    <tr>
+      <td>Referral</td><td>{{order.referral}}</td>
+    </tr>
+    <tr>
+      <td>Comments</td><td>{{order.comments}}</td>
+    </tr>
+  </table>
 {% endblock content %}

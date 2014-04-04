@@ -6,6 +6,7 @@ from django import forms
 from django.forms.models import inlineformset_factory, modelformset_factory
 from ajax_select.fields import AutoCompleteSelectField
 from bootstrap_toolkit.widgets import BootstrapDateInput
+from core.mixins import DisabledFieldsMixin
 
 class OrderItemForm(forms.ModelForm):
 
@@ -49,6 +50,7 @@ class CommissionForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
     super(CommissionForm, self).__init__(*args, **kwargs)
     self.fields['paid_date'].widget = BootstrapDateInput()
+    self.fields['associate'].required = True
 
   class Meta:
      model = Commission
@@ -69,6 +71,11 @@ class CustomerForm(forms.ModelForm):
 
   class Meta:
     model = Customer
+
+class CustomerDetailReadOnlyForm(DisabledFieldsMixin, CustomerForm):
+  def __init__(self, *args, **kwargs):
+    super(CustomerDetailReadOnlyForm, self).__init__(*args, **kwargs)
+
 
 def get_ordered_items_formset(extra=1, max_num=1000):
   return inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=extra, max_num=max_num)

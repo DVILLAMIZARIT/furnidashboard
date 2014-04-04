@@ -28,6 +28,7 @@ class Order(models.Model):
   shipping = models.FloatField(blank=True, default=0.0)
   comments = models.TextField(blank=True)
   store = models.ForeignKey(Store)
+  referral = models.CharField(blank=True, null=True, max_length=50)
 
   @property
   def not_placed(self):

@@ -7,6 +7,10 @@
 
 {% block page_title %}Orders Dashboard{% endblock page_title %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+{% endblock %}
+
 {% block content %}
   <!--<ul>
     {% for order in object_list %}
@@ -15,13 +19,18 @@
   </ul>-->
 
   <div>
-    <h2>Orders with Unplaced Special-Order Items</h2>
+    <h2>New/Unprocessed Orders</h2>
     {% render_table unplaced_orders_table  %}
   </div>
   <hr/>
   <div>
     <h2>Recent Orders</h2>
     {% render_table recent_orders_table  %}
+  </div>
+
+  <div id="monthly status">
+    <h2>Sales by Associate | this month</h2>
+    {% render_table sales_by_associate %}
   </div>
 
 {% endblock content %}

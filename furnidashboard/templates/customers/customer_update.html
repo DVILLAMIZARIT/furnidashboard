@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% load bootstrap_toolkit %}
+
+{% block title %}Update Customer Info{% endblock %}
+
+{% block page_title %}Update Customer {{customer}}{% endblock page_title %}
+{% block extra_js %}
+  {{ form.media }}
+{% endblock extra_js %}
+
+{% block content %}
+
+<form action="" method="POST">
+  {% csrf_token %}
+  {{ form.errors }} 
+
+  {{form.as_p}}
+  
+  <input type="submit" value="Save"/>
+
+</form>
+
+{% endblock content %}

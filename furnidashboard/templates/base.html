@@ -49,6 +49,13 @@
               <li><a href="{% url 'customer_list' %}">Customers</a></li>
             </ul>
           </div><!--/.nav-collapse -->
+          <div class="search">
+            <form action="/search/" method="get">
+              <label for="id_q">Search:</label>
+              <input id="id_q" name="q" type="text"/>
+              <input type="submit" value="Submit"/>
+            </form>
+          </div>
         </div>
       </div>
     </div>
