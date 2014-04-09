@@ -1,17 +1,43 @@
 {% extends "base.html" %}
 
+{% load render_table from django_tables2 %}
 {% block title %}Order -- {{object}}{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+{% endblock %}
 
 {% block page_title %}Order Details - {{object}}{% endblock page_title %}
 
 {% block content %}
-<ul>
-  {% for order in object_list %}
-    <li>{{ order.created|date:"F j, Y" }}: {{ order }}</li>
-  {% endfor %}
-</ul>
+  <div>
+
+    <h2>Recent Orders</h2>
+    <form action="" method="get">
+      {{ filter.form.as_p }}
+      <input type="submit"/>
+    </form>
+
+    {% render_table table %}
+  </div>
+
+  {% comment %}
+  {% if is_paginated %}
+    <div class="pagination">
+      <span class="step-links">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span class="current">Page {{ page_obj.number }} of {{ paginator.num_pages }}.</span>
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}">Next</a>
+        {% endif %}
+      </span>
+    </div>
+  {% endif %}
+  {% endcomment %}
 
 <p>
+
   {% if previous_month %}
     <a href="{% url 'archive_month_numeric' year=previous_month.year month=previous_month.month %}">Previous Month: {{ previous_month|date:"F Y" }}</a>
   {% endif %}

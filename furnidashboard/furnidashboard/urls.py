@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView, ListView
 from orders.models import Order
 from customers.models import Customer
-from orders.views import UnplacedOrderTableView, OrderFilteredTableView, OrderListView, MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderMonthArchiveView, OrderWeekArchiveView
+from orders.views import UnplacedOrderTableView, MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveView, OrderMonthArchiveTableView
 from customers.views import CustomerCreateView, CustomerUpdateView, CustomerDetailView
 from django.views.generic.edit import FormView
 from orders.forms import OrderForm
@@ -18,7 +18,7 @@ urlpatterns = patterns('',
     #home page template
     url(
       regex=r'^$',
-      view=OrderFilteredTableView.as_view(),  
+      view=OrderMonthArchiveTableView.as_view(year=str(date.today().year), month=str(date.today().month), month_format='%m'),
       name="home",
     ),
     # url(r'^$', TemplateView.as_view(template_name='base.html')),  
@@ -26,7 +26,8 @@ urlpatterns = patterns('',
     
     url(
         regex= r'^orders/$', 
-        view=OrderListView.as_view(),
+        # view=OrderListView.as_view(),
+        view=OrderMonthArchiveTableView.as_view(year=str(date.today().year), month=str(date.today().month), month_format='%m'),
         name="order_list",
     ),
     url(
@@ -62,19 +63,19 @@ urlpatterns = patterns('',
     url(
         # /2014/mar/
         regex = r'^orders/(?P<year>\d{4})/(?P<month>[a-zA-z]+)/$', 
-        view=OrderMonthArchiveView.as_view(),
+        view=OrderMonthArchiveTableView.as_view(),
         name="archive_month",
     ),
     url(
         # /2014/03/
         regex = r'^orders/(?P<year>\d{4})/(?P<month>\d+)/$', 
-        view=OrderMonthArchiveView.as_view(month_format='%m'),
+        view=OrderMonthArchiveTableView.as_view(month_format='%m'),
         name="archive_month_numeric",
     ),
     url(
         # /this-month
         regex = r'^orders/this-month/$', 
-        view=OrderMonthArchiveView.as_view(year=str(date.today().year), month=str(date.today().month), month_format='%m'),
+        view=OrderMonthArchiveTableView.as_view(year=str(date.today().year), month=str(date.today().month), month_format='%m'),
         name="archive_this_month",
     ),
     # Weekly

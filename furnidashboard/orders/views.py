@@ -18,33 +18,33 @@ import django_filters as filters
 class OrderFilter(filters.FilterSet):
   class Meta:
     model = Order
-    fields = ['store', 'status']
+    fields = ['store', 'status', 'commission__associate']
 
-class PagedFilteredTableView(SingleTableView):
-  filter_class = None
-  formhelper_class = None
-  context_filter_name = 'filter'
-
-  def get_queryset(self, **kwargs):
-    qs = super(PagedFilteredTableView, self).get_queryset(**kwargs)
-    self.filter = self.filter_class(self.request.GET, queryset=qs)
-    # self.filter.form.helper = self.formhelper_class()
-    return self.filter.qs
-
-  def get_table(self, **kwargs):
-    table = super(PagedFilteredTableView, self).get_table()
-    try:
-      page = self.kwargs['page']
-    except KeyError:
-      page = 1 
-    RequestConfig(self.request, paginate={'page':page,
-                      'per_page':self.paginate_by}).configure(table)
-    return table
-
-  def get_context_data(self, **kwargs):
-    context = super(PagedFilteredTableView, self).get_context_data(**kwargs)
-    context[self.context_filter_name] = self.filter
-    return context
+#class PagedFilteredTableView(SingleTableView):
+#  filter_class = None
+#  formhelper_class = None
+#  context_filter_name = 'filter'
+#
+#  def get_queryset(self, **kwargs):
+#    qs = super(PagedFilteredTableView, self).get_queryset(**kwargs)
+#    self.filter = self.filter_class(self.request.GET, queryset=qs)
+#    # self.filter.form.helper = self.formhelper_class()
+#    return self.filter.qs
+#
+#  def get_table(self, **kwargs):
+#    table = super(PagedFilteredTableView, self).get_table()
+#    try:
+#      page = self.kwargs['page']
+#    except KeyError:
+#      page = 1 
+#    RequestConfig(self.request, paginate={'page':page,
+#                      'per_page':self.paginate_by}).configure(table)
+#    return table
+#
+#  def get_context_data(self, **kwargs):
+#    context = super(PagedFilteredTableView, self).get_context_data(**kwargs)
+#    context[self.context_filter_name] = self.filter
+#    return context
 
 class UnplacedOrderTableView(SingleTableView):
   model = Order
@@ -54,48 +54,46 @@ class UnplacedOrderTableView(SingleTableView):
   def get_queryset(self, **kwargs):
     return  Order.objects.select_related().filter(Q(status=None) | Q(status='N') | (Q(orderitem__in_stock=False) & (Q(orderitem__po_num__isnull=True) | Q(orderitem__po_num="")))).distinct()
 
-  
+#class OrderFilteredTableView(LoginRequiredMixin, PagedFilteredTableView):
+#  model = Order
+#  table_class = OrderTable
+#  template_name = "orders/order_filtered_table.html"
+#  context_object_name = "order_list"
+#  paginate_by = 5
+#  filter_class = OrderFilter
+## formhelper_class = OrderFilterFormHelper
 
-class OrderFilteredTableView(LoginRequiredMixin, PagedFilteredTableView):
-  model = Order
-  table_class = OrderTable
-  template_name = "orders/order_table.html"
-  context_object_name = "order_list"
-  paginate_by = 5
-  filter_class = OrderFilter
-# formhelper_class = OrderFilterFormHelper
+#class OrderListView(LoginRequiredMixin, ListView):
+#  model = Order
+#  context_object_name = "order_list"
+#  template_name = "orders/order_list.html"
+#
+#  def get_queryset(self):
+#    return Order.objects.select_related().all() # super(OrderListView, self).get_queryset().select_related()
+#
+#  def get_context_data(self, **kwargs):
+#    context = super(OrderListView, self).get_context_data(**kwargs)
+#    recent_orders_table = OrderTable(context['order_list'])
+#    unplaced_orders = context['object_list'].filter(Q(status=None) | Q(status='N') | (Q(orderitem__in_stock=False) & (Q(orderitem__po_num__isnull=True) | Q(orderitem__po_num="")))).distinct()
+#    unplaced_orders_table = UnplacedOrdersTable(unplaced_orders)
+#
+#    now = datetime.now()
+#    sales_by_assoc_data = _calc_sales_by_assoc(now.year, now.month) #[{'associate':'Lana', 'sales':5000}, {'associate':'Pearl', 'sales':10000}]
+#    sales_by_assoc = SalesByAssociateTable(sales_by_assoc_data)
+#
+#    RequestConfig(self.request).configure(recent_orders_table)
+#    RequestConfig(self.request).configure(unplaced_orders_table)
+#    RequestConfig(self.request).configure(sales_by_assoc)
+#    context['recent_orders_table'] = recent_orders_table
+#    context['unplaced_orders_table'] = unplaced_orders_table
+#    context['sales_by_associate'] = sales_by_assoc 
+#
+#    return context
 
-class OrderListView(LoginRequiredMixin, ListView):
-  model = Order
-  context_object_name = "order_list"
-  template_name = "orders/order_list.html"
-
-  def get_queryset(self):
-    return Order.objects.select_related().all() # super(OrderListView, self).get_queryset().select_related()
-
-  def get_context_data(self, **kwargs):
-    context = super(OrderListView, self).get_context_data(**kwargs)
-    recent_orders_table = OrderTable(context['order_list'])
-    unplaced_orders = context['object_list'].filter(Q(status=None) | Q(status='N') | (Q(orderitem__in_stock=False) & (Q(orderitem__po_num__isnull=True) | Q(orderitem__po_num="")))).distinct()
-    unplaced_orders_table = UnplacedOrdersTable(unplaced_orders)
-
-    now = datetime.now()
-    sales_by_assoc_data = _calc_sales_by_assoc(now.year, now.month) #[{'associate':'Lana', 'sales':5000}, {'associate':'Pearl', 'sales':10000}]
-    sales_by_assoc = SalesByAssociateTable(sales_by_assoc_data)
-
-    RequestConfig(self.request).configure(recent_orders_table)
-    RequestConfig(self.request).configure(unplaced_orders_table)
-    RequestConfig(self.request).configure(sales_by_assoc)
-    context['recent_orders_table'] = recent_orders_table
-    context['unplaced_orders_table'] = unplaced_orders_table
-    context['sales_by_associate'] = sales_by_assoc 
-
-    return context
-
-class MyOrderListView(OrderListView, ListView):
-  def get_queryset(self):
-    me = self.request.user
-    return Order.objects.select_related().filter(commission__associate=me) # super(OrderListView, self).get_queryset().select_related()
+#class MyOrderListView(OrderListView, ListView):
+#  def get_queryset(self):
+#    me = self.request.user
+#    return Order.objects.select_related().filter(commission__associate=me) # super(OrderListView, self).get_queryset().select_related()
 
 class OrderDetailView(LoginRequiredMixin, DetailView):
   model = Order
@@ -411,13 +409,63 @@ class OrderDeleteView(LoginRequiredMixin, DeleteView):
   model = Order
   success_url = reverse_lazy("order_list")
 
-class OrderMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
-  queryset = Order.objects.all()
+#class OrderMonthArchiveView(LoginRequiredMixin, PagedFilteredTableView, MonthArchiveView):
+#  queryset = Order.objects.all()
+#  date_field = "created"
+#  make_object_list = True
+#  allow_future = True
+#  template_name = "orders/order_archive_month.html"
+#  month_format = '%b'
+
+
+class OrderMonthArchiveTableView(LoginRequiredMixin, MonthArchiveView):
+  # table-related fields
+  formhelper_class = None
+  context_filter_name = 'filter'
+  context_table_name = 'table'
+  model = Order
+  table_class = OrderTable
+  context_object_name = "order_list"
+  paginate_by = 3 
+  filter_class = OrderFilter
+
+  # archive view specific fields
+  # queryset = Order.objects.all()
   date_field = "created"
   make_object_list = True
   allow_future = True
+  allow_empty = True
   template_name = "orders/order_archive_month.html"
   month_format = '%b'
+
+  def get_queryset(self, **kwargs):
+    qs = super(OrderMonthArchiveTableView, self).get_queryset(**kwargs)
+    self.filter = self.filter_class(self.request.GET, queryset=qs)
+    # self.filter.form.helper = self.formhelper_class()
+    return self.filter.qs
+
+  def get_table(self, **kwargs):
+    try:
+      page = self.kwargs['page']
+    except KeyError:
+      page = 1 
+    options = {'paginate':{'page':page, 'per_page':self.paginate_by}}
+    table_class = self.table_class
+    table = table_class(**kwargs)
+    RequestConfig(self.request, **options).configure(table)
+    return table
+
+  def get_context_data(self, **kwargs):
+    context = super(OrderMonthArchiveTableView, self).get_context_data(**kwargs)
+    table = self.get_table(data=context['order_list'])
+    context[self.context_table_name] = table
+    context[self.context_filter_name] = self.filter
+    return context
+
+class MyOrderListView(OrderMonthArchiveTableView):
+  def get_queryset(self):
+    me = self.request.user
+    return Order.objects.select_related().filter(commission__associate=me) # super(OrderListView, self).get_queryset().select_related()
 
 class OrderWeekArchiveView(LoginRequiredMixin, WeekArchiveView):
   queryset = Order.objects.all()
