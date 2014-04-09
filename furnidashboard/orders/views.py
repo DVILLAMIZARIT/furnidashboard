@@ -10,17 +10,65 @@ from django.core.exceptions import ValidationError
 from core.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-from django_tables2 import RequestConfig
+from django_tables2 import RequestConfig, SingleTableView
 from django.db.models import Q
 from datetime import timedelta, date, datetime
+import django_filters as filters
+
+class OrderFilter(filters.FilterSet):
+  class Meta:
+    model = Order
+    fields = ['store', 'status']
+
+class PagedFilteredTableView(SingleTableView):
+  filter_class = None
+  formhelper_class = None
+  context_filter_name = 'filter'
+
+  def get_queryset(self, **kwargs):
+    qs = super(PagedFilteredTableView, self).get_queryset(**kwargs)
+    self.filter = self.filter_class(self.request.GET, queryset=qs)
+    # self.filter.form.helper = self.formhelper_class()
+    return self.filter.qs
+
+  def get_table(self, **kwargs):
+    table = super(PagedFilteredTableView, self).get_table()
+    try:
+      page = self.kwargs['page']
+    except KeyError:
+      page = 1 
+    RequestConfig(self.request, paginate={'page':page,
+                      'per_page':self.paginate_by}).configure(table)
+    return table
+
+  def get_context_data(self, **kwargs):
+    context = super(PagedFilteredTableView, self).get_context_data(**kwargs)
+    context[self.context_filter_name] = self.filter
+    return context
+
+class UnplacedOrderTableView(SingleTableView):
+  model = Order
+  table_class = OrderTable
+  template_name = "orders/order_table.html"
+
+  def get_queryset(self, **kwargs):
+    return  Order.objects.select_related().filter(Q(status=None) | Q(status='N') | (Q(orderitem__in_stock=False) & (Q(orderitem__po_num__isnull=True) | Q(orderitem__po_num="")))).distinct()
+
+  
+
+class OrderFilteredTableView(LoginRequiredMixin, PagedFilteredTableView):
+  model = Order
+  table_class = OrderTable
+  template_name = "orders/order_table.html"
+  context_object_name = "order_list"
+  paginate_by = 5
+  filter_class = OrderFilter
+# formhelper_class = OrderFilterFormHelper
 
 class OrderListView(LoginRequiredMixin, ListView):
   model = Order
   context_object_name = "order_list"
   template_name = "orders/order_list.html"
-
-  def dispatch(self, *args, **kwargs):
-    return super(OrderListView, self).dispatch(*args, **kwargs)
 
   def get_queryset(self):
     return Order.objects.select_related().all() # super(OrderListView, self).get_queryset().select_related()
@@ -41,7 +89,13 @@ class OrderListView(LoginRequiredMixin, ListView):
     context['recent_orders_table'] = recent_orders_table
     context['unplaced_orders_table'] = unplaced_orders_table
     context['sales_by_associate'] = sales_by_assoc 
+
     return context
+
+class MyOrderListView(OrderListView, ListView):
+  def get_queryset(self):
+    me = self.request.user
+    return Order.objects.select_related().filter(commission__associate=me) # super(OrderListView, self).get_queryset().select_related()
 
 class OrderDetailView(LoginRequiredMixin, DetailView):
   model = Order

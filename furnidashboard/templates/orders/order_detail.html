@@ -79,6 +79,36 @@
     </tr>
   </table>
 
+  <h3>Ordered Items</h3>
+  <table id="order-items-table" cell-spacing="0" cell-padding="0">
+    <thead>
+      <th>&nbsp;</th>
+      <th>Status</th>
+      <th>PO #</th>
+      <th>PO Date</th>
+      <th>Acknowledgement #</th>
+      <th>Acknowledgement Date</th>
+      <th>ETA</th>
+    </thead>
+    <tbody>
+    {% for item in order.orderitem_set.all %}
+      <tr>
+        <td>{{ item.description }} <br/> </td>
+        {% if item.in_stock %}
+          <td colspan="6">In Stock</td>
+        {% else %}
+          <td>{{ item.status }}</td>
+          <td>{{ item.po_num}}</td>
+          <td>{{ item.po_date|date:'j F, Y'}}</td>
+          <td>{{ item.ack_num}}</td>
+          <td>{{ item.ack_date|date:'j F, Y'}}</td>
+          <td>{{ item.eta|date:'j F, Y' }} </td>
+        {% endif %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
   <h3>Additional</h3>
   <table id="order-addnl-table" cell-spacing="0" cell-padding="0">
     <tr>

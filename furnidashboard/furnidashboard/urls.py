@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView, ListView
 from orders.models import Order
 from customers.models import Customer
-from orders.views import OrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderMonthArchiveView, OrderWeekArchiveView
+from orders.views import UnplacedOrderTableView, OrderFilteredTableView, OrderListView, MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderMonthArchiveView, OrderWeekArchiveView
 from customers.views import CustomerCreateView, CustomerUpdateView, CustomerDetailView
 from django.views.generic.edit import FormView
 from orders.forms import OrderForm
@@ -16,13 +16,28 @@ admin.autodiscover()
 urlpatterns = patterns('',
     
     #home page template
-    url(r'^$', TemplateView.as_view(template_name='base.html')),  
-    #url(r'^$', FormView.as_view(form_class=OrderForm, template_name = 'orders/form.html')),    
+    url(
+      regex=r'^$',
+      view=OrderFilteredTableView.as_view(),  
+      name="home",
+    ),
+    # url(r'^$', TemplateView.as_view(template_name='base.html')),  
+    # url(r'^$', FormView.as_view(form_class=OrderForm, template_name = 'orders/form.html')),    
     
     url(
         regex= r'^orders/$', 
         view=OrderListView.as_view(),
         name="order_list",
+    ),
+    url(
+        regex= r'^orders/unplaced/$', 
+        view=UnplacedOrderTableView.as_view(),
+        name="unplaced_orders",
+    ),
+    url(
+        regex= r'^my-orders/$', 
+        view=MyOrderListView.as_view(),
+        name="my_order_list",
     ),
     url(
         regex = r'^orders/(?P<pk>\d+)/$', 
