@@ -198,6 +198,7 @@ THIRD_PARTY_APPS = (
     'django_tables2',
     'ajax_select',
     'bootstrap_toolkit',
+    'crispy_forms',
 )
 
 # Apps specific for this project go here.
@@ -263,3 +264,5 @@ AJAX_LOOKUP_CHANNELS = {
     # 'contact' : ('peoplez.lookups', 'ContactLookup'),
     # this specifies to look for the class `ContactLookup` in the `peoplez.lookups` module
 }
+
+CRISPY_TEMPLATE_PACK = 'bootstrap' # django crispy forms

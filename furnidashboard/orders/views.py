@@ -14,6 +14,8 @@ from django_tables2 import RequestConfig, SingleTableView
 from django.db.models import Q
 from datetime import timedelta, date, datetime
 import django_filters as filters
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit
 
 class OrderFilter(filters.FilterSet):
   class Meta:
@@ -442,6 +444,12 @@ class OrderMonthArchiveTableView(LoginRequiredMixin, MonthArchiveView):
     qs = super(OrderMonthArchiveTableView, self).get_queryset(**kwargs)
     self.filter = self.filter_class(self.request.GET, queryset=qs)
     # self.filter.form.helper = self.formhelper_class()
+    self.filter.helper = FormHelper()
+    self.filter.helper.form_id = "order-list-monthly"
+    self.filter.helper.form_class = "blueForms, hero-unit"
+    self.filter.helper.form_method = "get"
+    self.filter.helper.add_input(Submit('submit', 'Submit'))
+
     return self.filter.qs
 
   def get_table(self, **kwargs):

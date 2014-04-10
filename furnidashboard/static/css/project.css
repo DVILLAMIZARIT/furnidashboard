@@ -15,5 +15,11 @@
 }
 
 /* ORDER ITEMS FORM */
-#order-items-fieldset 
 /* /ORDER ITEMS FORM */
+
+/* ORDER LIST */
+div.table-container, 
+div.table-container > table {
+  width:100%;
+}
+/* \ORDER LSIT */
