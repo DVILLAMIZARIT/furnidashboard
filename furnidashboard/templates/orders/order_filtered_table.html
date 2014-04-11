@@ -1,31 +1,24 @@
+
 {% extends "base.html" %}
 
 {% load render_table from django_tables2 %}
+{% load crispy_forms_tags %}
 
 {% block title %}Order List{% endblock %}
-
-{% block page_title %}Orders Dashboard{% endblock page_title %}
-
 {% block extra_css %}
   <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
 {% endblock %}
 
-{% block content %}
+{% block page_title %}Order List{% endblock page_title %}
 
+{% block content %}
   <div>
-    <h2>Recent Orders</h2>
-    <form action="" method="get">
-      {{ filter.form.as_p }}
-      <input type="submit"/>
-    </form>
+
+    <h2>Orders</h2>
+    {% crispy filter.form filter.helper %}
+
     {% render_table table %}
+
   </div>
 
-  {% comment %}
-  <!--<div id="monthly status">
-    <h2>Sales by Associate | this month</h2>
-    {% render_table sales_by_associate %}
-  </div>-->
-  {% endcomment %}
-
-{% endblock content %}
+{% endblock %}

@@ -13,12 +13,14 @@ from datetime import date
 from django.contrib import admin
 admin.autodiscover()
 
+this_month_args = {'year':str(date.today().year), 'month':str(date.today().month)}
+
 urlpatterns = patterns('',
     
     #home page template
     url(
       regex=r'^$',
-      view=OrderMonthArchiveTableView.as_view(year=str(date.today().year), month=str(date.today().month), month_format='%m'),
+      view=OrderMonthArchiveTableView.as_view(month_format='%m', **this_month_args),
       name="home",
     ),
     # url(r'^$', TemplateView.as_view(template_name='base.html')),  

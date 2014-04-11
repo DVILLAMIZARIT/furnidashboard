@@ -1,0 +1,36 @@
+
+{% extends "base.html" %}
+
+{% load render_table from django_tables2 %}
+
+{% block title %}Deliveries{% endblock %}
+
+{% block page_title %}Deliveries{% endblock page_title %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+{% endblock %}
+
+{% block content %}
+  <!--<ul>
+    {% for order in object_list %}
+    <li>{{ order }} <a href="{% url "order_detail" order.pk %}" title="View order detail">View</a> | <a href="{% url "order_edit" order.pk %}" title="Edit order">Edit</a> | <a href="{% url "order_delete" order.pk %}" title="Delete Order">Delete</a> </li>
+    {% endfor %}
+  </ul>-->
+
+  <div>
+    <h2>New/Unprocessed Orders</h2>
+    {% render_table unplaced_orders_table  %}
+  </div>
+  <hr/>
+  <div>
+    <h2>Recent Orders</h2>
+    {% render_table recent_orders_table  %}
+  </div>
+
+  <div id="monthly status">
+    <h2>Sales by Associate | this month</h2>
+    {% render_table sales_by_associate %}
+  </div>
+
+{% endblock content %}

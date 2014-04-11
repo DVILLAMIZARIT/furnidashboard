@@ -4,6 +4,7 @@ from django.views.generic.dates import MonthArchiveView, WeekArchiveView
 from .models import Order, OrderItem, OrderDelivery
 from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable
 from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset
+from .filters import OrderFilter
 from customers.models import Customer
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.exceptions import ValidationError
@@ -13,14 +14,8 @@ from django.contrib import messages
 from django_tables2 import RequestConfig, SingleTableView
 from django.db.models import Q
 from datetime import timedelta, date, datetime
-import django_filters as filters
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
-
-class OrderFilter(filters.FilterSet):
-  class Meta:
-    model = Order
-    fields = ['store', 'status', 'commission__associate']
 
 #class PagedFilteredTableView(SingleTableView):
 #  filter_class = None
@@ -419,20 +414,52 @@ class OrderDeleteView(LoginRequiredMixin, DeleteView):
 #  template_name = "orders/order_archive_month.html"
 #  month_format = '%b'
 
-
-class OrderMonthArchiveTableView(LoginRequiredMixin, MonthArchiveView):
-  # table-related fields
-  formhelper_class = None
+class OrderFilteredTableMixin(object):
+  formhelper_class = FormHelper
   context_filter_name = 'filter'
   context_table_name = 'table'
   model = Order
   table_class = OrderTable
   context_object_name = "order_list"
-  paginate_by = 3 
+  table_paginate_by = None 
   filter_class = OrderFilter
+  filter_form_id = 'order-list'
+
+  def get_queryset(self, **kwargs):
+    qs = super(OrderFilteredTableMixin, self).get_queryset(**kwargs)
+    self.setup_filter(queryset=qs)
+    return self.filter.qs
+
+  def setup_filter(self, **kwargs):
+    self.filter = self.filter_class(self.request.GET, queryset=kwargs['queryset'])
+    self.filter.helper = self.formhelper_class()
+    self.filter.helper.form_id = self.filter_form_id
+    self.filter.helper.form_class = "blueForms, well"
+    self.filter.helper.form_method = "get"
+    self.filter.helper.add_input(Submit('submit', 'Submit'))
+
+  def get_table(self, **kwargs):
+    try:
+      page = self.kwargs['page']
+    except KeyError:
+      page = 1 
+    options = {'paginate':{'page':page, 'per_page':self.table_paginate_by}}
+    table_class = self.table_class
+    table = table_class(**kwargs)
+    RequestConfig(self.request, **options).configure(table)
+    return table
+
+  def get_context_data(self, **kwargs):
+    context = super(OrderFilteredTableMixin, self).get_context_data(**kwargs)
+    table = self.get_table(data=context[self.context_object_name])
+    context[self.context_table_name] = table
+    context[self.context_filter_name] = self.filter
+    return context
+
+class OrderMonthArchiveTableView(LoginRequiredMixin, OrderFilteredTableMixin, MonthArchiveView):
+  table_paginate_by = 3 
 
   # archive view specific fields
-  # queryset = Order.objects.all()
   date_field = "created"
   make_object_list = True
   allow_future = True
@@ -440,40 +467,16 @@ class OrderMonthArchiveTableView(LoginRequiredMixin, MonthArchiveView):
   template_name = "orders/order_archive_month.html"
   month_format = '%b'
 
+class MyOrderListView(LoginRequiredMixin, OrderFilteredTableMixin, ListView):
+  context_object_name = "order_list"
+  template_name = "orders/order_filtered_table.html"
+  table_paginate_by = 3
+ 
   def get_queryset(self, **kwargs):
-    qs = super(OrderMonthArchiveTableView, self).get_queryset(**kwargs)
-    self.filter = self.filter_class(self.request.GET, queryset=qs)
-    # self.filter.form.helper = self.formhelper_class()
-    self.filter.helper = FormHelper()
-    self.filter.helper.form_id = "order-list-monthly"
-    self.filter.helper.form_class = "blueForms, hero-unit"
-    self.filter.helper.form_method = "get"
-    self.filter.helper.add_input(Submit('submit', 'Submit'))
-
-    return self.filter.qs
-
-  def get_table(self, **kwargs):
-    try:
-      page = self.kwargs['page']
-    except KeyError:
-      page = 1 
-    options = {'paginate':{'page':page, 'per_page':self.paginate_by}}
-    table_class = self.table_class
-    table = table_class(**kwargs)
-    RequestConfig(self.request, **options).configure(table)
-    return table
-
-  def get_context_data(self, **kwargs):
-    context = super(OrderMonthArchiveTableView, self).get_context_data(**kwargs)
-    table = self.get_table(data=context['order_list'])
-    context[self.context_table_name] = table
-    context[self.context_filter_name] = self.filter
-    return context
-
-class MyOrderListView(OrderMonthArchiveTableView):
-  def get_queryset(self):
     me = self.request.user
-    return Order.objects.select_related().filter(commission__associate=me) # super(OrderListView, self).get_queryset().select_related()
+    qs = Order.objects.select_related().filter(commission__associate=me).all()
+    self.setup_filter(queryset=qs)
+    return self.filter.qs
 
 class OrderWeekArchiveView(LoginRequiredMixin, WeekArchiveView):
   queryset = Order.objects.all()
@@ -499,6 +502,11 @@ class OrderWeekArchiveView(LoginRequiredMixin, WeekArchiveView):
     context.update(extra)
 
     return self.render_to_response(context)
+
+class PendingDeliveriesList(LoginRequiredMixin, ListView):
+  model = OrderDelivery
+  template_name = "orders/delivery_list.html"
+  context_object_name = "deliveries_list"
 
 def _calc_sales_by_assoc(year, month):
   res = {}
