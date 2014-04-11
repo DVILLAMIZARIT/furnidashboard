@@ -96,7 +96,7 @@ class OrderDelivery(models.Model):
   scheduled_delivery_date = models.DateField(null=True, blank=True)
   delivered_date = models.DateField(null=True, blank=True)
   pickup_from = models.ForeignKey(Store)
-  delivery_slip = models.FileField(upload_to='deliveries/%Y/%m')
+  delivery_slip = models.FileField(upload_to='deliveries/%Y/%m', blank=True, null=True)
   comments = models.TextField(blank=True, null=True)
 
   class Meta:

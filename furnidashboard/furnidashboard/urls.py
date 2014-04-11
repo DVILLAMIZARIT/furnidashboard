@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView, ListView
 from orders.models import Order
 from customers.models import Customer
-from orders.views import UnplacedOrderTableView, MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveView, OrderMonthArchiveTableView
+from orders.views import UnplacedOrderTableView, MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveView, OrderMonthArchiveTableView, DeliveriesTableView
 from customers.views import CustomerCreateView, CustomerUpdateView, CustomerDetailView
 from django.views.generic.edit import FormView
 from orders.forms import OrderForm
@@ -120,6 +120,13 @@ urlpatterns = patterns('',
     url(
         regex = r'^search/$',
         view = 'core.views.search',
+        name = "search",
+    ),
+
+    # deliveries
+    url(
+        regex = r'^deliveries/$',
+        view = DeliveriesTableView.as_view() ,
         name = "search",
     ),
 

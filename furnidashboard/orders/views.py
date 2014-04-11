@@ -2,7 +2,7 @@ from django.views.generic import ListView, DetailView, UpdateView
 from django.views.generic.edit import CreateView, DeleteView
 from django.views.generic.dates import MonthArchiveView, WeekArchiveView
 from .models import Order, OrderItem, OrderDelivery
-from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable
+from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable, DeliveriesTable
 from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset
 from .filters import OrderFilter
 from customers.models import Customer
@@ -414,11 +414,11 @@ class OrderDeleteView(LoginRequiredMixin, DeleteView):
 #  template_name = "orders/order_archive_month.html"
 #  month_format = '%b'
 
-class OrderFilteredTableMixin(object):
+class FilteredTableMixin(object):
   formhelper_class = FormHelper
   context_filter_name = 'filter'
   context_table_name = 'table'
-  model = Order
+  model = None
   table_class = OrderTable
   context_object_name = "order_list"
   table_paginate_by = None 
@@ -426,7 +426,7 @@ class OrderFilteredTableMixin(object):
   filter_form_id = 'order-list'
 
   def get_queryset(self, **kwargs):
-    qs = super(OrderFilteredTableMixin, self).get_queryset(**kwargs)
+    qs = super(FilteredTableMixin, self).get_queryset(**kwargs)
     self.setup_filter(queryset=qs)
     return self.filter.qs
 
@@ -450,13 +450,14 @@ class OrderFilteredTableMixin(object):
     return table
 
   def get_context_data(self, **kwargs):
-    context = super(OrderFilteredTableMixin, self).get_context_data(**kwargs)
+    context = super(FilteredTableMixin, self).get_context_data(**kwargs)
     table = self.get_table(data=context[self.context_object_name])
     context[self.context_table_name] = table
     context[self.context_filter_name] = self.filter
     return context
 
-class OrderMonthArchiveTableView(LoginRequiredMixin, OrderFilteredTableMixin, MonthArchiveView):
+class OrderMonthArchiveTableView(LoginRequiredMixin, FilteredTableMixin, MonthArchiveView):
+  model = Order
   table_paginate_by = 3 
 
   # archive view specific fields
@@ -467,7 +468,8 @@ class OrderMonthArchiveTableView(LoginRequiredMixin, OrderFilteredTableMixin, Mo
   template_name = "orders/order_archive_month.html"
   month_format = '%b'
 
-class MyOrderListView(LoginRequiredMixin, OrderFilteredTableMixin, ListView):
+class MyOrderListView(LoginRequiredMixin, FilteredTableMixin, ListView):
+  model = Order
   context_object_name = "order_list"
   template_name = "orders/order_filtered_table.html"
   table_paginate_by = 3
@@ -503,10 +505,12 @@ class OrderWeekArchiveView(LoginRequiredMixin, WeekArchiveView):
 
     return self.render_to_response(context)
 
-class PendingDeliveriesList(LoginRequiredMixin, ListView):
+class DeliveriesTableView(LoginRequiredMixin, SingleTableView):
   model = OrderDelivery
+  table_class = DeliveriesTable
+  context_table_name = 'table' 
   template_name = "orders/delivery_list.html"
-  context_object_name = "deliveries_list"
+  paginate_by = 3
 
 def _calc_sales_by_assoc(year, month):
   res = {}

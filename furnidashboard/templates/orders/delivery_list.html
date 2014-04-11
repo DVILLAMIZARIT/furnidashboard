@@ -12,25 +12,8 @@
 {% endblock %}
 
 {% block content %}
-  <!--<ul>
-    {% for order in object_list %}
-    <li>{{ order }} <a href="{% url "order_detail" order.pk %}" title="View order detail">View</a> | <a href="{% url "order_edit" order.pk %}" title="Edit order">Edit</a> | <a href="{% url "order_delete" order.pk %}" title="Delete Order">Delete</a> </li>
-    {% endfor %}
-  </ul>-->
-
-  <div>
-    <h2>New/Unprocessed Orders</h2>
-    {% render_table unplaced_orders_table  %}
-  </div>
-  <hr/>
-  <div>
-    <h2>Recent Orders</h2>
-    {% render_table recent_orders_table  %}
-  </div>
-
-  <div id="monthly status">
-    <h2>Sales by Associate | this month</h2>
-    {% render_table sales_by_associate %}
+  <div id="deliveries">
+    {% render_table table %}
   </div>
 
 {% endblock content %}
