@@ -99,6 +99,9 @@ class OrderDelivery(models.Model):
   delivery_slip = models.FileField(upload_to='deliveries/%Y/%m', blank=True, null=True)
   comments = models.TextField(blank=True, null=True)
 
+  def get_absolute_url(self):
+    return reverse("delivery_detail", kwargs={"pk":self.pk})
+
   class Meta:
     db_table = "deliveries"
 

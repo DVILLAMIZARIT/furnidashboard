@@ -3,7 +3,7 @@ from django.views.generic.edit import CreateView, DeleteView
 from django.views.generic.dates import MonthArchiveView, WeekArchiveView
 from .models import Order, OrderItem, OrderDelivery
 from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable, DeliveriesTable
-from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset
+from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset, OrderDeliveryForm
 from .filters import OrderFilter
 from customers.models import Customer
 from django.core.urlresolvers import reverse_lazy, reverse
@@ -512,25 +512,71 @@ class DeliveriesTableView(LoginRequiredMixin, SingleTableView):
   template_name = "orders/delivery_list.html"
   paginate_by = 3
 
-def _calc_sales_by_assoc(year, month):
-  res = {}
-  month_start = datetime(int(year), int(month), 1)
-  month_end = month_start + timedelta(35)
-  month_end = datetime(month_end.year, month_end.month, 1)
-  orders = Order.objects.filter(Q(created__gte=month_start) & Q(created__lt=month_end))
-  
-  for o in orders:
-    split_num = o.commission_set.count()
-    comm_queryset = o.commission_set.select_related().all() 
-    for com in comm_queryset:
-      commission_amount = o.subtotal_after_discount / split_num
-      if res.has_key(com.associate.first_name):
-        res[com.associate.first_name] += commission_amount 
-      else:
-        res[com.associate.first_name] =  commission_amount
-  
-  sales_list = []
-  for associate, amount in res.items():
-    sales_list.append({'associate':associate, 'sales':amount })
+class DeliveryDetailView(LoginRequiredMixin, DetailView):
+  model = OrderDelivery
+  context_object_name = "delivery"
+  template_name = "orders/delivery_detail.html"
 
-  return sales_list
+class DeliveryDeleteView(LoginRequiredMixin, DeleteView):
+  model = OrderDelivery
+  success_url = reverse_lazy("delivery_list")
+
+class DeliveryUpdateView(LoginRequiredMixin, UpdateView):
+  model = OrderDelivery
+  context_object_name = "delivery"
+  template_name = "orders/delivery_update.html"
+  form_class = OrderDeliveryForm
+
+class SalesStandingsMonthTableView(LoginRequiredMixin, MonthArchiveView):
+  # archive view specific fields
+  date_field = "created"
+  make_object_list = True
+  allow_future = True
+  allow_empty = True
+  template_name = "orders/commissions_monthly.html"
+  month_format = '%b'
+  queryset = Order.objects.all()
+
+  def get_context_data(self, **kwargs):
+    context = super(SalesStandingsMonthTableView, self).get_context_data(**kwargs)
+
+    orders = context['object_list']
+    sales_by_assoc_data = self._calc_sales_assoc_by_orders(orders)
+    sales_by_assoc = SalesByAssociateTable(sales_by_assoc_data)
+
+#    now = datetime.now()
+#    sales_by_assoc_data = _calc_sales_by_assoc(now.year, now.month) #[{'associate':'Lana', 'sales':5000}, {'associate':'Pearl', 'sales':10000}]
+
+    RequestConfig(self.request).configure(sales_by_assoc)
+    context['sales_by_associate'] = sales_by_assoc 
+
+    sales_by_assoc_data_ytd = self._calc_sales_assoc_by_orders(self.queryset)
+    sales_by_assoc_ytd = SalesByAssociateTable(sales_by_assoc_data_ytd)
+    RequestConfig(self.request).configure(sales_by_assoc_ytd)
+    context['sales_by_associate_ytd'] = sales_by_assoc_ytd 
+
+    return context
+
+  def _calc_sales_assoc_by_orders(self, order_list):
+    res = {}
+    # month_start = datetime(int(year), int(month), 1)
+    # month_end = month_start + timedelta(35)
+    # month_end = datetime(month_end.year, month_end.month, 1)
+    # orders = Order.objects.filter(Q(created__gte=month_start) & Q(created__lt=month_end))
+    
+    for o in order_list:
+      split_num = o.commission_set.count()
+      comm_queryset = o.commission_set.select_related().all() 
+      for com in comm_queryset:
+        commission_amount = o.subtotal_after_discount / split_num
+        if res.has_key(com.associate.first_name):
+          res[com.associate.first_name] += commission_amount 
+        else:
+          res[com.associate.first_name] =  commission_amount
+    
+    sales_list = []
+    for associate, amount in res.items():
+      sales_list.append({'associate':associate, 'sales':amount })
+
+    return sales_list
+

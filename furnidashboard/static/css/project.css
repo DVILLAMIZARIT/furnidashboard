@@ -18,8 +18,8 @@
 /* /ORDER ITEMS FORM */
 
 /* ORDER LIST */
-div.table-container, 
-div.table-container > table {
+#monthly-orders div.table-container, 
+#monthly-orders div.table-container > table {
   width:100%;
 }
 /* \ORDER LSIT */

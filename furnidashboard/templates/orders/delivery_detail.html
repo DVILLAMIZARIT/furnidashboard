@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Delivery --Order -- {{delivery.order}}{% endblock %}
+
+{% block page_title %}Delivery for Order # {{delivery.order.number}}{% endblock page_title %}
+
+{% block content %}
+  
+  <div class="well"><a href="{% url 'delivery_edit' delivery.pk %}" title="Update Delivery">Update Delivery</a>  |  <a href="{% url 'delivery_delete' delivery.pk %}" title="Delete Delivery">Delete this Delivery</a></div>
+  <hr/>
+
+  <h3>Delivery Details</h3>
+  <table id="delivery-table" cell-spacing="0" cell-padding="0">
+    <tr>
+      <td>Order#</td><td>{{delivery.order.number}} | <a href={% url 'order_detail' delivery.order.pk %} title="View Order">View</a></td>
+    </tr>
+    <tr>
+      <td>Delivery Scheduled Date:</td><td>{{delivery.scheduled_delivery_date|date:'j F, Y'}}</td>
+    </tr>
+    <tr>
+      <td>Delivered Date:</td><td>{{delivery.delivered_date|date:'j F, Y'}}</td>
+    </tr>
+    <tr>
+      <td>Delivery type/by:</td><td>{{delivery.get_delivery_type_display|upper}}</td>
+    </tr>
+    <tr>
+      <td>Pick up from:</td><td>{{delivery.pickup_from}}</td>
+    </tr>
+    <tr>
+      <td>Comments</td><td>{{delivery.comments}}</td>
+    </tr>
+  </table>
+
+{% endblock content %}

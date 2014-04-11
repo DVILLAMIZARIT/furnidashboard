@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView, ListView
 from orders.models import Order
 from customers.models import Customer
-from orders.views import UnplacedOrderTableView, MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveView, OrderMonthArchiveTableView, DeliveriesTableView
+from orders.views import UnplacedOrderTableView, MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveView, OrderMonthArchiveTableView, DeliveriesTableView, DeliveryDetailView, DeliveryUpdateView, DeliveryDeleteView, SalesStandingsMonthTableView
 from customers.views import CustomerCreateView, CustomerUpdateView, CustomerDetailView
 from django.views.generic.edit import FormView
 from orders.forms import OrderForm
@@ -27,35 +27,36 @@ urlpatterns = patterns('',
     # url(r'^$', FormView.as_view(form_class=OrderForm, template_name = 'orders/form.html')),    
     
     url(
-        regex= r'^orders/$', 
-        # view=OrderListView.as_view(),
-        view=OrderMonthArchiveTableView.as_view(year=str(date.today().year), month=str(date.today().month), month_format='%m'),
-        name="order_list",
+      regex= r'^orders/$', 
+      # view=OrderListView.as_view(),
+      # view=OrderMonthArchiveTableView.as_view(year=str(date.today().year), month=str(date.today().month), month_format='%m'),
+      view=OrderMonthArchiveTableView.as_view(month_format='%m', **this_month_args),
+      name="order_list",
+    ),
+    # url(
+    #  regex= r'^orders/unplaced/$', 
+    #  view=UnplacedOrderTableView.as_view(),
+    #  name="unplaced_orders",
+    # ),
+    url(
+      regex= r'^my-orders/$', 
+      view=MyOrderListView.as_view(),
+      name="my_order_list",
     ),
     url(
-        regex= r'^orders/unplaced/$', 
-        view=UnplacedOrderTableView.as_view(),
-        name="unplaced_orders",
+      regex = r'^orders/(?P<pk>\d+)/$', 
+      view=OrderDetailView.as_view(),
+      name="order_detail",
     ),
     url(
-        regex= r'^my-orders/$', 
-        view=MyOrderListView.as_view(),
-        name="my_order_list",
+      regex = r'^orders/(?P<pk>\d+)/edit/$', 
+      view=login_required(OrderUpdateView.as_view()),
+      name="order_edit",
     ),
     url(
-        regex = r'^orders/(?P<pk>\d+)/$', 
-        view=OrderDetailView.as_view(),
-        name="order_detail",
-    ),
-    url(
-        regex = r'^orders/(?P<pk>\d+)/edit/$', 
-        view=login_required(OrderUpdateView.as_view()),
-        name="order_edit",
-    ),
-    url(
-        regex = r'^orders/(?P<pk>\d+)/delete/$', 
-        view=login_required(OrderDeleteView.as_view()),
-        name="order_delete",
+      regex = r'^orders/(?P<pk>\d+)/delete/$', 
+      view=login_required(OrderDeleteView.as_view()),
+      name="order_delete",
     ),
     url(r'orders/add/$', login_required(OrderCreateView.as_view()), name="order_add"),
     url(r'orders/(?P<pk>\d+)/delete/$', login_required(OrderDeleteView.as_view()), name="order_delete"),
@@ -63,53 +64,72 @@ urlpatterns = patterns('',
     # Archive Views
     # Month:
     url(
-        # /2014/mar/
-        regex = r'^orders/(?P<year>\d{4})/(?P<month>[a-zA-z]+)/$', 
-        view=OrderMonthArchiveTableView.as_view(),
-        name="archive_month",
+      # /2014/mar/
+      regex = r'^orders/(?P<year>\d{4})/(?P<month>[a-zA-z]+)/$', 
+      view=OrderMonthArchiveTableView.as_view(),
+      name="archive_month",
     ),
     url(
-        # /2014/03/
-        regex = r'^orders/(?P<year>\d{4})/(?P<month>\d+)/$', 
-        view=OrderMonthArchiveTableView.as_view(month_format='%m'),
-        name="archive_month_numeric",
+      # /2014/03/
+      regex = r'^orders/(?P<year>\d{4})/(?P<month>\d+)/$', 
+      view=OrderMonthArchiveTableView.as_view(month_format='%m'),
+      name="archive_month_numeric",
     ),
     url(
-        # /this-month
-        regex = r'^orders/this-month/$', 
-        view=OrderMonthArchiveTableView.as_view(year=str(date.today().year), month=str(date.today().month), month_format='%m'),
-        name="archive_this_month",
+      # /this-month
+      regex = r'^orders/this-month/$', 
+      view=OrderMonthArchiveTableView.as_view(year=str(date.today().year), month=str(date.today().month), month_format='%m'),
+      name="archive_this_month",
     ),
     # Weekly
     url(
-        # /this-week
-        regex = r'^orders/this-week/$', 
-        view=OrderWeekArchiveView.as_view(year=str(date.today().year), week=str(int(date.today().isocalendar()[1]) - 1)),
-        name="archive_this_week",
+      # /this-week
+      regex = r'^orders/this-week/$', 
+      view=OrderWeekArchiveView.as_view(year=str(date.today().year), week=str(int(date.today().isocalendar()[1]) - 1)),
+      name="archive_this_week",
     ),
     url(
-        # /2014/week/01/
-        regex = r'^orders/(?P<year>\d{4})/week/(?P<week>\d+)/$', 
-        view=OrderWeekArchiveView.as_view(),
-        name="archive_week",
+      # /2014/week/01/
+      regex = r'^orders/(?P<year>\d{4})/week/(?P<week>\d+)/$', 
+      view=OrderWeekArchiveView.as_view(),
+      name="archive_week",
     ),
 
     # Customer links
     url(r'customers/$', login_required(ListView.as_view(model=Customer, template_name="customers/customer_list.html")), name="customer_list"),
     url(
-        regex = r'^customers/(?P<pk>\d+)/edit/$', 
-        view=CustomerUpdateView.as_view(),
-        name="customer_edit",
+      regex = r'^customers/(?P<pk>\d+)/edit/$', 
+      view=CustomerUpdateView.as_view(),
+      name="customer_edit",
     ),
     url(
-        regex = r'^customers/add/$', 
-        view=CustomerCreateView.as_view(),
-        name="customer_add",
+      regex = r'^customers/add/$', 
+      view=CustomerCreateView.as_view(),
+      name="customer_add",
     ),
     url(
-        regex = r'^customers/(?P<pk>\d+)/$', 
-        view=CustomerDetailView.as_view(),
-        name="customer_detail",
+      regex = r'^customers/(?P<pk>\d+)/$', 
+      view=CustomerDetailView.as_view(),
+      name="customer_detail",
+    ),
+
+    # Sales Standings Report
+    url(
+      # /sales-standings/
+      regex = r'^sales-standings/$', 
+      view=SalesStandingsMonthTableView.as_view(year=str(date.today().year), month=str(date.today().month), month_format='%m'),
+      name="sales_standings_cur",
+    ),
+    url(
+      # /sales-standings/2013/02
+      regex = r'^sales-standings/(?P<year>\d{4})/(?P<month>\d+)/$',
+      view=SalesStandingsMonthTableView.as_view(month_format='%m'),
+      name="sales_standings",
+    ),
+    url(
+      regex = r'^sales-standings/commissions-scale/$',
+      view=TemplateView.as_view(template_name="orders/commissions_scale.html"),
+      name = "commissions_scale",
     ),
 
     # authentication-related URLs
@@ -118,22 +138,38 @@ urlpatterns = patterns('',
 
     # search
     url(
-        regex = r'^search/$',
-        view = 'core.views.search',
-        name = "search",
+      regex = r'^search/$',
+      view = 'core.views.search',
+      name = "search",
     ),
 
     # deliveries
     url(
-        regex = r'^deliveries/$',
-        view = DeliveriesTableView.as_view() ,
-        name = "search",
+      regex = r'^deliveries/$',
+      view = DeliveriesTableView.as_view() ,
+      name = "delivery_list",
+    ),
+    url(
+      regex = r'^deliveries/(?P<pk>\d+)/$', 
+      view=DeliveryDetailView.as_view(),
+      name="delivery_detail",
+    ),
+    url(
+      regex = r'^deliveries/(?P<pk>\d+)/edit/$', 
+      view=DeliveryUpdateView.as_view(),
+      name="delivery_edit",
+    ),
+    url(
+      regex = r'^deliveries(?P<pk>\d+)/delete/$', 
+      view=DeliveryDeleteView.as_view(),
+      name="delivery_delete",
     ),
 
+    url(r'^ajax_select/', include('ajax_select.urls')),
+
     # Uncomment the admin/doc line below to enable admin documentation:
-    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    #url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # administration URLs 
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^ajax_select/', include('ajax_select.urls')),
+    # url(r'^admin/', include(admin.site.urls)),
 )

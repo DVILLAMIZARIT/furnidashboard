@@ -3,6 +3,14 @@ from django.utils.safestring import mark_safe
 from django_tables2.utils import A #accessor
 from .models import Order, OrderDelivery
 
+class CustomTextLinkColumn(tables.LinkColumn):
+  def __init__(self, viewname, urlconf=None, args=None, kwargs=None, current_app=None, attrs=None, custom_text=None, **extra):
+    super(CustomTextLinkColumn, self).__init__(viewname, urlconf=urlconf, args=args, kwargs=kwargs, current_app=current_app, attrs=attrs, **extra)
+    self.custom_text = custom_text
+
+  def render(self, value, record, bound_column):
+    return super(CustomTextLinkColumn, self).render(self.custom_text if self.custom_text else value, record, bound_column)
+
 class AssociateColumn(tables.Column):
   def render(self, value):
     commissions = value.all()
@@ -16,6 +24,9 @@ class OrderTable(tables.Table):
   number  = tables.LinkColumn('order_detail', orderable=False, kwargs={'pk': A('pk')})
   associate = AssociateColumn(accessor="commission_set", verbose_name="Associate")
   grand_total = tables.Column(orderable=False)
+
+  def render_number(self, record):
+    return "Edit"
 
   class Meta:
     model = Order
@@ -43,9 +54,9 @@ class SalesByAssociateTable(tables.Table):
 
 class DeliveriesTable(tables.Table):
   order = tables.LinkColumn('order_detail', args=[A('order.pk')])
+  pk = CustomTextLinkColumn('delivery_detail', args=[A('pk')], custom_text="Detail", orderable=False, verbose_name="Actions")
 
   class Meta:
     model = OrderDelivery
     attrs = {"class":"paleblue"}
     fields = ("order", "scheduled_delivery_date", "delivery_type", 'delivered_date') 
-

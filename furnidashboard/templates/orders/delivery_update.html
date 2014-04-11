@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% load bootstrap_toolkit %}
+
+{% block title %}Modify Order{% endblock %}
+
+{% block page_title %}Modify Order {{order}}{% endblock page_title %}
+
+{% block extra_js %}
+<script type="text/javascript">
+    $(function() {
+      $(document).ready(function() {
+        
+      });
+    })
+</script>
+
+  {{ form.media }}
+  
+{% endblock %}
+
+{% block extra_css %}
+<style type="text/css">
+</style>
+{% endblock %}
+
+{% block content %}
+
+<form action="" method="POST">
+  {% csrf_token %}
+  
+  {{ form.management_form }}
+  {{ form.non_form_errors }}
+  <div class="form-row inline">
+    {{ form | as_bootstrap}}
+  </div>
+
+  <input type="submit" value="Save"/>
+
+</form>
+
+{% endblock content %}

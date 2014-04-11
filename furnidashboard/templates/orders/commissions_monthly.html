@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% load render_table from django_tables2 %}
+
+{% block title %}Sales Standings Report{% endblock %}
+
+{% block page_title %}Sales Standings Report{% endblock page_title %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+{% endblock %}
+
+{% block content %}
+  
+  <div class="well">
+    <a href="{% url 'commissions_scale' %}" title="Bonus Commissions Chart">Bonus Commissions Scale Chart</a>
+  </div>
+
+  <div id="monthly-sales-report">
+    <h2>Sales by Associate for  {{ month|date:'F, Y' }} </h2>
+    {% render_table sales_by_associate %}
+  </div>
+  <div id="ytd-sales-report">
+    <h2>Year-to-date Sales Report</h2>
+    {% render_table sales_by_associate_ytd %}
+  </div>
+
+<p class="pagination">
+
+  {% if previous_month %}
+    <a href="{% url 'sales_standings' year=previous_month.year month=previous_month.month %}" class="btn pull-left">&larr; {{ previous_month|date:"F Y" }}</a>
+  {% endif %}
+
+  {% if next_month %}
+    <a href="{% url 'sales_standings' year=next_month.year month=next_month.month %}" class="btn pull-right">{{ next_month|date:"F Y" }} &rarr;</a>
+  {% endif %}
+</p>
+{% endblock content %}
