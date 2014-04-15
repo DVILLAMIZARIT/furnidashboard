@@ -123,7 +123,7 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
     if self.object.commission_set.count() == 0:
       extra = 1
     SpecialCommissionFormSet = get_commissions_formset(extra=extra, max_num=3)
-    commission_form = SpecialCommissionFormSet(instance=self.object, prefix="commissions")
+    commissions_form = SpecialCommissionFormSet(instance=self.object, prefix="commissions")
     
     DeliveriesFormSet = get_deliveries_formset(extra=1, max_num=100)
     delivery_form = DeliveriesFormSet(instance = self.object, prefix="deliveries")
@@ -137,7 +137,15 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
 
     SoldItemsFormSet = get_ordered_items_formset(extra=extra, max_num=100)
     items_form = SoldItemsFormSet(instance=self.object, prefix="ordered_items")
-    context = self.get_context_data(form=form, commission_form=commission_form, customer_form=customer_form, items_form=items_form, delivery_form=delivery_form)
+    extra_forms = {
+      'form':form,
+      'customer_form':customer_form,
+      'items_form':items_form,
+      'commissions_form':commissions_form,
+      'delivery_form':delivery_form,
+    }
+    context = self.get_context_data()
+    context.update(extra_forms)
     return self.render_to_response(context)
 
   def post(self, request, *args, **kwargs):
@@ -149,18 +157,18 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
     form_class = self.get_form_class()
     form = self.get_form(form_class)
     #self.object = form.save(commit=False)
-    customer_form = CustomerFormSet(self.request.POST, prefix="customers")
-    commission_form = CommissionFormSet(self.request.POST, instance=self.object, prefix="commissions")
-    items_form = ItemFormSet(self.request.POST, instance=self.object, prefix="ordered_items")
+    customer_form = CustomerFormSet(self.request.POST, self.request.FILES, prefix="customers")
+    commissions_form = CommissionFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="commissions")
+    items_form = ItemFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="ordered_items")
     delivery_form = DeliveryFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="deliveries")
     forms = {
       'form':form,
       'customer_form':customer_form,
       'items_form':items_form,
-      'commission_form':commission_form,
+      'commissions_form':commissions_form,
       'delivery_form':delivery_form,
     }
-    if form.is_valid() and commission_form.is_valid() and items_form.is_valid() and delivery_form.is_valid():
+    if form.is_valid() and commissions_form.is_valid() and items_form.is_valid() and delivery_form.is_valid():
       return self.form_valid(**forms)
     else:
       return self.form_invalid(**forms)
@@ -173,7 +181,7 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
     form = kwargs['form']
     customer_form = kwargs['customer_form']
     items_form = kwargs['items_form']
-    commission_form = kwargs['commission_form']
+    commissions_form = kwargs['commissions_form']
     delivery_form = kwargs['delivery_form']
 
     self.object = form.save(commit=False)
@@ -234,9 +242,9 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
         items_form.save()
 
       # save commissions
-      if commission_form.has_changed():
-        commission_form.instance = self.object
-        commission_form.save()
+      if commissions_form.has_changed():
+        commissions_form.instance = self.object
+        commissions_form.save()
 
       # save deliveries
       if delivery_form.has_changed():
@@ -280,10 +288,12 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
 
     customer_form = CustomerFormSet(queryset=Customer.objects.none(), prefix="customers")
     items_form = ItemFormSet(prefix="ordered_items")
+    commissions_form = CommissionFormSet(prefix="commissions")
     extra_forms = {
       'form':form,
       'customer_form':customer_form,
       'items_form':items_form,
+      'commissions_form':commissions_form,
     }
     context = self.get_context_data()
     context.update(extra_forms)
@@ -298,16 +308,17 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
     form_class = self.get_form_class()
     form = self.get_form(form_class)
 
-    customer_form = CustomerFormSet(self.request.POST, prefix="customers")
-    items_form = ItemFormSet(self.request.POST, prefix="ordered_items")
-
+    customer_form = CustomerFormSet(self.request.POST, self.reqest.FILES, prefix="customers")
+    items_form = ItemFormSet(self.request.POST, self.request.FILES, prefix="ordered_items")
+    commissions_form = CommissionFormSet(self.request.POST, self.request.FILES, prefix="commissions")
     forms = {
       'form':form,
       'customer_form':customer_form,
       'items_form':items_form,
+      'commissions_form':commissions_form,
     }
 
-    if form.is_valid() and items_form.is_valid(): 
+    if form.is_valid() and items_form.is_valid() and commissions_form.is_valid(): 
       return self.form_valid(**forms)
     else:
       return self.form_invalid(**forms)
@@ -423,7 +434,7 @@ class FilteredTableMixin(object):
   context_object_name = "order_list"
   table_paginate_by = None 
   filter_class = OrderFilter
-  filter_form_id = 'order-list'
+  filter_form_id = 'order-filter'
 
   def get_queryset(self, **kwargs):
     qs = super(FilteredTableMixin, self).get_queryset(**kwargs)
@@ -480,8 +491,36 @@ class MyOrderListView(LoginRequiredMixin, FilteredTableMixin, ListView):
     self.setup_filter(queryset=qs)
     return self.filter.qs
 
-class OrderWeekArchiveView(LoginRequiredMixin, WeekArchiveView):
-  queryset = Order.objects.all()
+#class OrderWeekArchiveView(LoginRequiredMixin, WeekArchiveView):
+#  queryset = Order.objects.all()
+#  date_field = "created"
+#  make_object_list = True
+#  allow_future = True
+#  allow_empty = True
+#  template_name = "orders/order_archive_week.html"
+#  week_format = '%W'
+#
+#  def get(self, request, *args, **kwargs):
+#    self.date_list, self.object_list, extra_content = self.get_dated_items()
+#    context = self.get_context_data(object_list=self.object_list, date_list=self.date_list)
+#    context.update(extra_content)
+#    
+#    # extra fields for cur. week, prev, and next week
+#    extra = {
+#      'next_week_num': context['next_week'].isocalendar()[1] - 1,
+#      'prev_week_num': context['previous_week'].isocalendar()[1] - 1,
+#      'next_week_sun': context['next_week'] + timedelta(days=7),
+#      'this_week_sun': context['week'] + timedelta(days=6),
+#    }
+#    context.update(extra)
+#
+#    return self.render_to_response(context)
+
+class OrderWeekArchiveTableView(LoginRequiredMixin, FilteredTableMixin, WeekArchiveView):
+  model = Order
+  table_paginate_by = 5 
+
+  # archive view specific fields
   date_field = "created"
   make_object_list = True
   allow_future = True

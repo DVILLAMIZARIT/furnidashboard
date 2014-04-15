@@ -78,6 +78,7 @@ class OrderItem(models.Model):
 
   class Meta:
     db_table = "order_items"
+    verbose_name_plural = "ordered items"
   
 class OrderDelivery(models.Model):
   """
@@ -109,4 +110,5 @@ class OrderDelivery(models.Model):
 
   class Meta:
     db_table = "deliveries"
+    verbose_name_plural = "deliveries"
 

@@ -15,14 +15,14 @@
       <h3>Matched Customers</h3>
       <ul>
         {% for object in found_customers  %}
-          <li>{{ object }}</li> 
+          <li><a href="{% url 'customer_detail' pk=object.pk %}">{{ object }}</a></li> 
         {% endfor %}
       </ul>
       <hr/>
       <h3>Matched orders</h3>
       <ul>
         {% for object in found_orders  %}
-          <li>{{ object }}</li> 
+          <li><a href="{% url 'order_detail' pk=object.pk %}">{{ object }}</a></li> 
         {% endfor %}
       </ul>
   </div>

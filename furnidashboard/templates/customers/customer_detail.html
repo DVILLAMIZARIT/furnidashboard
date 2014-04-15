@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
 {% load bootstrap_toolkit %}
+{% load crispy_forms_tags %}
+{% load render_table from django_tables2 %}
 
 {% block title %} Customer Info{% endblock %}
 
@@ -8,6 +10,9 @@
 {% block extra_js %}
   {{ form.media }}
 {% endblock extra_js %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+{% endblock %}
 
 {% block content %}
 
@@ -15,7 +20,12 @@
   <hr/>
 
   <form action="" method="POST">
-    {{customer_details_form.as_ul}}
+    {% crispy customer_details_form %}
   </form>
+
+  <h4>Orders</h4>
+  <div id="order-list">
+    {% render_table customer_orders_table %}
+  </div>
 
 {% endblock content %}

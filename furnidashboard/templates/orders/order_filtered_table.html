@@ -17,7 +17,9 @@
     <h2>Orders</h2>
     {% crispy filter.form filter.helper %}
 
-    {% render_table table %}
+    <div id="order-list">
+      {% render_table table %}
+  </div>
 
   </div>
 

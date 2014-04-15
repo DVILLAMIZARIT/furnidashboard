@@ -4,7 +4,7 @@ from django.views.generic import TemplateView, ListView
 from orders.models import Order
 from customers.models import Customer
 from customers.views import CustomerCreateView, CustomerUpdateView, CustomerDetailView, CustomerTableView
-from orders.views import UnplacedOrderTableView, MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveView, OrderMonthArchiveTableView, DeliveriesTableView, DeliveryDetailView, DeliveryUpdateView, DeliveryDeleteView, SalesStandingsMonthTableView
+from orders.views import UnplacedOrderTableView, MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveTableView, OrderMonthArchiveTableView, DeliveriesTableView, DeliveryDetailView, DeliveryUpdateView, DeliveryDeleteView, SalesStandingsMonthTableView
 from django.views.generic.edit import FormView
 from orders.forms import OrderForm
 from datetime import date
@@ -85,13 +85,13 @@ urlpatterns = patterns('',
     url(
       # /this-week
       regex = r'^orders/this-week/$', 
-      view=OrderWeekArchiveView.as_view(year=str(date.today().year), week=str(int(date.today().isocalendar()[1]) - 1)),
+      view=OrderWeekArchiveTableView.as_view(year=str(date.today().year), week=str(int(date.today().isocalendar()[1]) - 1)),
       name="archive_this_week",
     ),
     url(
       # /2014/week/01/
       regex = r'^orders/(?P<year>\d{4})/week/(?P<week>\d+)/$', 
-      view=OrderWeekArchiveView.as_view(),
+      view=OrderWeekArchiveTableView.as_view(),
       name="archive_week",
     ),
 

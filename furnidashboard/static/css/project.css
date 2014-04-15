@@ -14,12 +14,21 @@
   display:inline;
 }
 
+div.search {
+  padding-top:.3em;
+  float:right;
+}
+div.search form {
+  margin:0
+}
+
 /* ORDER ITEMS FORM */
 /* /ORDER ITEMS FORM */
 
 /* ORDER LIST */
-#monthly-orders div.table-container, 
-#monthly-orders div.table-container > table {
+#order-list,
+#order-list div.table-container, 
+#order-list div.table-container > table {
   width:100%;
 }
 /* \ORDER LSIT */
