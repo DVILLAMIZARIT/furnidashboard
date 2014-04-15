@@ -3,8 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView, ListView
 from orders.models import Order
 from customers.models import Customer
+from customers.views import CustomerCreateView, CustomerUpdateView, CustomerDetailView, CustomerTableView
 from orders.views import UnplacedOrderTableView, MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveView, OrderMonthArchiveTableView, DeliveriesTableView, DeliveryDetailView, DeliveryUpdateView, DeliveryDeleteView, SalesStandingsMonthTableView
-from customers.views import CustomerCreateView, CustomerUpdateView, CustomerDetailView
 from django.views.generic.edit import FormView
 from orders.forms import OrderForm
 from datetime import date
@@ -96,7 +96,11 @@ urlpatterns = patterns('',
     ),
 
     # Customer links
-    url(r'customers/$', login_required(ListView.as_view(model=Customer, template_name="customers/customer_list.html")), name="customer_list"),
+    url(
+      regex = r'customers/$', 
+      view = CustomerTableView.as_view(), 
+      name="customer_list",
+    ),
     url(
       regex = r'^customers/(?P<pk>\d+)/edit/$', 
       view=CustomerUpdateView.as_view(),

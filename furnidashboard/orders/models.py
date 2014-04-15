@@ -102,6 +102,11 @@ class OrderDelivery(models.Model):
   def get_absolute_url(self):
     return reverse("delivery_detail", kwargs={"pk":self.pk})
 
+  @property
+  def delivery_slip_filename(self):
+    import os
+    return os.path.basename(self.delivery_slip.name)
+
   class Meta:
     db_table = "deliveries"
 

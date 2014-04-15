@@ -12,9 +12,16 @@
   <div>
       You searched for: {{query_string}}
 
-      <h3>Search Results</h3>
+      <h3>Matched Customers</h3>
       <ul>
-        {% for object in found_entries  %}
+        {% for object in found_customers  %}
+          <li>{{ object }}</li> 
+        {% endfor %}
+      </ul>
+      <hr/>
+      <h3>Matched orders</h3>
+      <ul>
+        {% for object in found_orders  %}
           <li>{{ object }}</li> 
         {% endfor %}
       </ul>

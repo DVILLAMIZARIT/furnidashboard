@@ -53,10 +53,11 @@
             </ul>
           </div><!--/.nav-collapse -->
           <div class="search">
-            <form action="/search/" method="get">
-              <label for="id_q">Search:</label>
-              <input id="id_q" name="q" type="text"/>
-              <input type="submit" value="Submit"/>
+            <form action="/search/" method="get" class="form-search">
+              <div class="input-append">
+                <input id="id_q" name="q" type="text" placeholder="Enter order # to search" class="span2 search-query input-medium"/>
+                <button type="submit" value="Submit" class="btn">Search</button>
+              </div>
             </form>
           </div>
         </div>

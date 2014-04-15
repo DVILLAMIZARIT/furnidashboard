@@ -1,6 +1,7 @@
 import re
 from django.db.models import Q
 from orders.models import Order
+from customers.models import Customer
 from django.shortcuts import render
 
 def normalize_query(query_string, findterms=re.compile(r'"([^"]+)"|(\S)').findall, normspaces=re.compile(r'\s{2,}').sub):
@@ -42,10 +43,14 @@ def search(request):
     if query_string:
 
       entry_query = get_query(query_string, ['number',]) #, 'comments',])
+      found_orders = Order.objects.filter(entry_query).order_by('-created')
 
-      found_entries = Order.objects.filter(entry_query).order_by('-created')
+      entry_query = get_query(query_string, ['first_name', 'last_name', 'email'])
+      found_customers = Customer.objects.filter(entry_query).order_by('-last_name')
 
       return render(request, 'search/search_results.html', 
         {'query_string': query_string, 
-         'found_entries': found_entries},
+         'found_orders': found_orders,
+         'found_customers':found_customers,
+        },
         )

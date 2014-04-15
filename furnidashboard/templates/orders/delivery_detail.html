@@ -27,6 +27,9 @@
       <td>Pick up from:</td><td>{{delivery.pickup_from}}</td>
     </tr>
     <tr>
+      <td>Delivery Slip:</td><td><a href="{{ MEDIA_URL }}{{delivery.delivery_slip}}">{{ delivery.delivery_slip_filename }}</a></td>
+    </tr>
+    <tr>
       <td>Comments</td><td>{{delivery.comments}}</td>
     </tr>
   </table>

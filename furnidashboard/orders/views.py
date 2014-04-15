@@ -152,7 +152,7 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
     customer_form = CustomerFormSet(self.request.POST, prefix="customers")
     commission_form = CommissionFormSet(self.request.POST, instance=self.object, prefix="commissions")
     items_form = ItemFormSet(self.request.POST, instance=self.object, prefix="ordered_items")
-    delivery_form = DeliveryFormSet(self.request.POST, instance=self.object, prefix="deliveries")
+    delivery_form = DeliveryFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="deliveries")
     forms = {
       'form':form,
       'customer_form':customer_form,
