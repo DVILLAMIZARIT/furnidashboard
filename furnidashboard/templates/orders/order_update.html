@@ -92,6 +92,10 @@
              {{ form.number }}
            </div>
            <div class="field-wrapper inline">
+             {{ form.created.errors }}
+             {{ form.created | as_bootstrap }}
+           </div>
+           <div class="field-wrapper inline">
              {{ form.status.errors }}
              <label for="id_status">Status</label>
              {{ form.status }}

@@ -18,7 +18,7 @@ class Order(models.Model):
   )
 
   number = models.CharField(max_length=50)
-  created = models.DateTimeField(auto_now_add=True)
+  created = models.DateTimeField() # auto_now_add=True)
   modified = models.DateTimeField(auto_now=True)
   customer = models.ForeignKey(Customer, default=0, blank=True, null=True)
   status = models.CharField(max_length=5, choices=ORDER_STATUSES)

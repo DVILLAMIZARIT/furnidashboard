@@ -469,7 +469,7 @@ class FilteredTableMixin(object):
 
 class OrderMonthArchiveTableView(LoginRequiredMixin, FilteredTableMixin, MonthArchiveView):
   model = Order
-  table_paginate_by = 3 
+  table_paginate_by = 20 
 
   # archive view specific fields
   date_field = "created"
@@ -483,7 +483,7 @@ class MyOrderListView(LoginRequiredMixin, FilteredTableMixin, ListView):
   model = Order
   context_object_name = "order_list"
   template_name = "orders/order_filtered_table.html"
-  table_paginate_by = 3
+  table_paginate_by = 20 
  
   def get_queryset(self, **kwargs):
     me = self.request.user
@@ -518,7 +518,7 @@ class MyOrderListView(LoginRequiredMixin, FilteredTableMixin, ListView):
 
 class OrderWeekArchiveTableView(LoginRequiredMixin, FilteredTableMixin, WeekArchiveView):
   model = Order
-  table_paginate_by = 5 
+  table_paginate_by = 20 
 
   # archive view specific fields
   date_field = "created"
@@ -549,7 +549,7 @@ class DeliveriesTableView(LoginRequiredMixin, SingleTableView):
   table_class = DeliveriesTable
   context_table_name = 'table' 
   template_name = "orders/delivery_list.html"
-  paginate_by = 3
+  paginate_by = 20 
 
 class DeliveryDetailView(LoginRequiredMixin, DetailView):
   model = OrderDelivery

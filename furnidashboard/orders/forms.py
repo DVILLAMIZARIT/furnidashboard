@@ -41,6 +41,9 @@ class OrderForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
     super(OrderForm, self).__init__(*args, **kwargs)
     self.fields['status'].initial='N'
+    self.fields['created'].widget = BootstrapDateInput()
+    self.fields['created'].label = "Ordered Date"
+    self.fields['created'].widget.attrs['class'] = "order-date"
 
   class Meta:
     model = Order
