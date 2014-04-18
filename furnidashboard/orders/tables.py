@@ -3,6 +3,7 @@ from django.utils.safestring import mark_safe
 from django_tables2.utils import A #accessor
 from .models import Order, OrderDelivery
 from core.tables import CustomTextLinkColumn
+import orders.utils as utils
 
 class AssociateColumn(tables.Column):
   def render(self, value):
@@ -17,6 +18,9 @@ class OrderTable(tables.Table):
   pk = CustomTextLinkColumn('order_detail', args=[A('pk')], custom_text="Detail", orderable=False, verbose_name="Actions")
   associate = AssociateColumn(accessor="commission_set", verbose_name="Associate")
   grand_total = tables.Column(orderable=False)
+
+  def render_grand_total(self, value):
+    return utils.dollars(value)
 
   class Meta:
     model = Order
@@ -36,10 +40,14 @@ class UnplacedOrdersTable(tables.Table):
     fields = ("number", "created", "customer", "grand_total", "associate", "detail")
 
 class SalesByAssociateTable(tables.Table):
-  associate = tables.Column()
+  associate = tables.Column(orderable=False)
   sales = tables.Column()
 
+  def render_sales(self, value):
+    return utils.dollars(value)
+
   class Meta:
+    order_by='-sales'
     attrs = {"class":"paleblue"}
 
 class DeliveriesTable(tables.Table):
@@ -50,3 +58,13 @@ class DeliveriesTable(tables.Table):
     model = OrderDelivery
     attrs = {"class":"paleblue"}
     fields = ("order", "scheduled_delivery_date", "delivery_type", 'delivered_date') 
+
+class SalesTotalsTable(tables.Table):
+  item = tables.Column(verbose_name="-", orderable=False)
+  hq = tables.Column(verbose_name="HQ/Sacramento", orderable=False)
+  fnt = tables.Column(verbose_name="Roseville", orderable=False)
+  total = tables.Column(verbose_name="Total", orderable=False)
+
+  class Meta:
+    attrs = {"class":"paleblue"}
+

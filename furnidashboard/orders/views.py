@@ -2,7 +2,7 @@ from django.views.generic import ListView, DetailView, UpdateView
 from django.views.generic.edit import CreateView, DeleteView
 from django.views.generic.dates import MonthArchiveView, WeekArchiveView
 from .models import Order, OrderItem, OrderDelivery
-from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable, DeliveriesTable
+from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable, DeliveriesTable, SalesTotalsTable
 from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset, OrderDeliveryForm
 from .filters import OrderFilter
 from customers.models import Customer
@@ -16,6 +16,7 @@ from django.db.models import Q
 from datetime import timedelta, date, datetime
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
+import orders.utils as utils
 
 #class PagedFilteredTableView(SingleTableView):
 #  filter_class = None
@@ -479,6 +480,26 @@ class OrderMonthArchiveTableView(LoginRequiredMixin, FilteredTableMixin, MonthAr
   template_name = "orders/order_archive_month.html"
   month_format = '%b'
 
+  def get_context_data(self, **kwargs):
+    context = super(OrderMonthArchiveTableView, self).get_context_data(**kwargs)
+    subtotal_hq = reduce(lambda a,b:a+b, [o.subtotal_after_discount for o in context['object_list'] if o.store.name == "Copenhagen"])
+    subtotal_fnt = reduce(lambda a,b:a+b, [o.subtotal_after_discount for o in context['object_list'] if o.store.name == "Fountains"])
+    total_hq = reduce(lambda a,b:a+b, [o.grand_total for o in context['object_list'] if o.store.name == "Copenhagen"])
+    total_fnt = reduce(lambda a,b:a+b, [o.grand_total for o in context['object_list'] if o.store.name == "Fountains"])
+    totals_data = [
+      {'item':'Subtotal After Discount', 'hq':utils.dollars(subtotal_hq), 'fnt':utils.dollars(subtotal_fnt), 'total':utils.dollars(subtotal_hq + subtotal_fnt)},
+      {'item':'Grand Total', 'hq':utils.dollars(total_hq), 'fnt':utils.dollars(total_fnt), 'total':utils.dollars(total_hq + total_fnt)},
+      ]
+    totals_table = SalesTotalsTable(totals_data)
+    RequestConfig(self.request).configure(totals_table)
+    context['totals_table'] = totals_table
+
+    sales_by_assoc_data = utils._calc_sales_assoc_by_orders(context['object_list'])
+    sales_by_assoc = SalesByAssociateTable(sales_by_assoc_data)
+    RequestConfig(self.request).configure(sales_by_assoc)
+    context['sales_by_associate'] = sales_by_assoc 
+    return context
+
 class MyOrderListView(LoginRequiredMixin, FilteredTableMixin, ListView):
   model = Order
   context_object_name = "order_list"
@@ -580,7 +601,7 @@ class SalesStandingsMonthTableView(LoginRequiredMixin, MonthArchiveView):
     context = super(SalesStandingsMonthTableView, self).get_context_data(**kwargs)
 
     orders = context['object_list']
-    sales_by_assoc_data = self._calc_sales_assoc_by_orders(orders)
+    sales_by_assoc_data = utils._calc_sales_assoc_by_orders(orders)
     sales_by_assoc = SalesByAssociateTable(sales_by_assoc_data)
 
 #    now = datetime.now()
@@ -589,33 +610,10 @@ class SalesStandingsMonthTableView(LoginRequiredMixin, MonthArchiveView):
     RequestConfig(self.request).configure(sales_by_assoc)
     context['sales_by_associate'] = sales_by_assoc 
 
-    sales_by_assoc_data_ytd = self._calc_sales_assoc_by_orders(self.queryset)
+    sales_by_assoc_data_ytd = utils._calc_sales_assoc_by_orders(self.queryset)
     sales_by_assoc_ytd = SalesByAssociateTable(sales_by_assoc_data_ytd)
     RequestConfig(self.request).configure(sales_by_assoc_ytd)
     context['sales_by_associate_ytd'] = sales_by_assoc_ytd 
 
     return context
-
-  def _calc_sales_assoc_by_orders(self, order_list):
-    res = {}
-    # month_start = datetime(int(year), int(month), 1)
-    # month_end = month_start + timedelta(35)
-    # month_end = datetime(month_end.year, month_end.month, 1)
-    # orders = Order.objects.filter(Q(created__gte=month_start) & Q(created__lt=month_end))
-    
-    for o in order_list:
-      split_num = o.commission_set.count()
-      comm_queryset = o.commission_set.select_related().all() 
-      for com in comm_queryset:
-        commission_amount = o.subtotal_after_discount / split_num
-        if res.has_key(com.associate.first_name):
-          res[com.associate.first_name] += commission_amount 
-        else:
-          res[com.associate.first_name] =  commission_amount
-    
-    sales_list = []
-    for associate, amount in res.items():
-      sales_list.append({'associate':associate, 'sales':amount })
-
-    return sales_list
 
