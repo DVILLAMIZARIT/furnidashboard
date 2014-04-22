@@ -1,9 +1,4 @@
-from django.contrib.humanize.templatetags.humanize import intcomma
 from orders.models import Order
-
-def dollars(dollars):
-  dollars = round(float(dollars), 2)
-  return "$ {0}{1}".format(intcomma(int(dollars)), ("%0.2f" % dollars)[-3:])
 
 def _calc_sales_assoc_by_orders(order_list):
   res = {}

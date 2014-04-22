@@ -6,7 +6,13 @@
 
 {% block content %}
   
-  <div class="well"><a href="{% url 'order_edit' object.pk %}" title="Edit Order">Edit Order</a>  |  <a href="{% url 'order_delete' object.pk %}" title="Delete Order">Delete Order</a></div>
+  <div class="well">
+    {% if perms.orders.change_order %}
+    <a href="{% url 'order_edit' object.pk %}" title="Edit Order">Edit Order</a>  
+    {% endif %}
+    {% if perms.orders.delete_order %}
+      |  <a href="{% url 'order_delete' object.pk %}" title="Delete Order">Delete Order</a></div>
+    {% endif %}
   <hr/>
 
   {% if object.not_placed %}

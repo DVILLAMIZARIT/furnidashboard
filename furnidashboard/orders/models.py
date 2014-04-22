@@ -48,6 +48,10 @@ class Order(models.Model):
   class Meta:
     ordering = ["-created","-modified"]
     db_table = "order_info"
+    permissions = (
+        ("view_orders", "Can View Orders"),
+        ("view_sales", "Can View Sales Reports"),
+    )
   
   def __unicode__(self):
     return "{0}, {1}".format(self.number, self.grand_total)

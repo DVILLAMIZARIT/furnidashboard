@@ -3,7 +3,7 @@ from django.utils.safestring import mark_safe
 from django_tables2.utils import A #accessor
 from .models import Order, OrderDelivery
 from core.tables import CustomTextLinkColumn
-import orders.utils as utils
+import core.utils as utils
 
 class AssociateColumn(tables.Column):
   def render(self, value):

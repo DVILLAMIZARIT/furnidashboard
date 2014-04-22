@@ -6,7 +6,14 @@
 
 {% block content %}
   
-  <div class="well"><a href="{% url 'delivery_edit' delivery.pk %}" title="Update Delivery">Update Delivery</a>  |  <a href="{% url 'delivery_delete' delivery.pk %}" title="Delete Delivery">Delete this Delivery</a></div>
+  <div class="well">
+    {% if perms.orders.change_orderdelivery %}
+      <a href="{% url 'delivery_edit' delivery.pk %}" title="Update Delivery">Update Delivery</a>  
+    {% endif %}
+    {% if perms.orders.delete_orderdelivery %}
+      |  <a href="{% url 'delivery_delete' delivery.pk %}" title="Delete Delivery">Delete this Delivery</a>
+    {% endif %}
+  </div>
   <hr/>
 
   <h3>Delivery Details</h3>

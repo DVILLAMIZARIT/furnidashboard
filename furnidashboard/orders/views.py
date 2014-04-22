@@ -1,4 +1,4 @@
-from django.views.generic import ListView, DetailView, UpdateView
+from django.views.generic import ListView, DetailView, UpdateView, RedirectView
 from django.views.generic.edit import CreateView, DeleteView
 from django.views.generic.dates import MonthArchiveView, WeekArchiveView
 from .models import Order, OrderItem, OrderDelivery
@@ -8,7 +8,7 @@ from .filters import OrderFilter
 from customers.models import Customer
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.exceptions import ValidationError
-from core.mixins import LoginRequiredMixin
+from core.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django_tables2 import RequestConfig, SingleTableView
@@ -16,7 +16,9 @@ from django.db.models import Q
 from datetime import timedelta, date, datetime
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
-import orders.utils as utils
+import orders.utils as order_utils
+import core.utils as utils
+
 
 #class PagedFilteredTableView(SingleTableView):
 #  filter_class = None
@@ -93,22 +95,32 @@ class UnplacedOrderTableView(SingleTableView):
 #    me = self.request.user
 #    return Order.objects.select_related().filter(commission__associate=me) # super(OrderListView, self).get_queryset().select_related()
 
-class OrderDetailView(LoginRequiredMixin, DetailView):
+class OrderDetailView(PermissionRequiredMixin, DetailView):
   model = Order
   context_object_name = "order"
   template_name = "orders/order_detail.html"
+  required_permissions = (
+    'orders.view_orders',
+  )
 
-class OrderDeleteView(LoginRequiredMixin, DeleteView):
+class OrderDeleteView(PermissionRequiredMixin, DeleteView):
   model = Order
   context_object_name = "order"
   success_url = reverse_lazy("order_list")
 
+  required_permissions = (
+    'orders.delete_order',
+  )
 
-class OrderUpdateView(LoginRequiredMixin, UpdateView):
+class OrderUpdateView(PermissionRequiredMixin, UpdateView):
   model = Order
   context_object_name = "order"
   template_name = "orders/order_update.html"
   form_class = OrderForm
+
+  required_permissions = (
+    'orders.change_order',
+  )
 
   def get(self, request, *args, **kwargs):
     """ 
@@ -270,10 +282,14 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
   def get_success_url(self):
     return self.get_object().get_absolute_url() #reverse('order_detail', kwargs={'pk': self.object.pk})
 
-class OrderCreateView(LoginRequiredMixin, CreateView):
+class OrderCreateView(PermissionRequiredMixin, CreateView):
   model = Order
   template_name = "orders/order_update.html"
   form_class = OrderForm
+
+  required_permissions = (
+    'orders.add_order',
+  )
 
   def get(self, request, *args, **kwargs):
     """ 
@@ -414,9 +430,13 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
     return reverse('order_detail', kwargs={'pk': self.object.pk})
 
 
-class OrderDeleteView(LoginRequiredMixin, DeleteView):
+class OrderDeleteView(PermissionRequiredMixin, DeleteView):
   model = Order
   success_url = reverse_lazy("order_list")
+
+  required_permissions = (
+    'orders.delete_order',
+  )
 
 #class OrderMonthArchiveView(LoginRequiredMixin, PagedFilteredTableView, MonthArchiveView):
 #  queryset = Order.objects.all()
@@ -468,7 +488,7 @@ class FilteredTableMixin(object):
     context[self.context_filter_name] = self.filter
     return context
 
-class OrderMonthArchiveTableView(LoginRequiredMixin, FilteredTableMixin, MonthArchiveView):
+class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, MonthArchiveView):
   model = Order
   table_paginate_by = 20 
 
@@ -479,6 +499,10 @@ class OrderMonthArchiveTableView(LoginRequiredMixin, FilteredTableMixin, MonthAr
   allow_empty = True
   template_name = "orders/order_archive_month.html"
   month_format = '%b'
+
+  required_permissions = (
+    'orders.view_orders',
+  )
 
   def get_context_data(self, **kwargs):
     context = super(OrderMonthArchiveTableView, self).get_context_data(**kwargs)
@@ -494,18 +518,22 @@ class OrderMonthArchiveTableView(LoginRequiredMixin, FilteredTableMixin, MonthAr
     RequestConfig(self.request).configure(totals_table)
     context['totals_table'] = totals_table
 
-    sales_by_assoc_data = utils._calc_sales_assoc_by_orders(context['object_list'])
+    sales_by_assoc_data = order_utils._calc_sales_assoc_by_orders(context['object_list'])
     sales_by_assoc = SalesByAssociateTable(sales_by_assoc_data)
     RequestConfig(self.request).configure(sales_by_assoc)
     context['sales_by_associate'] = sales_by_assoc 
     return context
 
-class MyOrderListView(LoginRequiredMixin, FilteredTableMixin, ListView):
+class MyOrderListView(PermissionRequiredMixin, FilteredTableMixin, ListView):
   model = Order
   context_object_name = "order_list"
   template_name = "orders/order_filtered_table.html"
   table_paginate_by = 20 
  
+  required_permissions = (
+    'orders.view_orders',
+  )
+
   def get_queryset(self, **kwargs):
     me = self.request.user
     qs = Order.objects.select_related().filter(commission__associate=me).all()
@@ -537,7 +565,7 @@ class MyOrderListView(LoginRequiredMixin, FilteredTableMixin, ListView):
 #
 #    return self.render_to_response(context)
 
-class OrderWeekArchiveTableView(LoginRequiredMixin, FilteredTableMixin, WeekArchiveView):
+class OrderWeekArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, WeekArchiveView):
   model = Order
   table_paginate_by = 20 
 
@@ -548,6 +576,10 @@ class OrderWeekArchiveTableView(LoginRequiredMixin, FilteredTableMixin, WeekArch
   allow_empty = True
   template_name = "orders/order_archive_week.html"
   week_format = '%W'
+
+  required_permissions = (
+    'orders.view_orders',
+  )
 
   def get(self, request, *args, **kwargs):
     self.date_list, self.object_list, extra_content = self.get_dated_items()
@@ -587,7 +619,12 @@ class DeliveryUpdateView(LoginRequiredMixin, UpdateView):
   template_name = "orders/delivery_update.html"
   form_class = OrderDeliveryForm
 
-class SalesStandingsMonthTableView(LoginRequiredMixin, MonthArchiveView):
+  def get_form_kwargs(self):
+    kwargs = super(DeliveryUpdateView, self).get_form_kwargs()
+    kwargs.update({'request':self.request})
+    return kwargs
+
+class SalesStandingsMonthTableView(PermissionRequiredMixin, MonthArchiveView):
   # archive view specific fields
   date_field = "created"
   make_object_list = True
@@ -597,11 +634,15 @@ class SalesStandingsMonthTableView(LoginRequiredMixin, MonthArchiveView):
   month_format = '%b'
   queryset = Order.objects.all()
 
+  required_permissions = (
+    'orders.view_sales',
+  )
+
   def get_context_data(self, **kwargs):
     context = super(SalesStandingsMonthTableView, self).get_context_data(**kwargs)
 
     orders = context['object_list']
-    sales_by_assoc_data = utils._calc_sales_assoc_by_orders(orders)
+    sales_by_assoc_data = order_utils._calc_sales_assoc_by_orders(orders)
     sales_by_assoc = SalesByAssociateTable(sales_by_assoc_data)
 
 #    now = datetime.now()
@@ -610,10 +651,19 @@ class SalesStandingsMonthTableView(LoginRequiredMixin, MonthArchiveView):
     RequestConfig(self.request).configure(sales_by_assoc)
     context['sales_by_associate'] = sales_by_assoc 
 
-    sales_by_assoc_data_ytd = utils._calc_sales_assoc_by_orders(self.queryset)
+    sales_by_assoc_data_ytd = order_utils._calc_sales_assoc_by_orders(self.queryset)
     sales_by_assoc_ytd = SalesByAssociateTable(sales_by_assoc_data_ytd)
     RequestConfig(self.request).configure(sales_by_assoc_ytd)
     context['sales_by_associate_ytd'] = sales_by_assoc_ytd 
 
     return context
 
+class HomePageRedirectView(LoginRequiredMixin, RedirectView):
+  url = reverse_lazy('order_list')
+
+  def get_redirect_url(self, **kwargs):
+    # redirect directly to deliveries page if user belongs to group delivery_person
+    if utils.is_user_delivery_group(self.request):
+      self.url = reverse('delivery_list')
+
+    return super(HomePageRedirectView, self).get_redirect_url(**kwargs)

@@ -26,6 +26,9 @@ class Customer(models.Model):
 
   class Meta:
     db_table = "customers"
+    permissions = (
+        ("view_customers", "Can View Orders"),
+    )
 
   def __unicode__(self):
     return "{0} {1}".format(self.first_name, self.last_name)

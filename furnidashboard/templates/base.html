@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>{% block title %}icecreamratings_project{% endblock title %}</title>
+    <title>{% block title %}Furnitalia Dashboard{% endblock title %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -44,12 +44,20 @@
           <a class="brand" href="/">Furnitalia Dashboard</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
-              <li class="active"><a href="{% url 'order_list' %}">All Orders</a></li>
-              <li><a href="{% url 'my_order_list' %}">My Orders</a></li>
-              <li><a href="{% url 'order_add' %}">Add Order</a></li>
-              <li><a href="{% url 'customer_list' %}">Customers</a></li>
+              {% if perms.orders.view_orders %}
+                <li class="active"><a href="{% url 'order_list' %}">All Orders</a></li>
+                <li><a href="{% url 'my_order_list' %}">My Orders</a></li>
+              {% endif %}
+              {% if perms.orders.add_order %}
+                <li><a href="{% url 'order_add' %}">Add Order</a></li>
+              {% endif %}
+              {% if perms.customers.view_customers %}
+                <li><a href="{% url 'customer_list' %}">Customers</a></li>
+              {% endif %}
               <li><a href="{% url 'delivery_list' %}">Deliveries</a></li>
-              <li><a href="{% url 'sales_standings_cur' %}">Sales Totals</a></li>
+              {% if perms.orders.view_sales %}
+                <li><a href="{% url 'sales_standings_cur' %}">Sales Totals</a></li>
+              {% endif %}
             </ul>
           </div><!--/.nav-collapse -->
           <div class="search">

@@ -7,6 +7,7 @@ from django.forms.models import inlineformset_factory, modelformset_factory
 from ajax_select.fields import AutoCompleteSelectField
 from bootstrap_toolkit.widgets import BootstrapDateInput
 from core.mixins import DisabledFieldsMixin
+import core.utils as utils
 
 class OrderItemForm(forms.ModelForm):
 
@@ -61,9 +62,17 @@ class CommissionForm(forms.ModelForm):
 class OrderDeliveryForm(forms.ModelForm):
 
   def __init__(self, *args, **kwargs):
+    self.request = kwargs.pop('request', None)
     super(OrderDeliveryForm, self).__init__(*args, **kwargs)
     self.fields['scheduled_delivery_date'].widget = BootstrapDateInput()
     self.fields['delivered_date'].widget = BootstrapDateInput()
+    
+    if utils.is_user_delivery_group(self.request):
+      # person can modify only certain delivery info data
+      enabled_fields = ('delivered_date', 'comments')
+      remove = [f for f in self.fields if f not in enabled_fields]
+      for field in remove: 
+          del self.fields[field]
   
   class Meta:
     model = OrderDelivery

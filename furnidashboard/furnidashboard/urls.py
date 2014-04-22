@@ -4,7 +4,7 @@ from django.views.generic import TemplateView, ListView
 from orders.models import Order
 from customers.models import Customer
 from customers.views import CustomerCreateView, CustomerUpdateView, CustomerDetailView, CustomerTableView
-from orders.views import UnplacedOrderTableView, MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveTableView, OrderMonthArchiveTableView, DeliveriesTableView, DeliveryDetailView, DeliveryUpdateView, DeliveryDeleteView, SalesStandingsMonthTableView
+from orders.views import UnplacedOrderTableView, MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveTableView, OrderMonthArchiveTableView, DeliveriesTableView, DeliveryDetailView, DeliveryUpdateView, DeliveryDeleteView, SalesStandingsMonthTableView, HomePageRedirectView
 from django.views.generic.edit import FormView
 from orders.forms import OrderForm
 from datetime import date
@@ -20,7 +20,7 @@ urlpatterns = patterns('',
     #home page template
     url(
       regex=r'^$',
-      view=OrderMonthArchiveTableView.as_view(month_format='%m', **this_month_args),
+      view=HomePageRedirectView.as_view(),
       name="home",
     ),
     # url(r'^$', TemplateView.as_view(template_name='base.html')),  
@@ -137,8 +137,13 @@ urlpatterns = patterns('',
     ),
 
     # authentication-related URLs
-    (r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
-    url(r'^accounts/', include('django.contrib.auth.urls')),
+    url(
+      r'^accounts/login/$', 
+      'django.contrib.auth.views.login', 
+      {'template_name': 'login.html'},
+      name = 'login_url',
+    ),
+    (r'^accounts/', include('django.contrib.auth.urls')),
 
     # search
     url(
@@ -175,5 +180,5 @@ urlpatterns = patterns('',
     #url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # administration URLs 
-    # url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', include(admin.site.urls)),
 )
