@@ -464,11 +464,11 @@ class FilteredTableMixin(object):
 
   def setup_filter(self, **kwargs):
     self.filter = self.filter_class(self.request.GET, queryset=kwargs['queryset'])
-    self.filter.helper = self.formhelper_class()
+    #self.filter.helper = self.formhelper_class()
     self.filter.helper.form_id = self.filter_form_id
-    self.filter.helper.form_class = "blueForms, well"
+    #self.filter.helper.form_class = "blueForms, well"
     self.filter.helper.form_method = "get"
-    self.filter.helper.add_input(Submit('submit', 'Submit'))
+    #self.filter.helper.add_input(Submit('submit', 'Submit'))
 
   def get_table(self, **kwargs):
     try:

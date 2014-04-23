@@ -137,12 +137,12 @@ urlpatterns = patterns('',
     ),
 
     # authentication-related URLs
-    url(
-      r'^accounts/login/$', 
-      'django.contrib.auth.views.login', 
-      {'template_name': 'login.html'},
-      name = 'login_url',
-    ),
+#    url(
+#      r'^accounts/login/$', 
+#      'django.contrib.auth.views.login', 
+#      {'template_name': 'login.html'},
+#      name = 'login_url',
+#    ),
     (r'^accounts/', include('django.contrib.auth.urls')),
 
     # search

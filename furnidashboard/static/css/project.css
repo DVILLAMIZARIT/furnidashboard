@@ -31,4 +31,8 @@ div.search form {
 #order-list div.table-container > table {
   width:100%;
 }
+#order-filter .control-group {
+  display:inline-block;
+  margin-right:1.5em;
+}
 /* \ORDER LSIT */
