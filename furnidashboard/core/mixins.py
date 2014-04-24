@@ -34,7 +34,7 @@ class PermissionRequiredMixin(object):
           request,
           'You do not have the permission required to perform the requested operation'
           )
-      return redirect(reverse('login_url'))
+      return redirect(reverse('login'))
 
     return super(PermissionRequiredMixin, self).dispatch(request, *args, **kwargs)
 

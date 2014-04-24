@@ -8,6 +8,7 @@ from orders.views import UnplacedOrderTableView, MyOrderListView, OrderUpdateVie
 from django.views.generic.edit import FormView
 from orders.forms import OrderForm
 from datetime import date
+from django.conf import settings
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -181,4 +182,11 @@ urlpatterns = patterns('',
 
     # administration URLs 
     url(r'^admin/', include(admin.site.urls)),
+
 )
+
+if settings.DEBUG:
+    # development serve static files
+    urlpatterns += patterns('', 
+      (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
+    )
