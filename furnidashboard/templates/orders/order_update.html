@@ -33,7 +33,7 @@
         // commissions formset
         $("#order-commissions-fieldset").find("div.accordion-body:first").addClass("in"); //expand first item
         $('#order-commissions-fieldset div.commissions-form').formset({
-            prefix: '{{commission_form.prefix}}',
+            prefix: '{{commissions_form.prefix}}',
             added: function($form) {
               var accordions = $form.parent().find('div.accordion-group');
               var form_ind = accordions.length - 1;
@@ -49,7 +49,7 @@
 
   {{ form.media }}
   {{ items_form.media }}
-  {{ commission_form.media }}
+  {{ commissions_form.media }}
   {{ delivery_form.media }}
   
 {% endblock %}
@@ -214,17 +214,17 @@
       <div class="tab-pane" id="order-commissions-fieldset">
         <fieldset class="formset accordion">
           <legend>Commissions</legend>
-          {{ commission_form.management_form }}
-          {% if commission_form %}
-            {{ commission_form.non_field_errors }}    
-            {% for comm_form in commission_form %}
-              <div class="accordion-group commissions-form form-row" id="{{ commission_form.prefix }}-{{forloop.counter}}-row">
+          {{ commissions_form.management_form }}
+          {% if commissions_form %}
+            {{ commissions_form.non_field_errors }}    
+            {% for comm_form in commissions_form %}
+              <div class="accordion-group commissions-form form-row" id="{{ commissions_form.prefix }}-{{forloop.counter}}-row">
                 <div class="accordion-heading">
-                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#order-commissions-fieldset" href="#collapse{{ commission_form.prefix }}">
+                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#order-commissions-fieldset" href="#collapse{{ commissions_form.prefix }}">
                    Commissions {{ forloop.counter }}
                   </a>
                 </div>
-                <div id="collapse{{ commission_form.prefix }}" class="accordion-body collapse">
+                <div id="collapse{{ commissions_form.prefix }}" class="accordion-body collapse">
                   <div class="accordion-inner">
                     {{ comm_form | as_bootstrap }}
                   </div>

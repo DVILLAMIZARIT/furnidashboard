@@ -325,7 +325,7 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
     form_class = self.get_form_class()
     form = self.get_form(form_class)
 
-    customer_form = CustomerFormSet(self.request.POST, self.reqest.FILES, prefix="customers")
+    customer_form = CustomerFormSet(self.request.POST, self.request.FILES, prefix="customers")
     items_form = ItemFormSet(self.request.POST, self.request.FILES, prefix="ordered_items")
     commissions_form = CommissionFormSet(self.request.POST, self.request.FILES, prefix="commissions")
     forms = {
@@ -357,6 +357,7 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
     form = kwargs['form']
     customer_form = kwargs['customer_form']
     items_form = kwargs['items_form']
+    commissions_form = kwargs['commissions_form']
 
     self.object = form.save(commit=False)
     
@@ -413,6 +414,11 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
       # save items
       items_form.instance = self.object
       items_form.save()
+
+      # save commissions
+      commissions_form.instance = self.object
+      commissions_form.save()
+
       return HttpResponseRedirect(self.get_success_url())
     else:
       return self.form_invalid(**kwargs)

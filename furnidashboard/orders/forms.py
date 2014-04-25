@@ -4,9 +4,11 @@ from commissions.models import Commission
 from customers.models import Customer
 from django import forms
 from django.forms.models import inlineformset_factory, modelformset_factory
+from django.contrib.auth import get_user_model
 from ajax_select.fields import AutoCompleteSelectField
 from bootstrap_toolkit.widgets import BootstrapDateInput
 from core.mixins import DisabledFieldsMixin
+from django.db.models import Q
 import core.utils as utils
 
 class OrderItemForm(forms.ModelForm):
@@ -55,6 +57,8 @@ class CommissionForm(forms.ModelForm):
     super(CommissionForm, self).__init__(*args, **kwargs)
     self.fields['paid_date'].widget = BootstrapDateInput()
     self.fields['associate'].required = True
+    user_model = get_user_model() 
+    self.fields['associate'].queryset = user_model.objects.filter(Q(groups__name__icontains="associates") | Q(groups__name__icontains="managers" ))
 
   class Meta:
      model = Commission
