@@ -67,7 +67,7 @@ class OrderDeliveryForm(forms.ModelForm):
     self.fields['scheduled_delivery_date'].widget = BootstrapDateInput()
     self.fields['delivered_date'].widget = BootstrapDateInput()
     
-    if utils.is_user_delivery_group(self.request):
+    if self.request and utils.is_user_delivery_group(self.request):
       # person can modify only certain delivery info data
       enabled_fields = ('delivered_date', 'comments')
       remove = [f for f in self.fields if f not in enabled_fields]

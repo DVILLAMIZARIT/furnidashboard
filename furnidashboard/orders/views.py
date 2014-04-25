@@ -495,7 +495,7 @@ class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, Mo
   # archive view specific fields
   date_field = "created"
   make_object_list = True
-  allow_future = True
+  allow_future = False
   allow_empty = True
   template_name = "orders/order_archive_month.html"
   month_format = '%b'
@@ -506,16 +506,21 @@ class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, Mo
 
   def get_context_data(self, **kwargs):
     context = super(OrderMonthArchiveTableView, self).get_context_data(**kwargs)
-    subtotal_hq = reduce(lambda a,b:a+b, [o.subtotal_after_discount for o in context['object_list'] if o.store.name == "Copenhagen"])
-    subtotal_fnt = reduce(lambda a,b:a+b, [o.subtotal_after_discount for o in context['object_list'] if o.store.name == "Fountains"])
-    total_hq = reduce(lambda a,b:a+b, [o.grand_total for o in context['object_list'] if o.store.name == "Copenhagen"])
-    total_fnt = reduce(lambda a,b:a+b, [o.grand_total for o in context['object_list'] if o.store.name == "Fountains"])
-    totals_data = [
-      {'item':'Subtotal After Discount', 'hq':utils.dollars(subtotal_hq), 'fnt':utils.dollars(subtotal_fnt), 'total':utils.dollars(subtotal_hq + subtotal_fnt)},
-      {'item':'Grand Total', 'hq':utils.dollars(total_hq), 'fnt':utils.dollars(total_fnt), 'total':utils.dollars(total_hq + total_fnt)},
-      ]
-    totals_table = SalesTotalsTable(totals_data)
-    RequestConfig(self.request).configure(totals_table)
+
+    if context['object_list']:
+      subtotal_hq = sum([o.subtotal_after_discount for o in context['object_list'] if o.store.name == "Copenhagen"])
+      subtotal_fnt = sum([o.subtotal_after_discount for o in context['object_list'] if o.store.name == "Fountains"])
+      total_hq = sum([o.grand_total for o in context['object_list'] if o.store.name == "Copenhagen"])
+      total_fnt = sum([o.grand_total for o in context['object_list'] if o.store.name == "Fountains"])
+      totals_data = [
+        {'item':'Subtotal After Discount', 'hq':utils.dollars(subtotal_hq), 'fnt':utils.dollars(subtotal_fnt), 'total':utils.dollars(subtotal_hq + subtotal_fnt)},
+        {'item':'Grand Total', 'hq':utils.dollars(total_hq), 'fnt':utils.dollars(total_fnt), 'total':utils.dollars(total_hq + total_fnt)},
+        ]
+      totals_table = SalesTotalsTable(totals_data)
+      RequestConfig(self.request).configure(totals_table)
+    else:
+      totals_table = SalesTotalsTable([])
+      RequestConfig(self.request).configure(totals_table)
     context['totals_table'] = totals_table
 
     sales_by_assoc_data = order_utils._calc_sales_assoc_by_orders(context['object_list'])
