@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load extras %}
+
 {% block title %}Order -- {{object}}{% endblock %}
 
 {% block page_title %}Order # {{order.number}}{% endblock page_title %}
@@ -66,22 +68,22 @@
   <h3>Order Payment Info</h3>
   <table id="order-payments-table" cell-spacing="0" cell-padding="0">
     <tr>
-      <td>Subtotal After Discount</td><td>{{order.subtotal_after_discount}}</td>
+      <td>Subtotal After Discount</td><td>{{order.subtotal_after_discount|dollars}}</td>
     </tr>
     <tr>
-      <td>Tax</td><td>{{order.tax}}</td>
+      <td>Tax</td><td>{{order.tax|dollars}}</td>
     </tr>
     <tr>
-      <td>Shipping</td><td>{{order.shipping}}</td>
+      <td>Shipping</td><td>{{order.shipping|dollars}}</td>
     </tr>
     <tr>
-      <td>Grand Total</td><td>{{order.grand_total}}</td>
+      <td>Grand Total</td><td>{{order.grand_total|dollars}}</td>
     </tr>
     <tr>
-      <td>Deposit Balance</td><td>{{order.deposit_balance}}</td>
+      <td>Deposit Balance</td><td>{{order.deposit_balance|dollars}}</td>
     </tr>
     <tr>
-      <td>Balance Due</td><td>{{order.balance_due}}</td>
+      <td>Balance Due</td><td>{{order.balance_due|dollars}}</td>
     </tr>
   </table>
 
@@ -101,9 +103,14 @@
       <tr>
         <td>{{ item.description }} <br/> </td>
         {% if item.in_stock %}
-          <td colspan="6">In Stock</td>
+          <td>IN STOCK</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
         {% else %}
-          <td>{{ item.status }}</td>
+          <td>{{ item.get_status_display|upper}}</td>
           <td>{{ item.po_num}}</td>
           <td>{{ item.po_date|date:'j F, Y'}}</td>
           <td>{{ item.ack_num}}</td>
@@ -115,13 +122,10 @@
     </tbody>
   </table>
 
-  <h3>Additional</h3>
-  <table id="order-addnl-table" cell-spacing="0" cell-padding="0">
-    <tr>
-      <td>Referral</td><td>{{order.referral}}</td>
-    </tr>
-    <tr>
-      <td>Comments</td><td>{{order.comments}}</td>
-    </tr>
-  </table>
+  <h3>Referral</h3>
+  <p>{{order.referral}}</p>
+
+  <h3>Comments</h3>
+  <p>{{order.comments}}</p>
+
 {% endblock content %}

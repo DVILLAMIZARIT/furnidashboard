@@ -9,6 +9,7 @@ from customers.models import Customer
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.exceptions import ValidationError
 from core.mixins import LoginRequiredMixin, PermissionRequiredMixin
+import core.utils as utils
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django_tables2 import RequestConfig, SingleTableView
@@ -17,34 +18,6 @@ from datetime import timedelta, date, datetime
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 import orders.utils as order_utils
-import core.utils as utils
-
-
-#class PagedFilteredTableView(SingleTableView):
-#  filter_class = None
-#  formhelper_class = None
-#  context_filter_name = 'filter'
-#
-#  def get_queryset(self, **kwargs):
-#    qs = super(PagedFilteredTableView, self).get_queryset(**kwargs)
-#    self.filter = self.filter_class(self.request.GET, queryset=qs)
-#    # self.filter.form.helper = self.formhelper_class()
-#    return self.filter.qs
-#
-#  def get_table(self, **kwargs):
-#    table = super(PagedFilteredTableView, self).get_table()
-#    try:
-#      page = self.kwargs['page']
-#    except KeyError:
-#      page = 1 
-#    RequestConfig(self.request, paginate={'page':page,
-#                      'per_page':self.paginate_by}).configure(table)
-#    return table
-#
-#  def get_context_data(self, **kwargs):
-#    context = super(PagedFilteredTableView, self).get_context_data(**kwargs)
-#    context[self.context_filter_name] = self.filter
-#    return context
 
 class UnplacedOrderTableView(SingleTableView):
   model = Order
@@ -54,51 +27,11 @@ class UnplacedOrderTableView(SingleTableView):
   def get_queryset(self, **kwargs):
     return  Order.objects.select_related().filter(Q(status=None) | Q(status='N') | (Q(orderitem__in_stock=False) & (Q(orderitem__po_num__isnull=True) | Q(orderitem__po_num="")))).distinct()
 
-#class OrderFilteredTableView(LoginRequiredMixin, PagedFilteredTableView):
-#  model = Order
-#  table_class = OrderTable
-#  template_name = "orders/order_filtered_table.html"
-#  context_object_name = "order_list"
-#  paginate_by = 5
-#  filter_class = OrderFilter
-## formhelper_class = OrderFilterFormHelper
-
-#class OrderListView(LoginRequiredMixin, ListView):
-#  model = Order
-#  context_object_name = "order_list"
-#  template_name = "orders/order_list.html"
-#
-#  def get_queryset(self):
-#    return Order.objects.select_related().all() # super(OrderListView, self).get_queryset().select_related()
-#
-#  def get_context_data(self, **kwargs):
-#    context = super(OrderListView, self).get_context_data(**kwargs)
-#    recent_orders_table = OrderTable(context['order_list'])
-#    unplaced_orders = context['object_list'].filter(Q(status=None) | Q(status='N') | (Q(orderitem__in_stock=False) & (Q(orderitem__po_num__isnull=True) | Q(orderitem__po_num="")))).distinct()
-#    unplaced_orders_table = UnplacedOrdersTable(unplaced_orders)
-#
-#    now = datetime.now()
-#    sales_by_assoc_data = _calc_sales_by_assoc(now.year, now.month) #[{'associate':'Lana', 'sales':5000}, {'associate':'Pearl', 'sales':10000}]
-#    sales_by_assoc = SalesByAssociateTable(sales_by_assoc_data)
-#
-#    RequestConfig(self.request).configure(recent_orders_table)
-#    RequestConfig(self.request).configure(unplaced_orders_table)
-#    RequestConfig(self.request).configure(sales_by_assoc)
-#    context['recent_orders_table'] = recent_orders_table
-#    context['unplaced_orders_table'] = unplaced_orders_table
-#    context['sales_by_associate'] = sales_by_assoc 
-#
-#    return context
-
-#class MyOrderListView(OrderListView, ListView):
-#  def get_queryset(self):
-#    me = self.request.user
-#    return Order.objects.select_related().filter(commission__associate=me) # super(OrderListView, self).get_queryset().select_related()
-
 class OrderDetailView(PermissionRequiredMixin, DetailView):
   model = Order
   context_object_name = "order"
   template_name = "orders/order_detail.html"
+
   required_permissions = (
     'orders.view_orders',
   )
@@ -130,10 +63,10 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     self.object = self.get_object()
     form_class = self.get_form_class()
     form = self.get_form(form_class)
-    customer_form = CustomerFormSet(queryset=Customer.objects.none(), prefix="customers") #filter(pk=self.object.customer_id))
+    customer_form = CustomerFormSet(queryset=Customer.objects.none(), prefix="customers") 
 
     extra = 0
-    if self.object.commission_set.count() == 0:
+    if self.object.commission_set.count() == 0:           #if no commissions were saved for this order, add a blank form
       extra = 1
     SpecialCommissionFormSet = get_commissions_formset(extra=extra, max_num=3)
     commissions_form = SpecialCommissionFormSet(instance=self.object, prefix="commissions")
@@ -141,9 +74,8 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     DeliveriesFormSet = get_deliveries_formset(extra=1, max_num=100)
     delivery_form = DeliveriesFormSet(instance = self.object, prefix="deliveries")
 
-    # prevent empty form showin up if no items were recorded for the order
+    # prevent empty form showing up if no items were recorded for the order
     # specify at least 1 extra of no items are set
-    # order_item_set = OrderItem.objects.filter(order=self.object)
     extra = 0
     if self.object.orderitem_set.count() == 0:
       extra = 1
@@ -169,7 +101,6 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     self.object = self.get_object()
     form_class = self.get_form_class()
     form = self.get_form(form_class)
-    #self.object = form.save(commit=False)
     customer_form = CustomerFormSet(self.request.POST, self.request.FILES, prefix="customers")
     commissions_form = CommissionFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="commissions")
     items_form = ItemFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="ordered_items")
@@ -227,17 +158,17 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
           messages.error(self.request, "Error saving customer form information!")
           BR_passed = False
   
-    # validate items
-    if BR_passed: 
-      for ind in xrange(items_form.total_form_count()):
-        try:
-          if items_form.cleaned_data[ind]['description'] is None:
-            BR_passed = False
-        except KeyError:
-          BR_passed = False
-
-      if not BR_passed:
-        messages.error(self.request, "Please enter sold item(s) description")
+#    # validate items
+#    if BR_passed: 
+#      for ind in xrange(items_form.total_form_count()):
+#        try:
+#          if items_form.cleaned_data[ind]['description'] is None:
+#            BR_passed = False
+#        except KeyError:
+#          BR_passed = False
+#
+#      if not BR_passed:
+#        messages.error(self.request, "Please enter sold item(s) description")
 
     if BR_passed: 
       
@@ -389,17 +320,17 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
           messages.error(self.request, "Error saving customer form information!")
           BR_passed = False
   
-    # validate items
-    if BR_passed: 
-      for ind in xrange(items_form.total_form_count()):
-        try:
-          if items_form.cleaned_data[ind]['description'] is None:
-            BR_passed = False
-        except KeyError:
-          BR_passed = False
-
-      if not BR_passed:
-        messages.error(self.request, "Please enter sold item(s) description")
+#    # validate items
+#    if BR_passed: 
+#      for ind in xrange(items_form.total_form_count()):
+#        try:
+#          if items_form.cleaned_data[ind]['description'] is None:
+#            BR_passed = False
+#        except KeyError:
+#          BR_passed = False
+#
+#      if not BR_passed:
+#        messages.error(self.request, "Please enter sold item(s) description")
 
     if BR_passed: 
       
@@ -423,15 +354,6 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
     else:
       return self.form_invalid(**kwargs)
 
-  def get_form(self, request=None, **kwargs):
-    self.exclude = []
-    #if not request.user.is_superuser:
-    #  self.exclude.append(field_to_hide)
-    
-    #self.initial = {'status':'N'}
-
-    return super(OrderCreateView, self).get_form(request, **kwargs)
-
   def get_success_url(self):
     return reverse('order_detail', kwargs={'pk': self.object.pk})
 
@@ -443,14 +365,6 @@ class OrderDeleteView(PermissionRequiredMixin, DeleteView):
   required_permissions = (
     'orders.delete_order',
   )
-
-#class OrderMonthArchiveView(LoginRequiredMixin, PagedFilteredTableView, MonthArchiveView):
-#  queryset = Order.objects.all()
-#  date_field = "created"
-#  make_object_list = True
-#  allow_future = True
-#  template_name = "orders/order_archive_month.html"
-#  month_format = '%b'
 
 class FilteredTableMixin(object):
   formhelper_class = FormHelper
@@ -550,31 +464,6 @@ class MyOrderListView(PermissionRequiredMixin, FilteredTableMixin, ListView):
     qs = Order.objects.select_related().filter(commission__associate=me).all()
     self.setup_filter(queryset=qs)
     return self.filter.qs
-
-#class OrderWeekArchiveView(LoginRequiredMixin, WeekArchiveView):
-#  queryset = Order.objects.all()
-#  date_field = "created"
-#  make_object_list = True
-#  allow_future = True
-#  allow_empty = True
-#  template_name = "orders/order_archive_week.html"
-#  week_format = '%W'
-#
-#  def get(self, request, *args, **kwargs):
-#    self.date_list, self.object_list, extra_content = self.get_dated_items()
-#    context = self.get_context_data(object_list=self.object_list, date_list=self.date_list)
-#    context.update(extra_content)
-#    
-#    # extra fields for cur. week, prev, and next week
-#    extra = {
-#      'next_week_num': context['next_week'].isocalendar()[1] - 1,
-#      'prev_week_num': context['previous_week'].isocalendar()[1] - 1,
-#      'next_week_sun': context['next_week'] + timedelta(days=7),
-#      'this_week_sun': context['week'] + timedelta(days=6),
-#    }
-#    context.update(extra)
-#
-#    return self.render_to_response(context)
 
 class OrderWeekArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, WeekArchiveView):
   model = Order

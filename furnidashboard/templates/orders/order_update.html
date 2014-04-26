@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load bootstrap_toolkit %}
+{% load crispy_forms_tags %}
 
 {% block title %}Modify Order{% endblock %}
 
@@ -15,6 +16,13 @@
           e.preventDefault();
           $(this).tab('show');
         })
+
+        /*$("#order-items-fieldset div.items-form").filter(':not .processed').each(function() {
+          $form = $(this);
+          $form.addClass('processed');
+          var in_stock = $form.find('input.order-item-in-stock').prop('checked');
+          console.log('stock_status' + in_stock);
+        });*/
         
         // items formset
         $("#order-items-fieldset").find("div.accordion-body").eq(0).addClass("in"); //expand first item
@@ -186,7 +194,8 @@
               </div>
               <div id="collapse{{ item_form.prefix }}" class="accordion-body collapse">
                 <div class="accordion-inner">
-                  {{ item_form | as_bootstrap }}
+                  {% comment %} {{ item_form | as_bootstrap }} {% endcomment %}
+                  {% crispy item_form %}
                 </div>
               </div>       
             </div>

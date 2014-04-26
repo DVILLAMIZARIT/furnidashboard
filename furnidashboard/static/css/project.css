@@ -35,4 +35,16 @@ div.search form {
   display:inline-block;
   margin-right:1.5em;
 }
-/* \ORDER LSIT */
+/* \ORDER LIST */
+
+/* ORDER DETAIL */
+#order-items-table, #order-detail-table, #order-payments-table {
+  border: 1px solid #D3D3D3;
+}
+#order-items-table td,
+#order-items-table th,
+#order-detail-table td, #order-payments-table td{
+  border: 1px dashed #D3D3D3;
+  padding: 0.5em 1em;
+}
+/* \ORDER DETAIL */

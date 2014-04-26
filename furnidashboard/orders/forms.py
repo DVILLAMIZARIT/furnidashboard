@@ -10,6 +10,8 @@ from bootstrap_toolkit.widgets import BootstrapDateInput
 from core.mixins import DisabledFieldsMixin
 from django.db.models import Q
 import core.utils as utils
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Fieldset, Submit, Div
 
 class OrderItemForm(forms.ModelForm):
 
@@ -35,8 +37,22 @@ class OrderItemForm(forms.ModelForm):
     #import pdb; pdb.set_trace()
     self.fields['description'].widget.attrs['size']=80
 
+    self.helper = FormHelper()
+    self.helper.layout = Layout(
+      Div(
+        'description',
+        'in_stock',
+        css_class='item-general-fields',
+      ),
+      Div(
+        'status', 'po_num', 'po_date', 'ack_num', 'ack_date', 'eta',
+        css_class='item-special-fields',
+      ),
+    )
+
   class Meta:
-      model = OrderItem
+    model = OrderItem
+    #fields = ['description', 'in_stock', 'status', 'po_num', 'po_date', 'ack_num', 'ack_date', 'eta']
 
 class OrderForm(forms.ModelForm):
   customer = AutoCompleteSelectField('customer', required=False)
