@@ -3,7 +3,7 @@ from django.views.generic.edit import CreateView, DeleteView
 from django.views.generic.dates import MonthArchiveView, WeekArchiveView
 from .models import Order, OrderItem, OrderDelivery
 from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable, DeliveriesTable, SalesTotalsTable
-from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset, OrderDeliveryForm
+from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset, OrderDeliveryForm, OrderItemFormHelper
 from .filters import OrderFilter
 from customers.models import Customer
 from django.core.urlresolvers import reverse_lazy, reverse
@@ -210,6 +210,11 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
 
     return self.render_to_response(context)
 
+  def get_context_data(self, **kwargs):
+    context = super(OrderUpdateView, self).get_context_data(**kwargs)
+    context['item_form_helper'] = OrderItemFormHelper
+    return context
+
   def get_success_url(self):
     return self.get_object().get_absolute_url() #reverse('order_detail', kwargs={'pk': self.object.pk})
 
@@ -353,6 +358,11 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
       return HttpResponseRedirect(self.get_success_url())
     else:
       return self.form_invalid(**kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(OrderUpdateView, self).get_context_data(**kwargs)
+    context['item_form_helper'] = OrderItemFormHelper
+    return context
 
   def get_success_url(self):
     return reverse('order_detail', kwargs={'pk': self.object.pk})

@@ -17,13 +17,32 @@
           $(this).tab('show');
         })
 
-        /*$("#order-items-fieldset div.items-form").filter(':not .processed').each(function() {
-          $form = $(this);
-          $form.addClass('processed');
-          var in_stock = $form.find('input.order-item-in-stock').prop('checked');
-          console.log('stock_status' + in_stock);
-        });*/
-        
+        var initItemForm = function() {
+          $("#order-items-fieldset div.items-form:not(.processed)").each(function() {
+            $form = $(this);
+            $form.addClass('processed');
+            var $in_stock = $(".item-general-fields", $form).find('input.order-item-in-stock');
+
+            if ($in_stock.length && $in_stock.prop('checked')) {
+              $(".item-special-fields", $form).hide();
+            } else {  
+              $(".item-special-fields", $form).show();
+            }
+
+            $in_stock.change(function() {
+              $special_fields = $(this).parents(".items-form").find(".item-special-fields");
+              if (this.checked) {
+                $special_fields.hide(); 
+              } else {
+                $special_fields.show();
+              }
+
+            });
+          });
+        };
+
+        initItemForm();
+
         // items formset
         $("#order-items-fieldset").find("div.accordion-body").eq(0).addClass("in"); //expand first item
         $('#order-items-fieldset div.items-form').formset({
@@ -35,6 +54,11 @@
               $form.find("div.accordion-body").attr("id", "collapseordered_items-" + form_ind);
               $("#order-items-fieldset").find("div.accordion-body").removeClass("in");
               $form.find("div.accordion-heading a").click();
+
+              var $in_stock = $(".item-general-fields", $form).find('input.order-item-in-stock');
+              $in_stock.prop('checked', true);
+              initItemForm();
+
             }
         });
 
@@ -183,7 +207,7 @@
       <div class="tab-pane" id="order-items-fieldset">
         <fieldset class="accordion">
           <legend>Sold Items</legend>
-          {{ items_form.management_form }}
+          {{ items_form.management_form|crispy }}
           {{ items_form.non_field_errors }}    
           {% for item_form in items_form %}
             <div class="accordion-group items-form form-row" id="{{ item_form.prefix }}-row">
@@ -195,7 +219,8 @@
               <div id="collapse{{ item_form.prefix }}" class="accordion-body collapse">
                 <div class="accordion-inner">
                   {% comment %} {{ item_form | as_bootstrap }} {% endcomment %}
-                  {% crispy item_form %}
+                  {% crispy item_form item_form_helper %}
+                  {{ item_form.id }}
                 </div>
               </div>       
             </div>
@@ -229,12 +254,13 @@
             {% for comm_form in commissions_form %}
               <div class="accordion-group commissions-form form-row" id="{{ commissions_form.prefix }}-{{forloop.counter}}-row">
                 <div class="accordion-heading">
-                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#order-commissions-fieldset" href="#collapse{{ commissions_form.prefix }}">
+                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#order-commissions-fieldset" href="#collapse-{{ comm_form.prefix }}">
                    Commissions {{ forloop.counter }}
                   </a>
                 </div>
-                <div id="collapse{{ commissions_form.prefix }}" class="accordion-body collapse">
+                <div id="collapse-{{ comm_form.prefix }}" class="accordion-body collapse">
                   <div class="accordion-inner">
+                    {% comment %}{{ comm_form.id }}{% endcomment %}
                     {{ comm_form | as_bootstrap }}
                   </div>
                 </div>       
@@ -248,16 +274,14 @@
       </div>
     
     </div>
-  
-  </div>
 
-  <div class="field-wrapper">
-    {{ form.comments.errors }}
-    <label for="id_comments">Comments</label>
-    {{ form.comments }}
-  </div>
+    <div class="field-wrapper">
+      {{ form.comments.errors }}
+      <label for="id_comments">Comments</label>
+      {{ form.comments }}
+    </div>
 
-  <input type="submit" value="Save"/>
+    <input type="submit" value="Save"/>
 
 </form>
 

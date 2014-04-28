@@ -11,7 +11,8 @@ from core.mixins import DisabledFieldsMixin
 from django.db.models import Q
 import core.utils as utils
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, Submit, Div
+from crispy_forms.layout import Layout, Fieldset, Submit, Div, Field
+from crispy_forms.bootstrap import AppendedText
 
 class OrderItemForm(forms.ModelForm):
 
@@ -37,22 +38,75 @@ class OrderItemForm(forms.ModelForm):
     #import pdb; pdb.set_trace()
     self.fields['description'].widget.attrs['size']=80
 
-    self.helper = FormHelper()
-    self.helper.layout = Layout(
+    # self.helper = FormHelper()
+#    self.helper.layout = Layout(
+#      Div(
+#        'description',
+#        'in_stock',
+#        css_class='item-general-fields',
+#      ),
+#      Div(
+#        'status', 
+#        Div(
+#          Field('po_num'),
+#          AppendedText('po_date', '<i class="icon-calendar"></i>'), 
+#          css_class='form-inline',
+#        ),
+#        Div(
+#          'ack_num', 
+#          AppendedText('ack_date', '<i class="icon-calendar"></i>'),
+#        ),
+#        AppendedText('eta', '<i class="icon-calendar"></i>'),
+#        css_class='item-special-fields',
+#      ),
+#    )
+
+  def clean(self):
+    cleaned_data = super(OrderItemForm, self).clean()
+    status = cleaned_data.get("status")
+    if status in ('O', 'R', 'D'): #ordered, received, or delivered
+      #check that all ordered items have PO num and date
+      po_num = cleaned_data.get('po_num')
+      po_date = cleaned_data.get('po_date')
+      if po_num == None or po_date == None:
+        #raise forms.ValidationError("Specify PO number and PO entered date before changing item status to 'Ordered'")
+        msg = "Specify PO# and PO date before changing item status"
+        # self.add_error('status', msg)
+        raise forms.ValidationError(msg)
+
+    return cleaned_data
+
+  class Meta:
+    model = OrderItem
+    #fields = ['description', 'in_stock', 'status', 'po_num', 'po_date', 'ack_num', 'ack_date', 'eta']
+
+class OrderItemFormHelper(FormHelper):
+  def __init__(self, *args, **kwargs):
+    super(OrderItemFormHelper, self).__init__(*args, **kwargs)
+    self.form_tag = False
+    self.disable_csrf = True
+    self.layout = Layout(
       Div(
         'description',
         'in_stock',
         css_class='item-general-fields',
       ),
       Div(
-        'status', 'po_num', 'po_date', 'ack_num', 'ack_date', 'eta',
+        'status', 
+        Div(
+          Field('po_num'),
+          AppendedText('po_date', '<i class="icon-calendar"></i>'), 
+          css_class='form-inline',
+        ),
+        Div(
+          'ack_num', 
+          AppendedText('ack_date', '<i class="icon-calendar"></i>'),
+        ),
+        AppendedText('eta', '<i class="icon-calendar"></i>'),
         css_class='item-special-fields',
       ),
     )
 
-  class Meta:
-    model = OrderItem
-    #fields = ['description', 'in_stock', 'status', 'po_num', 'po_date', 'ack_num', 'ack_date', 'eta']
 
 class OrderForm(forms.ModelForm):
   customer = AutoCompleteSelectField('customer', required=False)

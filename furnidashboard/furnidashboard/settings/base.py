@@ -199,6 +199,7 @@ THIRD_PARTY_APPS = (
     'ajax_select',
     'bootstrap_toolkit',
     'crispy_forms',
+    'django_cron',
 )
 
 # Apps specific for this project go here.
@@ -266,3 +267,9 @@ AJAX_LOOKUP_CHANNELS = {
 }
 
 CRISPY_TEMPLATE_PACK = 'bootstrap' # django crispy forms
+
+CRON_CLASSES = [
+    'orders.cron.OrderCronJob',
+    'django_cron.cron.FailedRunsNotificationCronJob',
+]
+FAILED_RUNS_CRONJOB_EMAIL_PREFIX = "[Furnitalia Dashboard]: "
