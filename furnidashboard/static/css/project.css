@@ -22,8 +22,28 @@ div.search form {
   margin:0
 }
 
-/* ORDER ITEMS FORM */
-/* /ORDER ITEMS FORM */
+/* ORDER FORM */
+div.order-comments-wrapper {
+  clear:both;
+}
+#id_comments {
+  width:100%;
+  height:100px;
+}
+#deliveries textarea {
+  width:600px;
+  height:80px;
+}
+.results_on_deck {
+  font-size:1.25em;
+}
+.results_on_deck .ui-icon-trash {
+  margin-right:5px;
+}
+input.order-item-desc {
+  width:500px;
+}
+/* /ORDER FORM */
 
 /* ORDER LIST */
 #order-list,

@@ -75,6 +75,59 @@
               $form.find("div.accordion-heading a").click();
             }
         });
+
+
+        //calc order total and balance due
+        var recalcOrderTotals = function() {
+          var $total = $("#order-total");
+          var $balance_due = $("#balance-due");
+
+          var subtotal = $("#id_subtotal_after_discount").val();
+          subtotal = parseFloat(subtotal.replace(',', ''));
+          if (isNaN(subtotal)) {
+            subtotal = 0;
+          }
+
+          var tax = $("#id_tax").val();
+          tax = parseFloat(tax.replace(',', ''));
+          if (isNaN(tax)) {
+            tax = 0;
+          }
+
+          var shipping = $("#id_shipping").val();
+          shipping = parseFloat(shipping.replace(',', ''));
+          if (isNaN(shipping)) {
+            shipping = 0;
+          }
+
+          var deposit_balance = $("#id_deposit_balance").val();
+          deposit_balance = parseFloat(deposit_balance.replace(',', ''));
+          if (isNaN(deposit_balance)) {
+            deposit_balance = 0;
+          }
+
+          var total_amount = subtotal + tax + shipping;
+          var due = total_amount - deposit_balance;
+          
+          $total.text(total_amount);
+          $balance_due.text(due);
+        };
+
+        $("#id_subtotal_after_discount").change(function() {
+            recalcOrderTotals();
+        });
+        $("#id_deposit_balance").change(function() {
+            recalcOrderTotals();
+        });
+        $("#id_tax").change(function() {
+            recalcOrderTotals();
+        });
+        $("#id_shipping").change(function() {
+            recalcOrderTotals();
+        });
+
+        recalcOrderTotals();
+
       });
     })
 </script>
@@ -157,9 +210,7 @@
               {% for subform in customer_form %}
                 <div class="accordion-group items-form form-row" id="{{ customer_form.prefix }}-row">
                   <div class="accordion-heading">
-                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#new-customer-form-wrapper" href="#collapse{{ customer_form.prefix }}">
-                      New Customer
-                    </a>
+                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#new-customer-form-wrapper" href="#collapse{{ customer_form.prefix }}">New Customer</a>
                   </div>
                   <div id="collapse{{ customer_form.prefix }}" class="accordion-body collapse">
                     <div class="accordion-inner">
@@ -170,6 +221,7 @@
                 </div>
               {% endfor %}
             </div>
+            <br/>
             <div id="referral-info">
               <label for="id_referral">Referral source</label>
               {{ form.referral }} 
@@ -181,24 +233,28 @@
       <div class="tab-pane" id="payment-info">
         <fieldset>
           <legend>Payment Information</legend>
-          <div class="field-wrapper">
+          <div class="field-wrapper input-prepend">
             {{ form.subtotal_after_discount.errors }}
             <label for="id_subtotal_after_discount">Subtotal After Discount</label>
-            {{ form.subtotal_after_discount }}
+            <span class="add-on">$</span> 
+            {{ form.subtotal_after_discount}}
           </div>
-          <div class="field-wrapper">
+          <div class="field-wrapper input-prepend">
             {{ form.deposit_balance.errors }}
             <label for="id_deposit_balance">Deposit Balance</label>
+            <span class="add-on">$</span> 
             {{ form.deposit_balance }}
           </div>
-          <div class="field-wrapper">
+          <div class="field-wrapper input-prepend">
             {{ form.tax.errors }}
             <label for="id_tax">Tax</label>
+            <span class="add-on">$</span> 
             {{ form.tax }}
           </div>
-          <div class="field-wrapper">
+          <div class="field-wrapper input-prepend">
             {{ form.shipping.errors }}
             <label for="id_shipping">Shipping</label>
+            <span class="add-on">$</span> 
             {{ form.shipping }}
           </div>
         </fieldset>
@@ -212,13 +268,10 @@
           {% for item_form in items_form %}
             <div class="accordion-group items-form form-row" id="{{ item_form.prefix }}-row">
               <div class="accordion-heading">
-                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#order-items-fieldset" href="#collapse{{ item_form.prefix }}">
-                 Item {{ forloop.counter }}
-                </a>
+                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#order-items-fieldset" href="#collapse{{ item_form.prefix }}">Item {{ forloop.counter }}</a>
               </div>
               <div id="collapse{{ item_form.prefix }}" class="accordion-body collapse">
                 <div class="accordion-inner">
-                  {% comment %} {{ item_form | as_bootstrap }} {% endcomment %}
                   {% crispy item_form item_form_helper %}
                   {{ item_form.id }}
                 </div>
@@ -254,13 +307,10 @@
             {% for comm_form in commissions_form %}
               <div class="accordion-group commissions-form form-row" id="{{ commissions_form.prefix }}-{{forloop.counter}}-row">
                 <div class="accordion-heading">
-                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#order-commissions-fieldset" href="#collapse-{{ comm_form.prefix }}">
-                   Commissions {{ forloop.counter }}
-                  </a>
+                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#order-commissions-fieldset" href="#collapse-{{ comm_form.prefix }}">Commissions {{ forloop.counter }}</a>
                 </div>
                 <div id="collapse-{{ comm_form.prefix }}" class="accordion-body collapse">
                   <div class="accordion-inner">
-                    {% comment %}{{ comm_form.id }}{% endcomment %}
                     {{ comm_form | as_bootstrap }}
                   </div>
                 </div>       
@@ -275,13 +325,19 @@
     
     </div>
 
-    <div class="field-wrapper">
+    <div class="well clear">
+      TOTAL:<span id="order-total"></span>
+      DUE:<span id="balance-due"></span>
+    </div>
+
+    <div class="field-wrapper order-comments-wrapper">
       {{ form.comments.errors }}
       <label for="id_comments">Comments</label>
       {{ form.comments }}
     </div>
 
-    <input type="submit" value="Save"/>
+    <br/>
+    <input type="submit" class="btn btn-primary btn-large" value="Save"/>
 
 </form>
 
