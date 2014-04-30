@@ -5,6 +5,7 @@ from customers.models import Customer
 from django import forms
 from django.forms.models import inlineformset_factory, modelformset_factory
 from django.contrib.auth import get_user_model
+from django.utils.functional import curry
 from ajax_select.fields import AutoCompleteSelectField
 from bootstrap_toolkit.widgets import BootstrapDateInput
 from core.mixins import DisabledFieldsMixin
@@ -124,11 +125,17 @@ class OrderForm(forms.ModelForm):
 class CommissionForm(forms.ModelForm):
 
   def __init__(self, *args, **kwargs):
+    self.request = kwargs.pop('request', None)
     super(CommissionForm, self).__init__(*args, **kwargs)
     self.fields['paid_date'].widget = BootstrapDateInput()
     self.fields['associate'].required = True
     user_model = get_user_model() 
     self.fields['associate'].queryset = user_model.objects.filter(Q(groups__name__icontains="associates") | Q(groups__name__icontains="managers" ))
+    
+    if self.request and not self.request.user.has_perm('commissions.update_commissions_payment'):
+      # person can modify only certain delivery info data
+      self.fields['paid_date'].widget.attrs['disabled'] = 'disabled'
+      self.fields['paid'].widget.attrs['disabled'] = 'disabled'
 
   class Meta:
      model = Commission
@@ -169,8 +176,10 @@ def get_ordered_items_formset(extra=1, max_num=1000):
 def get_deliveries_formset(extra=1, max_num=1000):
   return inlineformset_factory(Order, OrderDelivery, form=OrderDeliveryForm, extra=extra, max_num=max_num)
 
-def get_commissions_formset(extra=1, max_num=1000):
-  return inlineformset_factory(Order, Commission, form=CommissionForm, extra=extra, max_num=max_num, can_delete=False)
+def get_commissions_formset(extra=1, max_num=1000, request=None):
+  formset = inlineformset_factory(Order, Commission, extra=extra, max_num=max_num, can_delete=False)
+  formset.form = staticmethod(curry(CommissionForm, request=request))  
+  return formset
 
 ItemFormSet = inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=1, max_num=100)
 DeliveryFormSet = inlineformset_factory(Order, OrderDelivery, form=OrderDeliveryForm, extra=1, max_num=100)

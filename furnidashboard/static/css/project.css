@@ -43,6 +43,22 @@ div.order-comments-wrapper {
 input.order-item-desc {
   width:500px;
 }
+.order-totals-wrapper {
+  font-size: 1.3em;
+  font-weight: bold;
+  font-family: courier new,monospace;
+  margin-top:1em;
+}
+.order-totals-wrapper > span {
+  margin-right:1em;
+}
+.totals-amount {
+  background: none repeat scroll 0 0 #000000;
+  border: 3px solid #24D830;
+  color: #24D830;
+  margin-left: 0.3em;
+  padding: 5px 10px;
+}
 /* /ORDER FORM */
 
 /* ORDER LIST */

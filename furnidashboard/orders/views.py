@@ -68,7 +68,7 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     extra = 0
     if self.object.commission_set.count() == 0:           #if no commissions were saved for this order, add a blank form
       extra = 1
-    SpecialCommissionFormSet = get_commissions_formset(extra=extra, max_num=3)
+    SpecialCommissionFormSet = get_commissions_formset(extra=extra, max_num=3, request=self.request)
     commissions_form = SpecialCommissionFormSet(instance=self.object, prefix="commissions")
     
     DeliveriesFormSet = get_deliveries_formset(extra=1, max_num=100)

@@ -10,3 +10,6 @@ class Commission(models.Model):
 
   class Meta:
     db_table = "commissions"
+    permissions = (
+      ("update_commissions_payment", "Can Update Commission Payment Information"),
+    )
