@@ -12,8 +12,8 @@ from core.mixins import DisabledFieldsMixin
 from django.db.models import Q
 import core.utils as utils
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, Submit, Div, Field
-from crispy_forms.bootstrap import AppendedText
+from crispy_forms.layout import Layout, Fieldset, Submit, Div, Field, HTML
+from crispy_forms.bootstrap import AppendedText, InlineField
 
 class OrderItemForm(forms.ModelForm):
 
@@ -34,33 +34,9 @@ class OrderItemForm(forms.ModelForm):
     self.fields['ack_date'].widget.attrs['class'] = "order-item-ack-date"
     
     self.fields['eta'].widget=BootstrapDateInput()    
-    self.fields['eta'].widget.attrs['class'] = "order-item-eta"
+    self.fields['eta'].widget.attrs['class'] = "order-item-eta clear"
     self.fields['eta'].label = "ETA"
-    #import pdb; pdb.set_trace()
     self.fields['description'].widget.attrs['size']=80
-
-    # self.helper = FormHelper()
-#    self.helper.layout = Layout(
-#      Div(
-#        'description',
-#        'in_stock',
-#        css_class='item-general-fields',
-#      ),
-#      Div(
-#        'status', 
-#        Div(
-#          Field('po_num'),
-#          AppendedText('po_date', '<i class="icon-calendar"></i>'), 
-#          css_class='form-inline',
-#        ),
-#        Div(
-#          'ack_num', 
-#          AppendedText('ack_date', '<i class="icon-calendar"></i>'),
-#        ),
-#        AppendedText('eta', '<i class="icon-calendar"></i>'),
-#        css_class='item-special-fields',
-#      ),
-#    )
 
   def clean(self):
     cleaned_data = super(OrderItemForm, self).clean()
@@ -70,7 +46,6 @@ class OrderItemForm(forms.ModelForm):
       po_num = cleaned_data.get('po_num')
       po_date = cleaned_data.get('po_date')
       if po_num == None or po_date == None:
-        #raise forms.ValidationError("Specify PO number and PO entered date before changing item status to 'Ordered'")
         msg = "Specify PO# and PO date before changing item status"
         # self.add_error('status', msg)
         raise forms.ValidationError(msg)
@@ -94,16 +69,12 @@ class OrderItemFormHelper(FormHelper):
       ),
       Div(
         'status', 
-        Div(
-          Field('po_num'),
-          AppendedText('po_date', '<i class="icon-calendar"></i>'), 
-          css_class='form-inline',
-        ),
-        Div(
-          'ack_num', 
-          AppendedText('ack_date', '<i class="icon-calendar"></i>'),
-        ),
-        AppendedText('eta', '<i class="icon-calendar"></i>'),
+        Field('po_num', wrapper_class='field-wrapper inline'),
+        AppendedText('po_date', '<i class="icon-calendar"></i>', css_classes='field-wrapper inline'),
+        Field('ack_num', wrapper_class='field-wrapper inline clear'), 
+        AppendedText('ack_date', '<i class="icon-calendar"></i>'),
+        HTML('<br/>'),
+        AppendedText('eta', '<i class="icon-calendar"></i>'), 
         css_class='item-special-fields',
       ),
     )
@@ -128,6 +99,7 @@ class CommissionForm(forms.ModelForm):
     self.request = kwargs.pop('request', None)
     super(CommissionForm, self).__init__(*args, **kwargs)
     self.fields['paid_date'].widget = BootstrapDateInput()
+    self.fields['paid_date'].widget.attrs['layout'] = 'inline';
     self.fields['associate'].required = True
     user_model = get_user_model() 
     self.fields['associate'].queryset = user_model.objects.filter(Q(groups__name__icontains="associates") | Q(groups__name__icontains="managers" ))
@@ -181,6 +153,7 @@ def get_commissions_formset(extra=1, max_num=1000, request=None):
   formset.form = staticmethod(curry(CommissionForm, request=request))  
   return formset
 
+#inline formsets
 ItemFormSet = inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=1, max_num=100)
 DeliveryFormSet = inlineformset_factory(Order, OrderDelivery, form=OrderDeliveryForm, extra=1, max_num=100)
 CommissionFormSet = inlineformset_factory(Order, Commission, form=CommissionForm, extra=1, max_num=100, can_delete=False)

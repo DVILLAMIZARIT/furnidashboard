@@ -67,14 +67,16 @@
               {% endif %}
             </ul>
           </div><!--/.nav-collapse -->
-          <div class="search">
-            <form action="/search/" method="get" class="form-search">
-              <div class="input-append">
-                <input id="id_q" name="q" type="text" placeholder="Order # or customer..." class="span2 search-query input-medium"/>
-                <button type="submit" value="Submit" class="btn">Search</button>
-              </div>
-            </form>
-          </div>
+          {% if request.user.is_authenticated %}
+            <div class="search">
+              <form action="/search/" method="get" class="form-search">
+                <div class="input-append">
+                  <input id="id_q" name="q" type="text" placeholder="Order # or customer..." class="span2 search-query input-medium"/>
+                  <button type="submit" value="Submit" class="btn">Search</button>
+                </div>
+              </form>
+            </div>
+          {% endif %}
         </div>
       </div>
     </div>

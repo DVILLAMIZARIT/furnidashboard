@@ -85,32 +85,32 @@
           var subtotal = $("#id_subtotal_after_discount").val();
           subtotal = parseFloat(subtotal.replace(',', ''));
           if (isNaN(subtotal)) {
-            subtotal = 0;
+            subtotal = 0.0;
           }
 
           var tax = $("#id_tax").val();
           tax = parseFloat(tax.replace(',', ''));
           if (isNaN(tax)) {
-            tax = 0;
+            tax = 0.0;
           }
 
           var shipping = $("#id_shipping").val();
           shipping = parseFloat(shipping.replace(',', ''));
           if (isNaN(shipping)) {
-            shipping = 0;
+            shipping = 0.0;
           }
 
           var deposit_balance = $("#id_deposit_balance").val();
           deposit_balance = parseFloat(deposit_balance.replace(',', ''));
           if (isNaN(deposit_balance)) {
-            deposit_balance = 0;
+            deposit_balance = 0.0;
           }
 
           var total_amount = subtotal + tax + shipping;
           var due = total_amount - deposit_balance;
           
-          $total.text(total_amount);
-          $balance_due.text(due);
+          $total.text("$" + total_amount.toFixed(2));
+          $balance_due.text("$" + due.toFixed(2));
         };
 
         $("#id_subtotal_after_discount").change(function() {

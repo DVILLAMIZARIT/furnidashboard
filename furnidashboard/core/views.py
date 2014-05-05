@@ -3,6 +3,7 @@ from django.db.models import Q
 from orders.models import Order
 from customers.models import Customer
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 
 def normalize_query(query_string, findterms=re.compile(r'"([^"]+)"|(\S)').findall, normspaces=re.compile(r'\s{2,}').sub):
   """ Splits the query string in individual keywords, getting rid of unnecessary spaces and grouping quoted words together.
@@ -34,6 +35,7 @@ def get_query(query_string, search_fields):
       query = query & or_query
   return query
 
+@login_required 
 def search(request):
   query_string = ''
   found_entries = None
@@ -53,4 +55,4 @@ def search(request):
          'found_orders': found_orders,
          'found_customers':found_customers,
         },
-        )
+      )

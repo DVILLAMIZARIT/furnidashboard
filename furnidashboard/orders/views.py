@@ -1,22 +1,22 @@
 from django.views.generic import ListView, DetailView, UpdateView, RedirectView
 from django.views.generic.edit import CreateView, DeleteView
 from django.views.generic.dates import MonthArchiveView, WeekArchiveView
-from .models import Order, OrderItem, OrderDelivery
-from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable, DeliveriesTable, SalesTotalsTable
-from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset, OrderDeliveryForm, OrderItemFormHelper
-from .filters import OrderFilter
-from customers.models import Customer
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.exceptions import ValidationError
-from core.mixins import LoginRequiredMixin, PermissionRequiredMixin
-import core.utils as utils
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django_tables2 import RequestConfig, SingleTableView
 from django.db.models import Q
 from datetime import timedelta, date, datetime
+from .models import Order, OrderItem, OrderDelivery
+from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable, DeliveriesTable, SalesTotalsTable
+from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset, OrderDeliveryForm, OrderItemFormHelper
+from .filters import OrderFilter
+from customers.models import Customer
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
+import core.utils as utils
+from core.mixins import LoginRequiredMixin, PermissionRequiredMixin
 import orders.utils as order_utils
 
 class UnplacedOrderTableView(SingleTableView):
@@ -25,7 +25,7 @@ class UnplacedOrderTableView(SingleTableView):
   template_name = "orders/order_table.html"
 
   def get_queryset(self, **kwargs):
-    return  Order.objects.select_related().filter(Q(status=None) | Q(status='N') | (Q(orderitem__in_stock=False) & (Q(orderitem__po_num__isnull=True) | Q(orderitem__po_num="")))).distinct()
+    return  Order.objects.unplaced_orders() #select_related().filter(Q(status=None) | Q(status='N') | (Q(orderitem__in_stock=False) & (Q(orderitem__po_num__isnull=True) | Q(orderitem__po_num="")))).distinct()
 
 class OrderDetailView(PermissionRequiredMixin, DetailView):
   model = Order
@@ -360,7 +360,7 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
       return self.form_invalid(**kwargs)
 
   def get_context_data(self, **kwargs):
-    context = super(OrderUpdateView, self).get_context_data(**kwargs)
+    context = super(OrderCreateView, self).get_context_data(**kwargs)
     context['item_form_helper'] = OrderItemFormHelper
     return context
 
@@ -554,9 +554,6 @@ class SalesStandingsMonthTableView(PermissionRequiredMixin, MonthArchiveView):
     orders = context['object_list']
     sales_by_assoc_data = order_utils._calc_sales_assoc_by_orders(orders)
     sales_by_assoc = SalesByAssociateTable(sales_by_assoc_data)
-
-#    now = datetime.now()
-#    sales_by_assoc_data = _calc_sales_by_assoc(now.year, now.month) #[{'associate':'Lana', 'sales':5000}, {'associate':'Pearl', 'sales':10000}]
 
     RequestConfig(self.request).configure(sales_by_assoc)
     context['sales_by_associate'] = sales_by_assoc 

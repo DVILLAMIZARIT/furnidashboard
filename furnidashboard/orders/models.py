@@ -1,7 +1,12 @@
 from django.db import models
+from django.db.models import Q
 from customers.models import Customer
 from stores.models import Store
 from django.core.urlresolvers import reverse
+
+class OrderManager(models.Manager):
+  def unplaced_orders(self):
+    return super(OrderManager, self).get_query_set().filter((Q(status=None) | Q(status='N') | (Q(orderitem__in_stock=False) & (Q(orderitem__in_stock=False) & (Q(orderitem__po_num__isnull=True) | Q(orderitem__po_num="")))))).distinct()
 
 class Order(models.Model):
   """
@@ -29,6 +34,9 @@ class Order(models.Model):
   comments = models.TextField(blank=True)
   store = models.ForeignKey(Store)
   referral = models.CharField(blank=True, null=True, max_length=50)
+  
+  #objects = models.Manager()      #default
+  objects = OrderManager() #customer manager
 
   @property
   def not_placed(self):

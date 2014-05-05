@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 
+{% load staticfiles %}
 {% load render_table from django_tables2 %}
 {% load crispy_forms_tags %}
 
 {% block title %}Order List{% endblock %}
 {% block extra_css %}
-  <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+  <link rel="stylesheet" href="{% static 'django_tables2/themes/paleblue/css/screen.css' %}" />
 {% endblock %}
 
 {% block page_title %}Orders for {{ month|date:'F, Y'}} {% endblock page_title %}

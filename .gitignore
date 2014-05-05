@@ -19,3 +19,6 @@ build
 
 # Media files
 media
+
+# Production settings
+*furnidashboard/furnidashboard/settings/production.py
