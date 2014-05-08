@@ -71,6 +71,16 @@ input.order-item-desc {
   display:inline-block;
   margin-right:1.5em;
 }
+#totals {
+  padding:2em 0;
+}
+#totals > div {
+  float:left;
+  margin-left:2em;
+}
+#pager {
+  padding-bottom:3em;
+}
 /* \ORDER LIST */
 
 /* ORDER DETAIL */

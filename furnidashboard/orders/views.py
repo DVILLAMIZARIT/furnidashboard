@@ -386,11 +386,9 @@ class FilteredTableMixin(object):
   table_paginate_by = None 
   filter_class = OrderFilter
   filter_form_id = 'order-filter'
-  orig_qs = None
 
   def get_queryset(self, **kwargs):
     qs = super(FilteredTableMixin, self).get_queryset(**kwargs)
-    self.orig_qs = qs
     self.setup_filter(queryset=qs)
     return self.filter.qs
 
@@ -437,34 +435,50 @@ class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, Mo
   )
 
   def get_context_data(self, **kwargs):
-    #_get  =self.request.GET
-    #self.request.GET = {}
-    self.queryset =self.orig_qs
     unfiltered_orders = self.object_list.all() #super(MonthArchiveView, self).get_dated_items()[1].all() #super(MonthArchiveView, self).get_dated_queryset()
-    #self.request.GET = _get
     context = super(OrderMonthArchiveTableView, self).get_context_data(**kwargs)
 
-    if unfiltered_orders:
-      subtotal_hq = sum([o.subtotal_after_discount for o in unfiltered_orders if o.store.name == "Sacramento"])
-      subtotal_fnt = sum([o.subtotal_after_discount for o in unfiltered_orders if o.store.name == "Roseville"])
-      total_hq = sum([o.grand_total for o in unfiltered_orders if o.store.name == "Sacramento"])
-      total_fnt = sum([o.grand_total for o in unfiltered_orders if o.store.name == "Roseville"])
-      totals_data = [
-        {'item':'Subtotal After Discount', 'hq':utils.dollars(subtotal_hq), 'fnt':utils.dollars(subtotal_fnt), 'total':utils.dollars(subtotal_hq + subtotal_fnt)},
-        {'item':'Grand Total', 'hq':utils.dollars(total_hq), 'fnt':utils.dollars(total_fnt), 'total':utils.dollars(total_hq + total_fnt)},
-        ]
-      totals_table = SalesTotalsTable(totals_data)
-      RequestConfig(self.request).configure(totals_table)
-    else:
-      totals_table = SalesTotalsTable([])
-      RequestConfig(self.request).configure(totals_table)
-    context['totals_table'] = totals_table
+    # get monthly sales totals
+    month_totals_table = self._get_sales_totals(unfiltered_orders)
+    RequestConfig(self.request).configure(month_totals_table)
+    context['month_totals_table'] = month_totals_table
 
+    #calc YTD stats
+    year = self.get_year()
+    date_field = self.get_date_field()
+    date = datetime.strptime(str(year), self.get_year_format()).date()
+    since = self._make_date_lookup_arg(date)
+    until = self._make_date_lookup_arg(self._get_next_year(date))
+    lookup_kwargs = {
+        '%s__gte' % date_field: since,
+        '%s__lt' % date_field: until,
+    }
+    ytd_orders = self.model._default_manager.filter(**lookup_kwargs)
+    ytd_totals_table =  self._get_sales_totals(ytd_orders)
+    RequestConfig(self.request).configure(ytd_totals_table)
+    context['ytd_totals_table'] = ytd_totals_table
+
+    #calc sales totals by associate
     sales_by_assoc_data = order_utils._calc_sales_assoc_by_orders(unfiltered_orders)
     sales_by_assoc = SalesByAssociateTable(sales_by_assoc_data)
     RequestConfig(self.request).configure(sales_by_assoc)
     context['sales_by_associate'] = sales_by_assoc 
     return context
+
+  def _get_sales_totals(self, qs):
+    totals_data = []
+    if qs.count():
+      subtotal_hq = sum([o.subtotal_after_discount for o in qs if o.store.name == "Sacramento"])
+      subtotal_fnt = sum([o.subtotal_after_discount for o in qs if o.store.name == "Roseville"])
+      total_hq = sum([o.grand_total for o in qs if o.store.name == "Sacramento"])
+      total_fnt = sum([o.grand_total for o in qs if o.store.name == "Roseville"])
+      totals_data = [
+        {'item':'Subtotal After Discount', 'hq':utils.dollars(subtotal_hq), 'fnt':utils.dollars(subtotal_fnt), 'total':utils.dollars(subtotal_hq + subtotal_fnt)},
+        {'item':'Grand Total', 'hq':utils.dollars(total_hq), 'fnt':utils.dollars(total_fnt), 'total':utils.dollars(total_hq + total_fnt)},
+        ]
+    totals_table = SalesTotalsTable(totals_data)
+    return totals_table
+
 
 class MyOrderListView(PermissionRequiredMixin, FilteredTableMixin, ListView):
   model = Order

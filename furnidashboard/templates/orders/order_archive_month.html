@@ -12,9 +12,7 @@
 {% block page_title %}Orders for {{ month|date:'F, Y'}} {% endblock page_title %}
 
 {% block content %}
-<pre>
-{{ context }}
-</pre>
+
   <div id="order-list" class="monthly-orders">
 
     <h2>Recent Orders</h2>
@@ -24,13 +22,22 @@
 
   </div>
 
-  <h4>Sales Totals</h4>
-  {% render_table totals_table %}
+  <section id="totals" class="clearfix">
+    <div id="totals-month">
+      <h4>Month Sales Totals</h4>
+      {% render_table month_totals_table %}
+    </div>>
 
-  <div id="monthly-sales-report">
-    <h4>Sales by Associate for  {{ month|date:'F, Y' }} </h4>
-    {% render_table sales_by_associate %}
-  </div>
+    <div id="totals-ytd">
+      <h4>{{ year }} YTD Sales Totals</h4>
+      {% render_table ytd_totals_table %}
+    </div>
+
+    <div id="totals-assoc">
+      <h4>Sales by Associate for  {{ month|date:'F, Y' }} </h4>
+      {% render_table sales_by_associate %}
+    </div>
+  </section>
 
   {% comment %}
   {% if is_paginated %}
@@ -48,7 +55,7 @@
   {% endif %}
   {% endcomment %}
 
-<p class="">
+<p id="pager">
 
   {% if previous_month %}
     <a href="{% url 'archive_month_numeric' year=previous_month.year month=previous_month.month %}" class="btn pull-left">&larr; {{ previous_month|date:"F Y" }}</a>
