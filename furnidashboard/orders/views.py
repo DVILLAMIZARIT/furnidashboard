@@ -435,7 +435,7 @@ class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, Mo
   )
 
   def get_context_data(self, **kwargs):
-    unfiltered_orders = self.object_list.all() #super(MonthArchiveView, self).get_dated_items()[1].all() #super(MonthArchiveView, self).get_dated_queryset()
+    unfiltered_orders = self.get_month_dated_queryset() 
     context = super(OrderMonthArchiveTableView, self).get_context_data(**kwargs)
 
     # get monthly sales totals
@@ -502,6 +502,22 @@ class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, Mo
         ]
     totals_table = SalesTotalsTable(totals_data)
     return totals_table
+  
+  def get_month_dated_queryset(self):
+    year = self.get_year()
+    month = self.get_month()
+    date_field = self.get_date_field()
+    date = datetime.strptime("-".join((year, month)), "-".join((self.get_year_format(), self.get_month_format()))).date()
+    since = self._make_date_lookup_arg(date)
+    until = self._make_date_lookup_arg(self._get_next_month(date))
+    lookup_kwargs = {
+        '%s__gte' % date_field: since,
+        '%s__lt' % date_field: until,
+    }
+    qs = self.model._default_manager.all().filter(**lookup_kwargs)
+        
+    return qs
+
 
 
 class MyOrderListView(PermissionRequiredMixin, FilteredTableMixin, ListView):
