@@ -15,9 +15,28 @@
 
   <div id="order-list" class="monthly-orders">
 
-    <h2>Recent Orders</h2>
-    {% crispy filter.form filter.helper %}
+    <h2>All Unplaced orders</h2>
+    {% render_table unplaced_orders_table %}
 
+    <h2>Orders for {{ month|date:'F, Y'}}</h2>
+
+    <p id="orders-calendar">
+
+      {% if previous_year_links %}
+        {{ prev_year }}
+        {% for month, link in previous_year_links %} 
+          <a href="{{ link }}" class="btn">{{ month}}</a>
+        {% endfor %}
+      {% endif %}
+      <br/>
+      {{ month|date:'Y' }}: 
+      {% for month, link in order_months_links %} 
+        <a href="{{ link }}" class="btn">{{ month}}</a>
+      {% endfor %}
+
+    </p>
+
+    {% crispy filter.form filter.helper %}
     {% render_table table %}
 
   </div>
@@ -26,7 +45,7 @@
     <div id="totals-month">
       <h4>Month Sales Totals</h4>
       {% render_table month_totals_table %}
-    </div>>
+    </div>
 
     <div id="totals-ytd">
       <h4>{{ year }} YTD Sales Totals</h4>
@@ -38,6 +57,7 @@
       {% render_table sales_by_associate %}
     </div>
   </section>
+
 
   {% comment %}
   {% if is_paginated %}
@@ -53,7 +73,6 @@
       </span>
     </div>
   {% endif %}
-  {% endcomment %}
 
 <p id="pager">
 
@@ -65,5 +84,6 @@
     <a href="{% url 'archive_month_numeric' year=next_month.year month=next_month.month %}" class="btn pull-right">{{ next_month|date:"F Y" }} &rarr;</a>
   {% endif %}
 </p>
+  {% endcomment %}
 
 {% endblock %}

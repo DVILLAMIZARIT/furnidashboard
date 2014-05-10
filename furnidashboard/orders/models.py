@@ -20,6 +20,7 @@ class Order(models.Model):
     ('T', 'In Transit'),
     ('S', 'Scheduled for Delivery'),
     ('D', 'Delivered'),
+    ('Q', 'Pending'),
   )
 
   number = models.CharField(max_length=50)

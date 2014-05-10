@@ -303,8 +303,8 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
 
     # import pdb; pdb.set_trace()
 
-    if not form.data['status'] or form.data['status'] != 'N':
-      messages.error(self.request, "New orders must have a status 'New'")
+    if not form.data['status'] or form.data['status'] not in ('Q', 'N'):
+      messages.error(self.request, "Newly created order status must be either 'New' or 'Pending'!")
       BR_passed = False
 
     # validate customer
@@ -463,7 +463,31 @@ class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, Mo
     sales_by_assoc = SalesByAssociateTable(sales_by_assoc_data)
     RequestConfig(self.request).configure(sales_by_assoc)
     context['sales_by_associate'] = sales_by_assoc 
+
+    #links to other months data
+    context['order_months_links'] = self._get_month_list_for_year()
+    context['previous_year_links'] = self._get_month_list_for_year(datetime.now().year-1)
+    context['prev_year'] = datetime.now().year-1
+
+    #unplaced orders
+    unplaced_orders = Order.objects.unplaced_orders()
+    unplaced_orders_table = OrderTable(unplaced_orders)
+    RequestConfig(self.request).configure(unplaced_orders_table)
+    context['unplaced_orders_table'] = unplaced_orders_table
+
     return context
+
+  def _get_month_list_for_year(self, year=datetime.now().year):
+    cur_date = datetime(year, 1, 1)
+    months_data = []
+    while cur_date.year == year:
+      months_data.append((cur_date.strftime("%m"), cur_date.strftime("%b")))
+      cur_date = cur_date + timedelta(days=31)
+      cur_date = datetime(cur_date.year, cur_date.month, 1)
+      if cur_date > datetime.now():
+        break
+    return [(name, reverse('archive_month_numeric', kwargs={'year':year, 'month':m})) for m,name in sorted(months_data)]
+
 
   def _get_sales_totals(self, qs):
     totals_data = []
