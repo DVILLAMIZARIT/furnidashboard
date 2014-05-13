@@ -69,7 +69,7 @@
           </div><!--/.nav-collapse -->
           {% if request.user.is_authenticated %}
             <div class="search">
-              <form action="/search/" method="get" class="form-search">
+              <form action="/search/" method="get" class="navbar-search pull-right form-search">
                 <div class="input-append">
                   <input id="id_q" name="q" type="text" placeholder="Order # or customer..." class="span2 search-query input-medium"/>
                   <button type="submit" value="Submit" class="btn">Search</button>
