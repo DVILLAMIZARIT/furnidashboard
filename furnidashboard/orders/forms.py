@@ -90,6 +90,12 @@ class OrderForm(forms.ModelForm):
     self.fields['created'].label = "Ordered Date"
     self.fields['created'].widget.attrs['class'] = "order-date"
 
+  def clean_number(self):
+    number = self.cleaned_data.get('number')
+    if not number.isdigit():
+      raise forms.ValidationError("Order number needs to be numeric!")
+    return number
+    
   class Meta:
     model = Order
 

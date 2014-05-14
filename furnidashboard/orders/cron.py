@@ -14,21 +14,22 @@ class OrderCronJob(CronJobBase):
   def do(self):
     orders_missing = self._determine_potentially_missed_orders()
     if orders_missing:
-      print "Possibly missing orders:"
+      print "Checking for missing orders:"
       for o in orders_missing:
         print o
       print "-" * 20
 
     unplaced = Order.objects.unplaced_orders()
-    print "Unplaced orders: " + unplaced.count()
+    print "Checking for UNPLACED orders: "
+    print "{0} item(s)".format(unplaced.count())
     for o in unplaced:
-      print o.number + " " + o.get_abosulte_url()
+      print "#{0} unplaced. View details: {1}".format(o.number, o.get_absolute_url())
     print "-" * 20
 
     recent_orders = Order.objects.filter(status__exact='N').order_by('-created')[:5]
     print "Recent orders:"
     for o in recent_orders:
-       print "Order {0} created at {1}".format(o.number, o.created)
+       print "Order {0} created at {1}".format(o.number, o.created.strftime("%m-%d-%Y"))
 
   def _determine_potentially_missed_orders(self):
     launch_dt = datetime(2014, 6, 1)
@@ -41,10 +42,8 @@ class OrderCronJob(CronJobBase):
       expected = first + 1
       for num in order_nums[1:]:
         if num != expected:
-          res.append("Check for probably missing order: expected order with #{0}, first matched in sequence: #{1}".format(expected, num))
+          res.append("Potentially missing order: EXPECTED order #{0} not found; next in sequence: #{1}".format(expected, num))
         else:
           expected = num + 1
 
     return res
-
-    
