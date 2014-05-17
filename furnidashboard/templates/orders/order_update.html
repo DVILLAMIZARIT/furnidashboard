@@ -22,22 +22,63 @@
             $form = $(this);
             $form.addClass('processed');
             var $in_stock = $(".item-general-fields", $form).find('input.order-item-in-stock');
+            var $status = $(".item-general-fields", $form).find('select.order-item-status');
+            var $special_fields = $form.find(".item-special-fields");
+            var $po_num = $form.find("input.order-item-po");
+            var $ack_num = $form.find("input.order-item-ack-num");
+            var date = $.datepicker.formatDate('yy-mm-dd', new Date());
 
             if ($in_stock.length && $in_stock.prop('checked')) {
-              $(".item-special-fields", $form).hide();
+              $special_fields.find("input").val("");          // clear special order related values
+              $status.val("S");                               // select "In Stock"
+              $(".item-special-fields", $form).hide();        // hide special order related fields
+              
             } else {  
+              $status.val("P");                               // select "Pending"
               $(".item-special-fields", $form).show();
             }
 
             $in_stock.change(function() {
-              $special_fields = $(this).parents(".items-form").find(".item-special-fields");
               if (this.checked) {
-                $special_fields.hide(); 
+                $special_fields.find("input").val("");        // clear special order related values
+                $status.val("S");                             // select "In Stock"
+                $special_fields.hide();                       // hide special order related fields
               } else {
+                $status.val("P");                             // select "Pending"
                 $special_fields.show();
               }
-
             });
+            
+            //processing of dependent fields once item status is changed
+            $status.change(function() {
+              if ($(this).val() == "S") {
+                $special_fields.find("input").val("");        // clear special order related values
+                $in_stock.attr("checked", "checked");
+                $(".item-special-fields", $form).hide();      // hide special order related fields
+              } else {
+                $in_stock.removeAttr("checked");
+                $(".item-special-fields", $form).show();
+              }
+            });
+            
+            //default PO date to current date if PO number is entered
+            $po_num.change(function() {
+              if ($(this).val().trim() != "") {
+                $special_fields.find("input.order-item-po-date").val(date);
+              } else { 
+                $special_fields.find("input.order-item-po-date").val("");
+              }
+            });
+            
+            //default ack. date to current date if ack. number is entered
+            $ack_num.change(function() {
+              if ($(this).val().trim() != "") {
+                $special_fields.find("input.order-item-ack-date").val(date);
+              } else { 
+                $special_fields.find("input.order-item-ack-date").val("");
+              }
+            });            
+            
           });
         };
 

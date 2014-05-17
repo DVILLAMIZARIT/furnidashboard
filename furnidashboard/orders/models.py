@@ -1,13 +1,46 @@
+from datetime import datetime
 from django.db import models
 from django.db.models import Q
+from django.utils import timezone
+from django.conf import settings
+from django.core.urlresolvers import reverse
 from customers.models import Customer
 from stores.models import Store
-from django.core.urlresolvers import reverse
 
 class OrderManager(models.Manager):
-  def unplaced_orders(self):
-    return super(OrderManager, self).get_query_set().filter((Q(status=None) | Q(status='N') | (Q(orderitem__in_stock=False) & (Q(orderitem__in_stock=False) & (Q(orderitem__po_num__isnull=True) | Q(orderitem__po_num="")))))).distinct()
+  launch_dt = datetime(2014, 6, 1)
+  if settings.USE_TZ:
+    launch_dt = timezone.make_aware(launch_dt, timezone.get_current_timezone())
 
+  def get_qs(self):
+    qs = super(OrderManager, self).get_query_set().filter(created__gte=self.launch_dt)
+    return qs
+  
+  def unplaced_orders(self):
+    #special order, not placed (no PO number)
+    qs = self.get_qs()
+    return qs.filter(Q(status='N') | (Q(orderitem__in_stock=False) & Q(orderitem__po_num=""))).distinct()
+    
+  def special_no_ack(self):
+    #special order has been placed, but no acknowledgement number
+    qs = self.get_qs()
+    return qs.filter(Q(orderitem__status__in=['O', 'P']) & Q(orderitem__ack_num="")).distinct()
+  
+  def special_acknowledged_no_eta(self):
+    #special order has been placed and acknowledged, but no ETA
+    qs = self.get_qs()
+    return qs.filter(Q(orderitem__status__in=['O', 'P']) & ~Q(orderitem__ack_num="") & Q(orderitem__eta__isnull=True)).distinct()
+  
+  def special_eta_passed_not_received(self):
+    #special order ETA has passed, but item status is not 'Received'
+    qs = self.get_qs()
+    return qs.filter(Q(orderitem__status__in=['O', 'P']) & Q(orderitem__eta__gte=datetime.now())).distinct()
+  
+  def not_yet_delivered(self):
+    #undelivered orders
+    qs = self.get_qs()
+    return qs.filter(Q(orderitem__status__in=['S', 'R']))
+  
 class Order(models.Model):
   """
   A model class representing Order data
@@ -78,6 +111,7 @@ class OrderItem(models.Model):
     ('O', 'Ordered'),
     ('R', 'Received'),
     ('D', 'Delivered'),
+    ('S', 'In Stock'),
   )
 
   order = models.ForeignKey(Order)

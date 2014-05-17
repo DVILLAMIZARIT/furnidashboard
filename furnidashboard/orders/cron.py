@@ -30,6 +30,13 @@ class OrderCronJob(CronJobBase):
     print "Recent orders:"
     for o in recent_orders:
        print "Order {0} created at {1}".format(o.number, o.created.strftime("%m-%d-%Y"))
+       
+    orders_no_ack_no = Order.objects.special_no_ack()
+    print "Special Orders, acknowledgement not received from vendor:"
+    print "{0} orders_no_ack_no(s)".format(orders_no_ack_no.count())
+    for o in orders_no_ack_no:
+      print "#{0} order item(s) have not yet been acknowledged. View details: {1}".format(o.number, o.get_absolute_url())
+    print "-" * 20
 
   def _determine_potentially_missed_orders(self):
     launch_dt = datetime(2014, 6, 1)

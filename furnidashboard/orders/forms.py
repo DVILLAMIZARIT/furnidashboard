@@ -22,6 +22,11 @@ class OrderItemForm(forms.ModelForm):
     self.fields['in_stock'].widget.attrs['class'] = "order-item-in-stock"
     self.fields['description'].widget.attrs['class'] = "order-item-desc"
     self.fields['description'].required = True
+    
+    self.fields['status'].required = True
+    self.fields['status'].widget.attrs['class'] = "order-item-status"
+    self.fields['status'].initial = 'S'  #'In Stock' is selected by default
+    
     self.fields['po_num'].widget.attrs['class'] = "order-item-po"
     self.fields['po_num'].label = "PO #"
     self.fields['po_date'].widget = BootstrapDateInput()
@@ -39,6 +44,15 @@ class OrderItemForm(forms.ModelForm):
     self.fields['description'].widget.attrs['size']=80
 
   def clean(self):
+    ''' 
+    By default, 'In Stock' status is auto selected for order item.
+    If 'In stock' checkbox is selected, status is reset to 'In Stock'
+    and special order related values are cleared and hidden. Otherwise, 
+    if 'Pending' is selected, in stock indicator is cleared and special 
+    order values are shown. 'Ordered', 'Received', or 'Delivered' arenot 
+    availabe if PO number is not entered. 'Pending' is no available if
+    PO number is entered.
+    '''
     cleaned_data = super(OrderItemForm, self).clean()
     status = cleaned_data.get("status")
     if status in ('O', 'R', 'D'): #ordered, received, or delivered
@@ -63,12 +77,12 @@ class OrderItemFormHelper(FormHelper):
     self.disable_csrf = True
     self.layout = Layout(
       Div(
-        'description',
+        'status', 
         'in_stock',
+        'description',
         css_class='item-general-fields',
       ),
       Div(
-        'status', 
         Field('po_num', wrapper_class='field-wrapper inline'),
         AppendedText('po_date', '<i class="icon-calendar"></i>', css_classes='field-wrapper inline'),
         Field('ack_num', wrapper_class='field-wrapper inline clear'), 
