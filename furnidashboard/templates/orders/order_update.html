@@ -239,6 +239,34 @@
       <div class="tab-pane" id="customer-info">
         <fieldset>
           <legend>Customer Info</legend>
+          
+            <div class="tabbable"> <!-- Only required for left/right tabs -->
+              <ul class="nav nav-tabs">
+                <li class="active"><a href="#tab1" data-toggle="tab">Select Customer</a></li>
+                <li><a href="#tab2" data-toggle="tab">Create Customer</a></li>
+              </ul>
+              <div class="tab-content">
+                <div class="tab-pane active" id="tab1">
+                  <div class="field-wrapper">
+                    {{ form.customer.errors }}
+                    <label for="id_customer">Customer</label>
+                    {{ form.customer }}
+                  </div>
+
+                </div>
+                <div class="tab-pane" id="tab2">
+                  <div id="new-customer-form-wrapper" >
+                    {{ customer_form.management_form }}
+                    {% for subform in customer_form %}
+                      {{ subform.non_field_errors }}
+                      {{ subform }}
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          
+          {% comment %}
           <div class="customer-selection">
             <h5>Select existing or create a customer</h5>
             <div class="field-wrapper">
@@ -262,12 +290,11 @@
                 </div>
               {% endfor %}
             </div>
-            <br/>
-            <div id="referral-info">
-              <label for="id_referral">Referral source</label>
-              {{ form.referral }} 
-            </div>
-          </div>
+                      </div>
+            {% endcomment %}
+            
+            <br/>          
+          
         </fieldset>
       </div>
     
@@ -378,6 +405,14 @@
     </div>
 
     <br/>
+    
+    <div id="referral-info">
+      <label for="id_referral">Referral source</label>
+      {{ form.referral }} 
+    </div>
+    
+    <br/>
+            
     <input type="submit" class="btn btn-primary btn-large" value="Save"/>
 
 </form>
