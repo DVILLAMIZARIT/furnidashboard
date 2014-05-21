@@ -12,9 +12,10 @@ class OrderCronJob(CronJobBase):
   code = 'orders.cron.OrderCronJob'
 
   def do(self):
+    print "Checking for missing orders:"
     orders_missing = self._determine_potentially_missed_orders()
+    print "{0} item(s)".format(len(orders_missing))
     if orders_missing:
-      print "Checking for missing orders:"
       for o in orders_missing:
         print o
       print "-" * 20
@@ -39,12 +40,12 @@ class OrderCronJob(CronJobBase):
     print "-" * 20
 
   def _determine_potentially_missed_orders(self):
+    res = []
     launch_dt = datetime(2014, 6, 1)
     if settings.USE_TZ:
       launch_dt = timezone.make_aware(launch_dt, timezone.get_current_timezone())
     order_nums = sorted([o.number for o in Order.objects.filter(created__gte=launch_dt)])
     if order_nums:
-      res = []
       first = int(order_nums[0])
       expected = first + 1
       for num in order_nums[1:]:

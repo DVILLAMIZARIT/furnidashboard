@@ -8,7 +8,8 @@ from customers.models import Customer
 from stores.models import Store
 
 class OrderManager(models.Manager):
-  launch_dt = datetime(2014, 6, 1)
+  #launch_dt = datetime(2014, 6, 1)
+  launch_dt = datetime(2014, 5, 1)
   if settings.USE_TZ:
     launch_dt = timezone.make_aware(launch_dt, timezone.get_current_timezone())
 
