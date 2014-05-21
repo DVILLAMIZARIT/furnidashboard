@@ -63,6 +63,12 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     self.object = self.get_object()
     form_class = self.get_form_class()
     form = self.get_form(form_class)
+    self.request = request
+    
+    if not request.user.has_perm('orders.update_status'):
+      #disable order status for staff person without privilege
+      form.fields['status'].widget.attrs['readonly'] = 'readonly'
+    
     customer_form = CustomerFormSet(queryset=Customer.objects.none(), prefix="customers") 
 
     extra = 0
@@ -101,6 +107,7 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     self.object = self.get_object()
     form_class = self.get_form_class()
     form = self.get_form(form_class)
+    self.request = request
     customer_form = CustomerFormSet(self.request.POST, self.request.FILES, prefix="customers")
     commissions_form = CommissionFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="commissions")
     items_form = ItemFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="ordered_items")
@@ -127,7 +134,8 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     items_form = kwargs['items_form']
     commissions_form = kwargs['commissions_form']
     delivery_form = kwargs['delivery_form']
-
+    
+    old_obj = self.object
     self.object = form.save(commit=False)
 
     # flags
@@ -172,6 +180,11 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
 
     if BR_passed: 
       
+      if not self.request.user.has_perm('orders.update_status'):
+        if old_obj.pk:
+          self.object.status = old_obj.status #reset previous value
+          messages.warning(self.request, "You don't have permission to change order status. Order status was reset to previous value.")
+        
       #save order
       self.object.save()
       

@@ -99,12 +99,25 @@ class OrderForm(forms.ModelForm):
   
   def __init__(self, *args, **kwargs):
     super(OrderForm, self).__init__(*args, **kwargs)
+    
+    self.fields['number'].label = "SO#"
+    self.fields['number'].required = True
+    
     self.fields['status'].initial='N'
+    self.fields['status'].required = True
+    
     self.fields['created'].widget = BootstrapDateInput()
     self.fields['created'].label = "Ordered Date"
     self.fields['created'].widget.attrs['class'] = "order-date"
+    
+    self.fields['subtotal_after_discount'].required = True
 
   def clean_number(self):
+    ''' 
+    SO number validation: make sure that order 
+    numbers are numerical. This is needed to validate
+    potentially missing orders.
+    '''
     number = self.cleaned_data.get('number')
     if not number.isdigit():
       raise forms.ValidationError("Order number needs to be numeric!")

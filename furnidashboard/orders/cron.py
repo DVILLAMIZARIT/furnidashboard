@@ -48,8 +48,15 @@ class OrderCronJob(CronJobBase):
       first = int(order_nums[0])
       expected = first + 1
       for num in order_nums[1:]:
+        num = int(num)
         if num != expected:
-          res.append("Potentially missing order: EXPECTED order #{0} not found; next in sequence: #{1}".format(expected, num))
+          res.append("Potentially missing order: EXPECTED order #{0} - not found; next in sequence: #{1}".format(expected, num))
+          expected = expected + 1
+          while expected < num:
+            res.append("Potentially missing order: EXPECTED order #{0} - not found; next in sequence: #{1}".format(expected, num))
+            expected = expected + 1
+          if expected <= num:
+            expected = expected + 1
         else:
           expected = num + 1
 

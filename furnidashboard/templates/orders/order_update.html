@@ -212,25 +212,20 @@
         <fieldset>
           <legend>Order info</legend>
       
-           <div class="field-wrapper inline">
-             {{ form.number.errors }}
-             <label for="id_number">Order #</label>
-             {{ form.number }}
-           </div>
-           <div class="field-wrapper inline">
-             {{ form.created.errors }}
-             {{ form.created | as_bootstrap }}
-           </div>
-           <div class="field-wrapper inline">
-             {{ form.status.errors }}
-             <label for="id_status">Status</label>
-             {{ form.status }}
-           </div>
+            <div class="field-wrapper inline">
+              {{ form.number|as_bootstrap }}
+            </div>
+            
+            <div class="field-wrapper inline">
+              {{ form.created|as_bootstrap }}
+            </div>
+            
+            <div class="field-wrapper inline">
+              {{ form.status|as_bootstrap }}
+            </div>
       
            <div class="field-wrapper clear">
-             {{ form.store.errors }}
-             <label for="id_store">Store</label>
-             {{ form.store }}
+             {{ form.store|as_bootstrap }}
            </div>
       
         </fieldset>
@@ -243,14 +238,12 @@
             <div class="tabbable"> <!-- Only required for left/right tabs -->
               <ul class="nav nav-tabs">
                 <li class="active"><a href="#tab1" data-toggle="tab">Select Customer</a></li>
-                <li><a href="#tab2" data-toggle="tab">Create Customer</a></li>
+                <li><a href="#tab2" data-toggle="tab">New Customer...</a></li>
               </ul>
               <div class="tab-content">
                 <div class="tab-pane active" id="tab1">
                   <div class="field-wrapper">
-                    {{ form.customer.errors }}
-                    <label for="id_customer">Customer</label>
-                    {{ form.customer }}
+                    {{ form.customer|as_bootstrap }}
                   </div>
 
                 </div>
@@ -266,33 +259,6 @@
               </div>
             </div>
           
-          {% comment %}
-          <div class="customer-selection">
-            <h5>Select existing or create a customer</h5>
-            <div class="field-wrapper">
-              {{ form.customer.errors }}
-              <label for="id_customer">Customer</label>
-              {{ form.customer }}
-            </div>
-            <div id="new-customer-form-wrapper" >
-              {{ customer_form.management_form }}
-              {% for subform in customer_form %}
-                <div class="accordion-group items-form form-row" id="{{ customer_form.prefix }}-row">
-                  <div class="accordion-heading">
-                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#new-customer-form-wrapper" href="#collapse{{ customer_form.prefix }}">New Customer</a>
-                  </div>
-                  <div id="collapse{{ customer_form.prefix }}" class="accordion-body collapse">
-                    <div class="accordion-inner">
-                      {{ subform.non_field_errors }}
-                      {{ subform }}
-                    </div>
-                  </div>       
-                </div>
-              {% endfor %}
-            </div>
-                      </div>
-            {% endcomment %}
-            
             <br/>          
           
         </fieldset>
@@ -301,30 +267,50 @@
       <div class="tab-pane" id="payment-info">
         <fieldset>
           <legend>Payment Information</legend>
-          <div class="field-wrapper input-prepend">
-            {{ form.subtotal_after_discount.errors }}
-            <label for="id_subtotal_after_discount">Subtotal After Discount</label>
-            <span class="add-on">$</span> 
-            {{ form.subtotal_after_discount}}
-          </div>
-          <div class="field-wrapper input-prepend">
-            {{ form.deposit_balance.errors }}
-            <label for="id_deposit_balance">Deposit Balance</label>
-            <span class="add-on">$</span> 
-            {{ form.deposit_balance }}
-          </div>
-          <div class="field-wrapper input-prepend">
-            {{ form.tax.errors }}
-            <label for="id_tax">Tax</label>
-            <span class="add-on">$</span> 
-            {{ form.tax }}
-          </div>
-          <div class="field-wrapper input-prepend">
-            {{ form.shipping.errors }}
-            <label for="id_shipping">Shipping</label>
-            <span class="add-on">$</span> 
-            {{ form.shipping }}
-          </div>
+          
+          {% with form.subtotal_after_discount as field %}
+            <div class="field-wrapper control-group {% if field.errors %} error{% endif %}{% if field.field.required %} required{% endif %}">
+              <div class="input-prepend">
+                {{ field.label_tag }}
+                <span class="add-on">$</span> 
+                {{ field }}
+              </div>
+              {% include "bootstrap_toolkit/field_errors.html" with field=field %}
+            </div>
+          {% endwith %}
+          
+          {% with form.deposit_balance as field %}
+            <div class="field-wrapper control-group {% if field.errors %} error{% endif %}{% if field.field.required %} required{% endif %}">
+              <div class="input-prepend">
+                {{ field.label_tag }}
+                <span class="add-on">$</span> 
+                {{ field }}
+              </div>
+              {% include "bootstrap_toolkit/field_errors.html" with field=field %}
+            </div>
+          {% endwith %}
+          
+          {% with form.tax as field %}
+            <div class="field-wrapper control-group {% if field.errors %} error{% endif %}{% if field.field.required %} required{% endif %}">
+              <div class="input-prepend">
+                {{ field.label_tag }}
+                <span class="add-on">$</span> 
+                {{ field }}
+              </div>
+              {% include "bootstrap_toolkit/field_errors.html" with field=field %}
+            </div>
+          {% endwith %}
+          
+          {% with form.shipping as field %}
+            <div class="field-wrapper control-group {% if field.errors %} error{% endif %}{% if field.field.required %} required{% endif %}">
+              <div class="input-prepend">
+                {{ field.label_tag }}
+                <span class="add-on">$</span> 
+                {{ field }}
+              </div>
+              {% include "bootstrap_toolkit/field_errors.html" with field=field %}
+            </div>
+          {% endwith %}
         </fieldset>
       </div>
       

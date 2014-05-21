@@ -94,6 +94,7 @@ class Order(models.Model):
     permissions = (
         ("view_orders", "Can View Orders"),
         ("view_sales", "Can View Sales Reports"),
+        ("update_status", "Can Update Order Status"),
     )
   
   def __unicode__(self):

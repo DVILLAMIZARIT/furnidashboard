@@ -13,8 +13,9 @@
     <a href="{% url 'order_edit' object.pk %}" title="Edit Order">Edit Order</a>  
     {% endif %}
     {% if perms.orders.delete_order %}
-      |  <a href="{% url 'order_delete' object.pk %}" title="Delete Order">Delete Order</a></div>
+      |  <a href="{% url 'order_delete' object.pk %}" title="Delete Order">Delete Order</a>
     {% endif %}
+  </div>
   <hr/>
 
   {% if object.not_placed %}
