@@ -94,3 +94,14 @@ input.order-item-desc {
   padding: 0.5em 1em;
 }
 /* \ORDER DETAIL */
+
+a.delete-row {
+  float: right;
+  position: relative;
+  bottom: 2.2em;
+  right: 1em;
+  color: red;
+  background: pink;
+  border-radius: 5px;
+  padding: .2em .5em;
+}

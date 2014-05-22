@@ -25,7 +25,7 @@ class OrderItemForm(forms.ModelForm):
     
     self.fields['status'].required = True
     self.fields['status'].widget.attrs['class'] = "order-item-status"
-    self.fields['status'].initial = 'S'  #'In Stock' is selected by default
+    #self.fields['status'].initial = 'S'  #'In Stock' is selected by default
     
     self.fields['po_num'].widget.attrs['class'] = "order-item-po"
     self.fields['po_num'].label = "PO #"
@@ -90,6 +90,9 @@ class OrderItemFormHelper(FormHelper):
         HTML('<br/>'),
         AppendedText('eta', '<i class="icon-calendar"></i>'), 
         css_class='item-special-fields',
+      ),
+      Div(
+        Field('DELETE', css_class='input-small'),
       ),
     )
 
@@ -183,7 +186,7 @@ def get_deliveries_formset(extra=1, max_num=1000):
 
 def get_commissions_formset(extra=1, max_num=1000, request=None):
   formset = inlineformset_factory(Order, Commission, extra=extra, max_num=max_num, can_delete=False)
-  formset.form = staticmethod(curry(CommissionForm, request=request))  
+  formset.form = staticmethod(curry(CommissionForm, request=request))
   return formset
 
 #inline formsets

@@ -217,6 +217,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 #specifying which model is used for auth model
 AUTH_USER_MODEL = "auth.User"
+LOGIN_REDIRECT_URL = "/"
 
 
 ########## LOGGING CONFIGURATION

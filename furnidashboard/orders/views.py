@@ -135,7 +135,7 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     commissions_form = kwargs['commissions_form']
     delivery_form = kwargs['delivery_form']
     
-    old_obj = self.object
+    orig_status = self.object.status
     self.object = form.save(commit=False)
 
     # flags
@@ -181,8 +181,8 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     if BR_passed: 
       
       if not self.request.user.has_perm('orders.update_status'):
-        if old_obj.pk:
-          self.object.status = old_obj.status #reset previous value
+        if orig_status:
+          self.object.status = orig_status #reset previous value
           messages.warning(self.request, "You don't have permission to change order status. Order status was reset to previous value.")
         
       #save order

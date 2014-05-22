@@ -115,10 +115,13 @@
             }
             if (hasChildElements(row)) {
                 row.addClass(options.formCssClass);
-                if (row.is(':visible')) {
+                // --- PATCH ---
+                // commented out the condition below to make sure Delete links appears for each formset
+                // because if formset is accordion, the button will not appear
+                //if (row.is(':visible')) {
                     insertDeleteLink(row);
                     applyExtraClasses(row, i);
-                }
+                //}
             }
         });
 

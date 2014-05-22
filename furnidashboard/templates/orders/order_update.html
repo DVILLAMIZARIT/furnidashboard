@@ -21,9 +21,10 @@
           $("#order-items-fieldset div.items-form:not(.processed)").each(function() {
             $form = $(this);
             $form.addClass('processed');
-            var $in_stock = $(".item-general-fields", $form).find('input.order-item-in-stock');
-            var $status = $(".item-general-fields", $form).find('select.order-item-status');
             var $special_fields = $form.find(".item-special-fields");
+            var $general_fields = $form.find(".item-general-fields");            
+            var $in_stock = $general_fields.find('input.order-item-in-stock');
+            var $status = $general_fields.find('select.order-item-status');
             var $po_num = $form.find("input.order-item-po");
             var $ack_num = $form.find("input.order-item-ack-num");
             var date = $.datepicker.formatDate('yy-mm-dd', new Date());
@@ -31,11 +32,11 @@
             if ($in_stock.length && $in_stock.prop('checked')) {
               $special_fields.find("input").val("");          // clear special order related values
               $status.val("S");                               // select "In Stock"
-              $(".item-special-fields", $form).hide();        // hide special order related fields
+              $special_fields.hide();        // hide special order related fields
               
             } else {  
               $status.val("P");                               // select "Pending"
-              $(".item-special-fields", $form).show();
+              $special_fields.show();
             }
 
             $in_stock.change(function() {
@@ -54,10 +55,10 @@
               if ($(this).val() == "S") {
                 $special_fields.find("input").val("");        // clear special order related values
                 $in_stock.attr("checked", "checked");
-                $(".item-special-fields", $form).hide();      // hide special order related fields
+                $special_fields.hide();      // hide special order related fields
               } else {
                 $in_stock.removeAttr("checked");
-                $(".item-special-fields", $form).show();
+                $special_fields.show();
               }
             });
             
@@ -88,6 +89,7 @@
         $("#order-items-fieldset").find("div.accordion-body").eq(0).addClass("in"); //expand first item
         $('#order-items-fieldset div.items-form').formset({
             prefix: '{{items_form.prefix}}',
+            deleteText: 'Delete',
             added: function($form) {
               var accordions = $form.parent().find('div.accordion-group');
               var form_ind = accordions.length - 1;
@@ -96,8 +98,9 @@
               $("#order-items-fieldset").find("div.accordion-body").removeClass("in");
               $form.find("div.accordion-heading a").click();
 
-              var $in_stock = $(".item-general-fields", $form).find('input.order-item-in-stock');
-              $in_stock.prop('checked', true);
+              //var $in_stock = $(".item-general-fields", $form).find('input.order-item-in-stock');
+              //$in_stock.prop('checked', true);
+              $form.removeClass("processed");
               initItemForm();
 
             }
@@ -326,7 +329,8 @@
               </div>
               <div id="collapse{{ item_form.prefix }}" class="accordion-body collapse">
                 <div class="accordion-inner">
-                  {% crispy item_form item_form_helper %}
+                  {% crispy item_form item_form_helper %} 
+                  {% comment %} {{ item_form | as_bootstrap }} {% endcomment %}
                   {{ item_form.id }}
                 </div>
               </div>       
