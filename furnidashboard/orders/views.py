@@ -71,21 +71,17 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     
     customer_form = CustomerFormSet(queryset=Customer.objects.none(), prefix="customers") 
 
-    extra = 0
-    if self.object.commission_set.count() == 0:           #if no commissions were saved for this order, add a blank form
-      extra = 1
+    extra = 1 if self.object.commission_set.count() == 0 else 0  #if no commissions were saved for this order, add a blank form
     SpecialCommissionFormSet = get_commissions_formset(extra=extra, max_num=3, request=self.request)
     commissions_form = SpecialCommissionFormSet(instance=self.object, prefix="commissions")
     
-    DeliveriesFormSet = get_deliveries_formset(extra=1, max_num=100)
-    delivery_form = DeliveriesFormSet(instance = self.object, prefix="deliveries")
+    extra = 1 if self.object.orderdelivery_set.count() == 0 else 0
+    DeliveriesFormSet = get_deliveries_formset(extra=extra, max_num=100, request=self.request)
+    delivery_form = DeliveriesFormSet(instance=self.object, prefix="deliveries")
 
     # prevent empty form showing up if no items were recorded for the order
     # specify at least 1 extra of no items are set
-    extra = 0
-    if self.object.orderitem_set.count() == 0:
-      extra = 1
-
+    extra = 1 if self.object.orderitem_set.count() == 0 else 0
     SoldItemsFormSet = get_ordered_items_formset(extra=extra, max_num=100)
     items_form = SoldItemsFormSet(instance=self.object, prefix="ordered_items")
     extra_forms = {
@@ -111,7 +107,8 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     customer_form = CustomerFormSet(self.request.POST, self.request.FILES, prefix="customers")
     commissions_form = CommissionFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="commissions")
     items_form = ItemFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="ordered_items")
-    delivery_form = DeliveryFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="deliveries")
+    DeliveriesFormSet = get_deliveries_formset(extra=0, max_num=100, request=self.request)
+    delivery_form = DeliveriesFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="deliveries")
     forms = {
       'form':form,
       'customer_form':customer_form,
@@ -119,7 +116,21 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
       'commissions_form':commissions_form,
       'delivery_form':delivery_form,
     }
-    if form.is_valid() and commissions_form.is_valid() and items_form.is_valid() and delivery_form.is_valid():
+
+    #check if forms are valid
+    forms_valid = form.is_valid()
+    if forms_valid and commissions_form.has_changed():
+      forms_valid = commissions_form.is_valid()
+    if forms_valid and items_form.has_changed():  
+      forms_valid = items_form.is_valid()
+    if forms_valid :
+      #import pdb; pdb.set_trace()
+      for form in [f for f in delivery_form.forms if f.has_changed()]: # and  f not in delivery_form.deleted_forms]:  
+        forms_valid = form.is_valid()
+        if not forms_valid:
+          break
+      
+    if forms_valid:
       return self.form_valid(**forms)
     else:
       return self.form_invalid(**forms)
@@ -204,10 +215,10 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
         commissions_form.save()
 
       # save deliveries
-      if delivery_form.has_changed():
-        delivery_form.instance = self.object
-        delivery_form.save()
-
+      for del_form in delivery_form:
+        if del_form.has_changed() and del_form.instance.pk and not utils.delivery_form_empty(del_form.cleaned_data):
+          del_form.instance = self.object
+          del_form.save()
       return HttpResponseRedirect(self.get_success_url())
     else:
       return self.form_invalid(**kwargs)

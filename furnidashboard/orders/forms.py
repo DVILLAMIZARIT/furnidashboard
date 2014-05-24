@@ -155,14 +155,42 @@ class OrderDeliveryForm(forms.ModelForm):
     super(OrderDeliveryForm, self).__init__(*args, **kwargs)
     self.fields['scheduled_delivery_date'].widget = BootstrapDateInput()
     self.fields['delivered_date'].widget = BootstrapDateInput()
+    self.fields['pickup_from'].required = False
+    #self.fields['delivery_cost'].initial = 0.00
     
-    if self.request and utils.is_user_delivery_group(self.request):
-      # person can modify only certain delivery info data
-      enabled_fields = ('delivered_date', 'comments')
-      remove = [f for f in self.fields if f not in enabled_fields]
-      for field in remove: 
+    disabled_fields = []
+    self.fields_to_disable = []
+    self.fields_to_remove = []
+    
+    if self.request:
+      if utils.is_user_delivery_group(self.request):
+        # person can modify only certain delivery info data
+        visible_fields = ('scheduled_delivery_date', 'delivered_date', 'comments', 'delivery_person_notes', 'delivery_cost', 'paid')
+        disabled_fields.append(['comments', 'paid'])
+        self.fields_to_remove = [f for f in self.fields if f not in visible_fields]
+        
+        for field in self.fields_to_remove: 
           del self.fields[field]
+      else :
+        disabled_fields.append('delivery_person_notes')
+        disabled_fields.append('delivery_cost')
+        
+        if not self.request.user.has_perm('orders.modify_delivery_fee'):
+          disabled_fields.append('paid')
+      
+      self.fields_to_disable = [f for f in self.fields if f in disabled_fields]
+      
+      for field in self.fields_to_disable: 
+          self.fields[field].widget.attrs['disabled'] = 'disabled'
   
+  def clean(self):
+    cleaned_data = super(OrderDeliveryForm, self).clean()
+    for field in self.fields_to_disable:
+      val = getattr(self.instance, field)
+      cleaned_data[field] = val #if val != None else self.fields[field].initial
+    
+    return cleaned_data
+    
   class Meta:
     model = OrderDelivery
 
@@ -181,8 +209,10 @@ class CustomerDetailReadOnlyForm(DisabledFieldsMixin, CustomerForm):
 def get_ordered_items_formset(extra=1, max_num=1000):
   return inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=extra, max_num=max_num)
 
-def get_deliveries_formset(extra=1, max_num=1000):
-  return inlineformset_factory(Order, OrderDelivery, form=OrderDeliveryForm, extra=extra, max_num=max_num)
+def get_deliveries_formset(extra=1, max_num=1000, request=None):
+  formset = inlineformset_factory(Order, OrderDelivery, extra=extra, max_num=max_num, can_delete=False)
+  formset.form = staticmethod(curry(OrderDeliveryForm, request=request))
+  return formset
 
 def get_commissions_formset(extra=1, max_num=1000, request=None):
   formset = inlineformset_factory(Order, Commission, extra=extra, max_num=max_num, can_delete=False)

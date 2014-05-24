@@ -146,9 +146,12 @@ class OrderDelivery(models.Model):
   delivery_type =  models.CharField(max_length=25, choices=DELIVERY_TYPES, blank=True, null=True)
   scheduled_delivery_date = models.DateField(null=True, blank=True)
   delivered_date = models.DateField(null=True, blank=True)
-  pickup_from = models.ForeignKey(Store)
+  pickup_from = models.ForeignKey(Store, blank=True, null=True)
   delivery_slip = models.FileField(upload_to='deliveries/%Y/%m', blank=True, null=True)
   comments = models.TextField(blank=True, null=True)
+  delivery_person_notes = models.TextField(blank=True, null=True)
+  delivery_cost = models.FloatField(blank=True, default=0.0)
+  paid = models.BooleanField(default=False, blank=True)
 
   def get_absolute_url(self):
     return reverse("delivery_detail", kwargs={"pk":self.pk})
@@ -161,4 +164,6 @@ class OrderDelivery(models.Model):
   class Meta:
     db_table = "deliveries"
     verbose_name_plural = "deliveries"
-
+    permissions = (
+      ("modify_delivery_fee", "Modify Delivery Fee"),
+    )

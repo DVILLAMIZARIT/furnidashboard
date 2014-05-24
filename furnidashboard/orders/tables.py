@@ -53,11 +53,12 @@ class SalesByAssociateTable(tables.Table):
 class DeliveriesTable(tables.Table):
   order = tables.LinkColumn('order_detail', args=[A('order.pk')])
   pk = CustomTextLinkColumn('delivery_detail', args=[A('pk')], custom_text="Detail", orderable=False, verbose_name="Actions")
+  customer = tables.Column(accessor="order.customer", verbose_name="Customer")
 
   class Meta:
     model = OrderDelivery
     attrs = {"class":"paleblue"}
-    fields = ("order", "scheduled_delivery_date", "delivery_type", 'delivered_date') 
+    fields = ("order", "customer", "scheduled_delivery_date", "delivery_type", 'delivered_date') 
 
 class SalesTotalsTable(tables.Table):
   item = tables.Column(verbose_name="-", orderable=False)

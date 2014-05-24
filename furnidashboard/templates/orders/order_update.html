@@ -54,7 +54,7 @@
             $status.change(function() {
               if ($(this).val() == "S") {
                 $special_fields.find("input").val("");        // clear special order related values
-                $in_stock.attr("checked", "checked");
+                $in_stock.prop("checked", "checked");
                 $special_fields.hide();      // hide special order related fields
               } else {
                 $in_stock.removeAttr("checked");
@@ -105,6 +105,20 @@
 
             }
         });
+        
+        // order delivery formset
+        $("#deliveries").find("div.accordion-body:first").addClass("in"); //expand first item
+        $('#deliveries div.delivery-form').formset({
+            prefix: '{{delivery_form.prefix}}',
+            added: function($form) {
+              var accordions = $form.parent().find('div.accordion-group');
+              var form_ind = accordions.length - 1;
+              $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapsedeliveries-" + form_ind).text("Delivery " + (form_ind + 1));
+              $form.find("div.accordion-body").attr("id", "collapsedeliveries-" + form_ind);
+              $("#deliveries").find("div.accordion-body").removeClass("in");
+              $form.find("div.accordion-heading a").click();
+            }
+        });
 
         // commissions formset
         $("#order-commissions-fieldset").find("div.accordion-body:first").addClass("in"); //expand first item
@@ -119,7 +133,6 @@
               $form.find("div.accordion-heading a").click();
             }
         });
-
 
         //calc order total and balance due
         var recalcOrderTotals = function() {
@@ -346,8 +359,15 @@
           {% if delivery_form %}
             {{ delivery_form.non_form_errors }}
             {% for form in delivery_form %}
-              <div class="form-row inline">
-                {{ form | as_bootstrap}}
+              <div class="accordion-group delivery-form form-row" id="{{ delivery_form.prefix }}-{{forloop.counter}}-row">
+                <div class="accordion-heading">
+                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#deliveries" href="#collapse-{{ form.prefix }}">Delivery {{ forloop.counter }}</a>
+                </div>
+                <div id="collapse-{{ form.prefix }}" class="accordion-body collapse">
+                  <div class="accordion-inner">
+                    {{ form | as_bootstrap }}
+                  </div>
+                </div>       
               </div>
             {% endfor %}
           {% else %}

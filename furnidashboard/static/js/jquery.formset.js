@@ -97,6 +97,7 @@
         $$.each(function(i) {
             var row = $(this),
                 del = row.find('input:checkbox[id $= "-DELETE"]');
+            var allowDelete = del.length;
             if (del.length) {
                 // If you specify "can_delete = True" when creating an inline formset,
                 // Django adds a checkbox to each form in the formset.
@@ -119,9 +120,10 @@
                 // commented out the condition below to make sure Delete links appears for each formset
                 // because if formset is accordion, the button will not appear
                 //if (row.is(':visible')) {
+                if(allowDelete) {
                     insertDeleteLink(row);
                     applyExtraClasses(row, i);
-                //}
+                }
             }
         });
 
