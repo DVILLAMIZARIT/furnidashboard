@@ -14,6 +14,5 @@ def delivery_form_empty(form_data):
   '''
   Check if delivery form is empty to determine if we need to save the instance
   '''
-  import pdb; pdb.set_trace()
-  return form_data['delivery_type'] != None
+  return form_data['delivery_type'] == None
   

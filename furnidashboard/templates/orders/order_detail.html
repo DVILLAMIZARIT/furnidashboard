@@ -122,6 +122,42 @@
     {% endfor %}
     </tbody>
   </table>
+  
+  <hr/>
+  
+  <h3>Deliveries</h3>
+  {% if order.orderdelivery_set.count %}
+    <table id="order-deliveries-table" cell-spacing="0" cell-padding="0">
+      <thead>
+        <th>Delivery by</th>
+        <th>Pickup From</th>
+        <th>Delivery Slip</th>
+        <th>Delivery scheduled Date</th>
+        <th>Delivered Date</th>
+        <th>Delivery Fee</th>
+        <th>Fee Paid?</th>
+        <th>Associate Comments</th>
+        <th>Delivery Person Notes</th>
+      </thead>
+      <tbody>
+      {% for delivery in order.orderdelivery_set.all %}
+        <tr>
+          <td>{{ delivery.get_delivery_type_display|upper}}</td>
+          <td>{{ delivery.pickup_from}}</td>
+          <td><a href="{{ MEDIA_URL }}{{delivery.delivery_slip}}">{{ delivery.delivery_slip_filename }}</a></td>
+          <td>{{ delivery.scheduled_delivery_date|date:'j F, Y'}}</td>
+          <td>{{ delivery.delivered_date|date:'j F, Y'}}</td>
+          <td>{{ delivery.delivery_cost}}</td>
+          <td>{{ delivery.paid|yesno:"Yes,No"}}</td>
+          <td>{{ delivery.comments }} </td>
+          <td>{{ delivery.delivery_person_notes }} </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+      <p>No Deliveries for the order.</p>
+  {% endif %}
 
   <h3>Referral</h3>
   <p>{{order.referral}}</p>

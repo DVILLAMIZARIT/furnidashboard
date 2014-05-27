@@ -4,6 +4,8 @@ from django.db.models import Q
 from django.utils import timezone
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from audit_log.models import AuthStampedModel
+from django_extensions.db.models import TimeStampedModel
 from customers.models import Customer
 from stores.models import Store
 

@@ -32,7 +32,17 @@
   {{ form.management_form }}
   {{ form.non_form_errors }}
   <div class="form-row inline">
-    {{ form | as_bootstrap}}
+    {% for field in form %}
+      {% ifequal field.name "paid" %}
+        <div class="field-bg">
+      {% endifequal %}
+      
+      {{ field | as_bootstrap}}
+      
+      {% ifequal field.name "paid" %}
+        </div>
+      {% endifequal %}
+    {% endfor %}
   </div>
 
   <input type="submit" value="Save"/>

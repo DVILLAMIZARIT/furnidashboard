@@ -164,6 +164,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'audit_log.middleware.UserLoggingMiddleware',
 )
 ########## END MIDDLEWARE CONFIGURATION
 
@@ -200,6 +201,7 @@ THIRD_PARTY_APPS = (
     'bootstrap_toolkit',
     'crispy_forms',
     'django_cron',
+    'django_extensions',
 )
 
 # Apps specific for this project go here.

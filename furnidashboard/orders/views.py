@@ -215,10 +215,13 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
         commissions_form.save()
 
       # save deliveries
+      # import pdb; pdb.set_trace()
       for del_form in delivery_form:
-        if del_form.has_changed() and del_form.instance.pk and not utils.delivery_form_empty(del_form.cleaned_data):
-          del_form.instance = self.object
-          del_form.save()
+        if del_form.has_changed():
+          if del_form.instance.pk or not utils.delivery_form_empty(del_form.cleaned_data):
+            del_form.order = self.object
+            del_form.save()
+            
       return HttpResponseRedirect(self.get_success_url())
     else:
       return self.form_invalid(**kwargs)
@@ -228,7 +231,7 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     """
     Called if any of the forms on order page is invalid. Returns a response with an invalid form in the context
     """
-    messages.error(self.request, "Error saving the data")
+    messages.error(self.request, "Error saving the form. Please go through tabs and correct invalid information.")
     context = self.get_context_data()
     context.update(kwargs)
 

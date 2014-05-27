@@ -4,10 +4,12 @@ from commissions.models import Commission
 from customers.models import Customer
 from django import forms
 from django.forms.models import inlineformset_factory, modelformset_factory
+from django.forms.util import ErrorList
+from django.forms.widgets import Select
 from django.contrib.auth import get_user_model
 from django.utils.functional import curry
 from ajax_select.fields import AutoCompleteSelectField
-from bootstrap_toolkit.widgets import BootstrapDateInput
+from bootstrap_toolkit.widgets import BootstrapDateInput, BootstrapTextInput
 from core.mixins import DisabledFieldsMixin
 from django.db.models import Q
 import core.utils as utils
@@ -156,6 +158,9 @@ class OrderDeliveryForm(forms.ModelForm):
     self.fields['scheduled_delivery_date'].widget = BootstrapDateInput()
     self.fields['delivered_date'].widget = BootstrapDateInput()
     self.fields['pickup_from'].required = False
+    self.fields['delivery_cost'].widget = BootstrapTextInput(prepend='$')
+    self.fields['paid'].widget = Select(choices = ((0,"No"), (1, "Yes")));
+    self.fields['paid'].initial = False
     #self.fields['delivery_cost'].initial = 0.00
     
     disabled_fields = []
@@ -166,12 +171,12 @@ class OrderDeliveryForm(forms.ModelForm):
       if utils.is_user_delivery_group(self.request):
         # person can modify only certain delivery info data
         visible_fields = ('scheduled_delivery_date', 'delivered_date', 'comments', 'delivery_person_notes', 'delivery_cost', 'paid')
-        disabled_fields.append(['comments', 'paid'])
+        disabled_fields += ['comments', 'paid']
         self.fields_to_remove = [f for f in self.fields if f not in visible_fields]
         
         for field in self.fields_to_remove: 
           del self.fields[field]
-      else :
+      elif self.request.user.groups.filter(Q(name="managers") | Q(name="associates")).exists() :
         disabled_fields.append('delivery_person_notes')
         disabled_fields.append('delivery_cost')
         
@@ -187,7 +192,16 @@ class OrderDeliveryForm(forms.ModelForm):
     cleaned_data = super(OrderDeliveryForm, self).clean()
     for field in self.fields_to_disable:
       val = getattr(self.instance, field)
-      cleaned_data[field] = val #if val != None else self.fields[field].initial
+      cleaned_data[field] = val or self.fields[field].initial
+    
+    #validation
+    try:
+      if cleaned_data['pickup_from'] == None and cleaned_data['delivery_type']:
+        self._errors['pickup_from'] = ErrorList([u'Please specify pickup from location'])
+      elif cleaned_data['delivery_type'] == None and cleaned_data['pickup_from']:
+        self._errors['delivery_type'] = ErrorList([u'Please specify delivery type'])
+    except KeyError as e:
+      pass
     
     return cleaned_data
     

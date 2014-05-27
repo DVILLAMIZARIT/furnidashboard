@@ -17,9 +17,9 @@
   <hr/>
 
   <h3>Delivery Details</h3>
-  <table id="delivery-table" cell-spacing="0" cell-padding="0">
+  <table id="order-deliveries-table" cell-spacing="0" cell-padding="0">
     <tr>
-      <td>Order#</td><td>{{delivery.order.number}} | <a href={% url 'order_detail' delivery.order.pk %} title="View Order">View</a></td>
+      <td>Order#</td><td>{{delivery.order.number}} {% if perms.orders.view_orders %}| <a href={% url 'order_detail' delivery.order.pk %} title="View Order">View</a>{% endif %}</td>
     </tr>
     <tr>
       <td>Delivery Scheduled Date:</td><td>{{delivery.scheduled_delivery_date|date:'j F, Y'}}</td>
@@ -31,13 +31,19 @@
       <td>Delivery type/by:</td><td>{{delivery.get_delivery_type_display|upper}}</td>
     </tr>
     <tr>
+      <td>Delivery Cost:</td><td>{{ delivery.delivery_cost }}</td>
+    </tr>
+    <tr>
+      <td>Delivery Fee Paid:</td><td>{{ delivery.paid|yesno:"Yes,No" }}</td>
+    </tr>
+    <tr>
       <td>Pick up from:</td><td>{{delivery.pickup_from}}</td>
     </tr>
     <tr>
       <td>Delivery Slip:</td><td><a href="{{ MEDIA_URL }}{{delivery.delivery_slip}}">{{ delivery.delivery_slip_filename }}</a></td>
     </tr>
     <tr>
-      <td>Comments</td><td>{{delivery.comments}}</td>
+      <td>Associate Comments</td><td>{{delivery.comments}}</td>
     </tr>
   </table>
 
