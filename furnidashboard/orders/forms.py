@@ -111,9 +111,9 @@ class OrderForm(forms.ModelForm):
     self.fields['status'].initial='N'
     self.fields['status'].required = True
     
-    self.fields['created'].widget = BootstrapDateInput()
-    self.fields['created'].label = "Ordered Date"
-    self.fields['created'].widget.attrs['class'] = "order-date"
+    self.fields['order_date'].widget = BootstrapDateInput()
+    self.fields['order_date'].label = "Ordered Date"
+    self.fields['order_date'].widget.attrs['class'] = "order-date"
     
     self.fields['subtotal_after_discount'].required = True
 

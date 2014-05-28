@@ -12,7 +12,7 @@ class AssociateColumn(tables.Column):
     return mark_safe(associates)
 
 class OrderTable(tables.Table):
-  created = tables.TemplateColumn('{{ record.created|date:\'m/d/Y\'}}') 
+  order_date = tables.TemplateColumn('{{ record.order_date|date:\'m/d/Y\'}}') 
   modified = tables.TemplateColumn('{{ record.modified|date:\'m/d/Y\'}}', verbose_name="Last Modified") 
   # detail = tables.TemplateColumn('<a href="{% url \'order_detail\' record.pk %}">Detail</a>', verbose_name="Actions", orderable=False)
   pk = CustomTextLinkColumn('order_detail', args=[A('pk')], custom_text="Detail", orderable=False, verbose_name="Actions")
@@ -25,11 +25,11 @@ class OrderTable(tables.Table):
   class Meta:
     model = Order
     attrs = {"class": "paleblue"}
-    fields = ("number", "created", "status", "store", "customer", "grand_total", "modified", "associate")
+    fields = ("number", "order_date", "status", "store", "customer", "grand_total", "modified", "associate")
 
 class UnplacedOrdersTable(tables.Table):
 
-  created = tables.TemplateColumn('{{ record.created|date:\'m/d/Y\'}}') 
+  order_date = tables.TemplateColumn('{{ record.order_date|date:\'m/d/Y\'}}') 
   detail = tables.TemplateColumn('<a href="{% url \'order_detail\' record.pk %}">Detail</a>', verbose_name="Actions", orderable=False)
   associate = AssociateColumn(accessor="commission_set", verbose_name="Associate")
   grand_total = tables.Column(orderable=False)
@@ -37,7 +37,7 @@ class UnplacedOrdersTable(tables.Table):
   class Meta:
     model = Order
     attrs = {"class": "paleblue urgent"}
-    fields = ("number", "created", "customer", "grand_total", "associate", "detail")
+    fields = ("number", "order_date", "customer", "grand_total", "associate", "detail")
 
 class SalesByAssociateTable(tables.Table):
   associate = tables.Column(orderable=False)

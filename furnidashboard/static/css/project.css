@@ -84,9 +84,11 @@ input.order-item-desc {
 /* \ORDER LIST */
 
 /* ORDER DETAIL */
-#order-items-table, #order-detail-table, #order-payments-table, #order-deliveries-table {
+table.dashed-table,  #order-items-table, #order-detail-table, #order-payments-table, #order-deliveries-table {
   border: 1px solid #D3D3D3;
 }
+table.dashed-table td,
+table.dashed-table th,
 #order-items-table td,
 #order-items-table th,
 #order-detail-table td, 

@@ -27,10 +27,10 @@ class OrderCronJob(CronJobBase):
       print "#{0} unplaced. View details: {1}".format(o.number, o.get_absolute_url())
     print "-" * 20
 
-    recent_orders = Order.objects.filter(status__exact='N').order_by('-created')[:5]
+    recent_orders = Order.objects.filter(status__exact='N').order_by('-order_date')[:5]
     print "Recent orders:"
     for o in recent_orders:
-       print "Order {0} created at {1}".format(o.number, o.created.strftime("%m-%d-%Y"))
+       print "Order {0} created at {1}".format(o.number, o.order_date.strftime("%m-%d-%Y"))
        
     orders_no_ack_no = Order.objects.special_no_ack()
     print "Special Orders, acknowledgement not received from vendor:"
@@ -44,7 +44,7 @@ class OrderCronJob(CronJobBase):
     launch_dt = datetime(2014, 6, 1)
     if settings.USE_TZ:
       launch_dt = timezone.make_aware(launch_dt, timezone.get_current_timezone())
-    order_nums = sorted([o.number for o in Order.objects.filter(created__gte=launch_dt)])
+    order_nums = sorted([o.number for o in Order.objects.filter(order_date__gte=launch_dt)])
     if order_nums:
       first = int(order_nums[0])
       expected = first + 1

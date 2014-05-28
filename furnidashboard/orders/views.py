@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django_tables2 import RequestConfig, SingleTableView
 from django.db.models import Q
 from datetime import timedelta, date, datetime
@@ -25,7 +26,7 @@ class UnplacedOrderTableView(SingleTableView):
   template_name = "orders/order_table.html"
 
   def get_queryset(self, **kwargs):
-    return  Order.objects.unplaced_orders() #select_related().filter(Q(status=None) | Q(status='N') | (Q(orderitem__in_stock=False) & (Q(orderitem__po_num__isnull=True) | Q(orderitem__po_num="")))).distinct()
+    return  Order.objects.unplaced_orders() 
 
 class OrderDetailView(PermissionRequiredMixin, DetailView):
   model = Order
@@ -35,6 +36,14 @@ class OrderDetailView(PermissionRequiredMixin, DetailView):
   required_permissions = (
     'orders.view_orders',
   )
+
+  def get_context_data(self, **kwargs):
+    context = super(OrderDetailView, self).get_context_data(**kwargs)
+    user_model = get_user_model()
+    #context['created_by_user'] = user_model.objects.get(pk=context['object'].created_by)
+    #context['updated_by_user'] = user_model.objects.get(pk=context['object'].modified_by)
+
+    return context
 
 class OrderDeleteView(PermissionRequiredMixin, DeleteView):
   model = Order
@@ -450,7 +459,7 @@ class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, Mo
   table_paginate_by = 20 
 
   # archive view specific fields
-  date_field = "created"
+  date_field = "order_date"
   make_object_list = True
   allow_future = False
   allow_empty = True
@@ -568,7 +577,7 @@ class OrderWeekArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, Wee
   table_paginate_by = 20 
 
   # archive view specific fields
-  date_field = "created"
+  date_field = "order_date"
   make_object_list = True
   allow_future = True
   allow_empty = True
@@ -624,7 +633,7 @@ class DeliveryUpdateView(LoginRequiredMixin, UpdateView):
 
 class SalesStandingsMonthTableView(PermissionRequiredMixin, MonthArchiveView):
   # archive view specific fields
-  date_field = "created"
+  date_field = "order_date"
   make_object_list = True
   allow_future = True
   allow_empty = True

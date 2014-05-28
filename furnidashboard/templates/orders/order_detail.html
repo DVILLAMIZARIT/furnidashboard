@@ -23,15 +23,27 @@
   {% endif %}
 
   <h3>Order Info</h3>
+
+  <h4>Audit Trail:</h4>
+  <table id="order-audit-trail" class="dashed-table">
+    <tr>
+      <td>Record created:</td><td> {{ order.created|date:'j F, Y H:i' }}</td>
+      <td>Created by:</td> <td>{{ order.created_by }}</td>
+    </tr>
+    <tr>
+      <td>Record last modified: </td><td>{{ order.modified|date:'j F, Y H:i' }}</td>
+      <td>Modified by:</td><td> {{ order.modified_by }}</td>
+    </tr>
+  </table>
+
+  <br/>
+
   <table id="order-detail-table" cell-spacing="0" cell-padding="0">
     <tr>
       <td>Order#</td><td>{{order.number}}</td>
     </tr>
     <tr>
-      <td>Placed Date:</td><td>{{order.created|date:'j F, Y'}}</td>
-    </tr>
-    <tr>
-      <td>Last Modified:</td><td>{{order.modified|date:'j F, Y'}}</td>
+      <td>Placed Date:</td><td>{{order.order_date|date:'j F, Y'}}</td>
     </tr>
     <tr>
       <td>Status:</td><td>{{order.get_status_display|upper}}</td>

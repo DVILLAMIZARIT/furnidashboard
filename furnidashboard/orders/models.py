@@ -16,7 +16,7 @@ class OrderManager(models.Manager):
     launch_dt = timezone.make_aware(launch_dt, timezone.get_current_timezone())
 
   def get_qs(self):
-    qs = super(OrderManager, self).get_query_set().filter(created__gte=self.launch_dt)
+    qs = super(OrderManager, self).get_query_set().filter(order_date__gte=self.launch_dt)
     return qs
   
   def unplaced_orders(self):
@@ -44,7 +44,7 @@ class OrderManager(models.Manager):
     qs = self.get_qs()
     return qs.filter(Q(orderitem__status__in=['S', 'R']))
   
-class Order(models.Model):
+class Order(TimeStampedModel, AuthStampedModel):
   """
   A model class representing Order data
   """
@@ -61,8 +61,7 @@ class Order(models.Model):
   )
 
   number = models.CharField(max_length=50)
-  created = models.DateTimeField() # auto_now_add=True)
-  modified = models.DateTimeField(auto_now=True)
+  order_date = models.DateTimeField(null=True)
   customer = models.ForeignKey(Customer, default=0, blank=True, null=True)
   status = models.CharField(max_length=5, choices=ORDER_STATUSES)
   deposit_balance = models.FloatField(blank=True, default=0.0)
@@ -106,7 +105,8 @@ class Order(models.Model):
   def get_absolute_url(self):
     return reverse("order_detail", kwargs={"pk":self.pk})
 
-class OrderItem(models.Model):
+#class OrderItem(models.Model):
+class OrderItem(TimeStampedModel, AuthStampedModel):
   """
   A model class representing Items Ordered (stock items, special order items, etc).
   """
@@ -132,7 +132,7 @@ class OrderItem(models.Model):
     db_table = "order_items"
     verbose_name_plural = "ordered items"
   
-class OrderDelivery(models.Model):
+class OrderDelivery(TimeStampedModel, AuthStampedModel):
   """
   A model class representing deliveries  tracking for Orders 
   """
