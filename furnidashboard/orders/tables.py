@@ -50,6 +50,16 @@ class SalesByAssociateTable(tables.Table):
     order_by='-sales'
     attrs = {"class":"paleblue"}
 
+class SalesByAssociateWithBonusTable(SalesByAssociateTable):
+  bonus = tables.Column(verbose_name="Bonus amount")
+
+  def render_bonus(self, value):
+    return utils.dollars(value)
+
+  class Meta(SalesByAssociateTable.Meta):
+    pass
+
+
 class DeliveriesTable(tables.Table):
   order = tables.LinkColumn('order_detail', args=[A('order.pk')])
   pk = CustomTextLinkColumn('delivery_detail', args=[A('pk')], custom_text="Detail", orderable=False, verbose_name="Actions")

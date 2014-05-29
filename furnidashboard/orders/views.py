@@ -10,7 +10,7 @@ from django_tables2 import RequestConfig, SingleTableView
 from django.db.models import Q
 from datetime import timedelta, date, datetime
 from .models import Order, OrderItem, OrderDelivery
-from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable, DeliveriesTable, SalesTotalsTable
+from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable, SalesByAssociateWithBonusTable, DeliveriesTable, SalesTotalsTable
 from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset, OrderDeliveryForm, OrderItemFormHelper
 from .filters import OrderFilter
 from customers.models import Customer
@@ -650,7 +650,7 @@ class SalesStandingsMonthTableView(PermissionRequiredMixin, MonthArchiveView):
 
     orders = context['object_list']
     sales_by_assoc_data = order_utils._calc_sales_assoc_by_orders(orders)
-    sales_by_assoc = SalesByAssociateTable(sales_by_assoc_data)
+    sales_by_assoc = SalesByAssociateWithBonusTable(sales_by_assoc_data)
 
     RequestConfig(self.request).configure(sales_by_assoc)
     context['sales_by_associate'] = sales_by_assoc 

@@ -1,6 +1,6 @@
 from orders.models import Order
 
-def _calc_sales_assoc_by_orders(order_list):
+def _calc_sales_assoc_by_orders(order_list, include_bonus=True):
   res = {}
   # month_start = datetime(int(year), int(month), 1)
   # month_end = month_start + timedelta(35)
@@ -19,7 +19,26 @@ def _calc_sales_assoc_by_orders(order_list):
   
   sales_list = []
   for associate, amount in res.items():
-    sales_list.append({'associate':associate, 'sales':amount})
+    bonus = _calc_bonus_amount(amount)
+    sales_list.append({'associate':associate, 'sales':amount, 'bonus':bonus})
 
   return sales_list
+
+def _calc_bonus_amount(sales_amount):
+  bonus = 0.0
+  
+  if 25000.0 <= sales_amount < 35000.0:
+    bonus = 50.0 
+  elif 35000.0 <= sales_amount < 45000.0:
+    bonus = 100.0
+  elif 45000.0 <= sales_amount < 50000.0:
+    bonus = 150.0
+  elif 50000.0 <= sales_amount < 60000.0:
+    bonus = 200.0
+  elif 60000.0 <= sales_amount < 75000.0:
+    bonus = 250.0
+  elif sales_amount >= 75000.0:
+    bonus = 300.0
+
+  return bonus
 

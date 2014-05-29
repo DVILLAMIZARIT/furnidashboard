@@ -50,14 +50,14 @@ class Order(TimeStampedModel, AuthStampedModel):
   """
   ORDER_STATUSES = (
     ('N', 'New'),
-    ('C', 'Closed'),
+    ('Q', 'Pending'),
     ('H', 'On Hold'),
     ('P', 'In Production'),
     ('T', 'In Transit'),
     ('S', 'Scheduled for Delivery'),
     ('D', 'Delivered'),
-    ('Q', 'Pending'),
     ('X', 'Dummy'),
+    ('C', 'Closed'),
   )
 
   number = models.CharField(max_length=50)
