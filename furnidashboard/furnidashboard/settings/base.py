@@ -276,3 +276,6 @@ CRON_CLASSES = [
     'django_cron.cron.FailedRunsNotificationCronJob',
 ]
 FAILED_RUNS_CRONJOB_EMAIL_PREFIX = "[Furnitalia Dashboard]: "
+
+### FINANCIAL SETTINGS ###
+COMMISSION_PERCENT = 0.025

@@ -11,16 +11,17 @@ class AssociateColumn(tables.Column):
     associates = ", ".join([comm.associate.first_name for comm in commissions])
     return mark_safe(associates)
 
+class DollarAmountColumn(tables.Column):
+  def render(self, value):
+    return utils.dollars(value)
+
 class OrderTable(tables.Table):
   order_date = tables.TemplateColumn('{{ record.order_date|date:\'m/d/Y\'}}') 
   modified = tables.TemplateColumn('{{ record.modified|date:\'m/d/Y\'}}', verbose_name="Last Modified") 
   # detail = tables.TemplateColumn('<a href="{% url \'order_detail\' record.pk %}">Detail</a>', verbose_name="Actions", orderable=False)
   pk = CustomTextLinkColumn('order_detail', args=[A('pk')], custom_text="Detail", orderable=False, verbose_name="Actions")
   associate = AssociateColumn(accessor="commission_set", verbose_name="Associate")
-  grand_total = tables.Column(orderable=False)
-
-  def render_grand_total(self, value):
-    return utils.dollars(value)
+  grand_total = DollarAmountColumn(orderable=False)
 
   class Meta:
     model = Order
@@ -41,20 +42,17 @@ class UnplacedOrdersTable(tables.Table):
 
 class SalesByAssociateTable(tables.Table):
   associate = tables.Column(orderable=False)
-  sales = tables.Column()
-
-  def render_sales(self, value):
-    return utils.dollars(value)
+  sales = DollarAmountColumn()
+  commissions_paid = DollarAmountColumn(verbose_name="Commissions Paid")
+  commissions_pending = DollarAmountColumn(verbose_name="Commissions Pending")
+  commissions_due = DollarAmountColumn(verbose_name="Commissions Due")
 
   class Meta:
     order_by='-sales'
     attrs = {"class":"paleblue"}
 
 class SalesByAssociateWithBonusTable(SalesByAssociateTable):
-  bonus = tables.Column(verbose_name="Bonus amount")
-
-  def render_bonus(self, value):
-    return utils.dollars(value)
+  bonus = DollarAmountColumn(verbose_name="Bonus amount")
 
   class Meta(SalesByAssociateTable.Meta):
     pass
