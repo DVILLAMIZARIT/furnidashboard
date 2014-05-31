@@ -4,7 +4,7 @@ from django.views.generic import TemplateView, ListView
 from orders.models import Order
 from customers.models import Customer
 from customers.views import CustomerCreateView, CustomerUpdateView, CustomerDetailView, CustomerTableView
-from orders.views import UnplacedOrderTableView, MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveTableView, OrderMonthArchiveTableView, DeliveriesTableView, DeliveryDetailView, DeliveryUpdateView, DeliveryDeleteView, SalesStandingsMonthTableView, HomePageRedirectView
+from orders.views import UnplacedOrderTableView, MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveTableView, OrderMonthArchiveTableView, DeliveriesTableView, UnpaidDeliveriesTableView, DeliveryDetailView, DeliveryUpdateView, DeliveryDeleteView, SalesStandingsMonthTableView, HomePageRedirectView
 from django.views.generic.edit import FormView
 from orders.forms import OrderForm
 from datetime import date
@@ -34,11 +34,16 @@ urlpatterns = patterns('',
       view=OrderMonthArchiveTableView.as_view(month_format='%m', **this_month_args),
       name="order_list",
     ),
-    # url(
-    #  regex= r'^orders/unplaced/$', 
-    #  view=UnplacedOrderTableView.as_view(),
-    #  name="unplaced_orders",
-    # ),
+    url(
+      regex= r'^alerts/$', 
+      view=UnplacedOrderTableView.as_view(),
+      name="alerts_main",
+    ),
+    url(
+      regex= r'^alerts/unpaid-deliveries/$', 
+      view=UnpaidDeliveriesTableView.as_view(),
+      name="alerts_unpaid_deliveries",
+    ),
     url(
       regex= r'^my-orders/$', 
       view=MyOrderListView.as_view(),

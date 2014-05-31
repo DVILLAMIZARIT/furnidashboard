@@ -5,6 +5,7 @@ from customers.models import Customer
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 
+
 def normalize_query(query_string, findterms=re.compile(r'"([^"]+)"|(\S)').findall, normspaces=re.compile(r'\s{2,}').sub):
   """ Splits the query string in individual keywords, getting rid of unnecessary spaces and grouping quoted words together.
       Example:

@@ -45,7 +45,7 @@
           <div class="nav-collapse collapse">
             <ul class="nav">
               {% url 'order_list' as order_list %}
-              {% url 'my_order_list' as my_orders  %}
+              {% url 'alerts_main' as alerts  %}
               {% url 'order_add' as add_order  %}
               {% url 'customer_list' as customers %}
               {% url 'delivery_list' as delivery_list %}
@@ -54,7 +54,9 @@
 
               {% if perms.orders.view_orders %}
                 <li class="{% ifequal request.path order_list %}active{% endifequal %}"><a href="{{ order_list }}">All Orders</a></li>
-                <!--<li class="{% ifequal request.path my_orders %}active{% endifequal %}"><a href="{{my_orders}}">My Orders</a></li>-->
+              {% endif %}
+              {% if perms.orders.view_orders %}
+                <li class="{% ifequal request.path alerts %}active{% endifequal %}"><a href="{{ alerts }}">Alerts</a></li>
               {% endif %}
               {% if perms.orders.add_order %}
                 <li class="{% ifequal request.path add_order %}active{% endifequal %}"><a href="{{add_order}}">Add Order</a></li>

@@ -20,13 +20,18 @@ import core.utils as utils
 from core.mixins import LoginRequiredMixin, PermissionRequiredMixin
 import orders.utils as order_utils
 
-class UnplacedOrderTableView(SingleTableView):
+class UnplacedOrderTableView(LoginRequiredMixin, SingleTableView):
   model = Order
   table_class = OrderTable
-  template_name = "orders/order_table.html"
+  template_name = "core/alerts_table.html"
 
   def get_queryset(self, **kwargs):
-    return  Order.objects.unplaced_orders() 
+    return  Order.objects.unplaced_orders()
+
+  def get_context_data(self, **kwargs):
+    context = super(UnplacedOrderTableView, self).get_context_data(**kwargs)
+    context['alert_title'] = 'Unplaced Orders'
+    return context
 
 class OrderDetailView(PermissionRequiredMixin, DetailView):
   model = Order
@@ -610,6 +615,17 @@ class DeliveriesTableView(LoginRequiredMixin, SingleTableView):
   context_table_name = 'table' 
   template_name = "orders/delivery_list.html"
   paginate_by = 20 
+
+class UnpaidDeliveriesTableView(DeliveriesTableView):
+  template_name = "core/alerts_table.html"
+
+  def get_queryset(self, **kwargs):
+    return  OrderDelivery.objects.filter(Q(paid=False) & ~Q(delivery_type='SELF'))
+
+  def get_context_data(self, **kwargs):
+    context = super(UnpaidDeliveriesTableView, self).get_context_data(**kwargs)
+    context['alert_title'] = 'Unpaid Deliveries'
+    return context
 
 class DeliveryDetailView(LoginRequiredMixin, DetailView):
   model = OrderDelivery

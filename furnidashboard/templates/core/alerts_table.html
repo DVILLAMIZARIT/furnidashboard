@@ -1,0 +1,34 @@
+{% extends "core/alerts.html" %}
+
+{% load render_table from django_tables2 %}
+
+{% block content %}
+  {{ block.super }}
+
+  <div id="order-list" class="monthly-orders">
+
+    <h2>{{ alert_title }}</h2>
+    {% comment %}
+    <ul class="breadcrumb">
+      <li> {{ month|date:'Y' }}:</li>
+      {% for month, link in order_months_links %} 
+        <li><a href="{{ link }}" class="-btn">{{ month}}</a>  <span class="divider">/</span></li>
+      {% endfor %}      
+    </ul>
+    
+    {% if previous_year_links %}
+      <ul class="breadcrumb">
+        <li> {{ prev_year }}:</li>
+        {% for month, link in previous_year_links %} 
+          <li><a href="{{ link }}" class="-btn">{{ month}}</a>   <span class="divider">/</span></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% crispy filter.form filter.helper %}
+    {% endcomment %}
+
+    {% render_table table %}
+
+  </div>
+{% endblock %}

@@ -1,0 +1,25 @@
+
+{% extends "base.html" %}
+
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+
+{% block title %}Alerts Page{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'django_tables2/themes/paleblue/css/screen.css' %}" />
+{% endblock %}
+
+{% block page_title %}Alerts Dashboard{% endblock page_title %}
+
+{% block content %}
+  <div class="navbar">
+    {% url 'alerts_main' as alerts  %}
+    {% url 'alerts_unpaid_deliveries' as unpaid_deliveries  %}
+    <div class="navbar-inner">
+      <ul class="nav">
+        <li class="{% ifequal request.path alerts %}active{% endifequal %} -btn"><a href="{{ alerts }}">Unplaced Orders</a></li>
+        <li class="{% ifequal request.path unpaid_deliveries %}active{% endifequal %} -btn"><a href="{{ unpaid_deliveries }}">Unpaid Deliveries</a></li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}

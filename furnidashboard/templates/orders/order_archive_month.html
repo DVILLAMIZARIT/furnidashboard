@@ -15,8 +15,10 @@
 
   <div id="order-list" class="monthly-orders">
 
+    {% comment %}
     <h2>All Unplaced orders</h2>
     {% render_table unplaced_orders_table %}
+    {% endcomment %}
 
     <h2>Orders for {{ month|date:'F, Y'}}</h2>
     
