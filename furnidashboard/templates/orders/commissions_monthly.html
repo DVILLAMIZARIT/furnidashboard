@@ -12,13 +12,18 @@
 
 {% block content %}
   
-  <div class="well">
+  <!--<div class="well">
     <a href="{% url 'commissions_scale' %}" title="Bonus Commissions Chart">Bonus Commissions Scale Chart</a>
-  </div>
+  </div>-->
 
   <div id="monthly-sales-report">
     <h2>Sales by Associate for  {{ month|date:'F, Y' }} </h2>
     {% render_table sales_by_associate %}
+
+    <div id="bonus_scale">
+      <img src="{{ STATIC_URL }}img/bonus_scale.png" alt="Bonus Scale"/>
+    </div>
+
   </div>
   <div id="ytd-sales-report">
     <h2>Year-to-date Sales Report</h2>

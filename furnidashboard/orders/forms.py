@@ -62,8 +62,9 @@ class OrderItemForm(forms.ModelForm):
       po_num = cleaned_data.get('po_num')
       po_date = cleaned_data.get('po_date')
       if po_num == None or po_date == None:
-        msg = "Specify PO# and PO date before changing item status"
+        msg = "Specify PO# and PO Date before changing item status"
         # self.add_error('status', msg)
+        self._errors['status'] = ErrorList([u'Cannot change item status.'])
         raise forms.ValidationError(msg)
 
     return cleaned_data

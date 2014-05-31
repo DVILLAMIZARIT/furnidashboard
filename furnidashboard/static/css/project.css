@@ -49,6 +49,10 @@ input.order-item-desc {
   font-family: courier new,monospace;
   margin-top:1em;
 }
+#balance-due {
+  color: red;
+  border-color: red;
+}
 .order-totals-wrapper > span {
   margin-right:1em;
 }
@@ -67,6 +71,15 @@ input.order-item-desc {
 #order-list div.table-container > table {
   width:100%;
 }
+#ytd-sales-report {
+  clear:both;
+}
+#bonus_scale {
+  float:right;
+}
+#monthly-sales-report .table-container {
+  float:left; 
+} 
 #order-filter .control-group {
   display:inline-block;
   margin-right:1.5em;

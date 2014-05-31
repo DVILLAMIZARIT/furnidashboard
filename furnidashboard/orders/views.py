@@ -138,7 +138,6 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     if forms_valid and items_form.has_changed():  
       forms_valid = items_form.is_valid()
     if forms_valid :
-      #import pdb; pdb.set_trace()
       for form in [f for f in delivery_form.forms if f.has_changed()]: # and  f not in delivery_form.deleted_forms]:  
         forms_valid = form.is_valid()
         if not forms_valid:
@@ -169,9 +168,15 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
 
     # import pdb; pdb.set_trace()
 
+    # validate order status
     if not form.data['status'] :
-      messages.error(self.request, "Please enter order status'")
+      messages.error(self.request, "Order status cannot be blank!", extra_tags="alert")
       BR_passed = False
+    else:
+      new_status = form.cleaned_data['status']
+      if new_status == 'C' and any([comm_data['paid'] == False for comm_data in commissions_form.cleaned_data]): 
+        messages.add_message(self.request, messages.ERROR, "Cannot close the order while there are unpaid commissions due!", extra_tags="alert alert-danger")
+        BR_passed = False
 
     # validate customer
     if BR_passed:
@@ -180,15 +185,15 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
           # check that first and last name are filled
           try:
             if not customer_form[0].cleaned_data['first_name'] or not customer_form[0].cleaned_data['last_name']:
-              messages.error(self.request, "Please select existing customer or fill in new customer information!")
+              messages.error(self.request, "Please select existing customer or fill in new customer information!", extra_tags="alert alert-danger")
               BR_passed = False
             else:
               new_customer = True
           except KeyError: 
-            messages.error(self.request, "Please select existing customer or fill in new customer information!")
+            messages.error(self.request, "Please select existing customer or fill in new customer information!", extra_tags="alert alert-danger")
             BR_passed = False
         else:
-          messages.error(self.request, "Error saving customer form information!")
+          messages.error(self.request, "Error saving customer information!", extra_tags="alert alert-danger")
           BR_passed = False
   
 #    # validate items
@@ -203,12 +208,13 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
 #      if not BR_passed:
 #        messages.error(self.request, "Please enter sold item(s) description")
 
+
     if BR_passed: 
       
       if not self.request.user.has_perm('orders.update_status'):
         if orig_status:
           self.object.status = orig_status #reset previous value
-          messages.warning(self.request, "You don't have permission to change order status. Order status was reset to previous value.")
+          messages.warning(self.request, "You don't have permission to change order status. Order status was reset to previous value.", extra_tags="alert")
         
       #save order
       self.object.save()
@@ -229,12 +235,15 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
         commissions_form.save()
 
       # save deliveries
-      # import pdb; pdb.set_trace()
       for del_form in delivery_form:
         if del_form.has_changed():
           if del_form.instance.pk or not utils.delivery_form_empty(del_form.cleaned_data):
-            del_form.order = self.object
-            del_form.save()
+            if any(self.object.orderitem_set.filter(status__in=['S', 'R'])):
+              del_form.order = self.object
+              del_form.save()
+            else:
+              messages.add_message(self.request, messages.ERROR, "<strong>Delivery</strong> was not saved, there needs to be at least 1 in stock item OR special order item with status of 'Delivered'. The rest of the changes have been successfully saved.", extra_tags="alert alert-danger")
+
             
       return HttpResponseRedirect(self.get_success_url())
     else:
@@ -245,7 +254,7 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     """
     Called if any of the forms on order page is invalid. Returns a response with an invalid form in the context
     """
-    messages.error(self.request, "Error saving the form. Please go through tabs and correct invalid information.")
+    messages.add_message(self.request, messages.ERROR, "Error saving the form. Please go through tabs  to correct invalid information.", extra_tags="alert alert-danger")
     context = self.get_context_data()
     context.update(kwargs)
 
@@ -298,6 +307,7 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
     Handles POST requests, instantiates a form instance and its inline formsets with the passed POST variables
     and then checks them for validity
     """
+
     self.object = None
     form_class = self.get_form_class()
     form = self.get_form(form_class)
@@ -321,7 +331,9 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
     """
     Called if any of the forms on order page is invalid. Returns a response with an invalid form in the context
     """
-    messages.error(self.request, "Error saving order form information")
+    error_tag = "alert alert-danger"
+    messages.error(self.request, "Error saving order form information", extra_tags=error_tag)
+    messages.add_message(self.request, messages.ERROR, "Error saving the form. Please go through tabs  to correct invalid information.", extra_tags="alert alert-danger")
     context = self.get_context_data(messages=messages)
     context.update(kwargs)
     return self.render_to_response(context)
@@ -338,6 +350,8 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
 
     self.object = form.save(commit=False)
     
+    error_tag = "alert alert-danger"
+
     # flags
     BR_passed = True
     new_customer=False
@@ -345,7 +359,7 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
     # import pdb; pdb.set_trace()
 
     if not form.data['status'] or form.data['status'] not in ('Q', 'N'):
-      messages.error(self.request, "Newly created order status must be either 'New' or 'Pending'!")
+      messages.error(self.request, "Newly created order status must be either 'New' or 'Pending'!", extra_tags=error_tag)
       BR_passed = False
 
     # validate customer
@@ -355,15 +369,15 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
           # check that first and last name are filled
           try:
             if not customer_form[0].cleaned_data['first_name'] or not customer_form[0].cleaned_data['last_name']:
-              messages.error(self.request, "Please select existing customer or fill in new customer information!")
+              messages.error(self.request, "Please select existing customer or fill in new customer information!", extra_tags=error_tag)
               BR_passed = False
             else:
               new_customer = True
           except KeyError: 
-            messages.error(self.request, "Please select existing customer or fill in new customer information!")
+            messages.error(self.request, "Please select existing customer or fill in new customer information!", extra_tags=error_tag)
             BR_passed = False
         else:
-          messages.error(self.request, "Error saving customer form information!")
+          messages.error(self.request, "Error saving customer form information!", extra_tags=error_tag)
           BR_passed = False
   
 #    # validate items
