@@ -20,19 +20,6 @@ import core.utils as utils
 from core.mixins import LoginRequiredMixin, PermissionRequiredMixin
 import orders.utils as order_utils
 
-class UnplacedOrderTableView(LoginRequiredMixin, SingleTableView):
-  model = Order
-  table_class = OrderTable
-  template_name = "core/alerts_table.html"
-
-  def get_queryset(self, **kwargs):
-    return  Order.objects.unplaced_orders()
-
-  def get_context_data(self, **kwargs):
-    context = super(UnplacedOrderTableView, self).get_context_data(**kwargs)
-    context['alert_title'] = 'Unplaced Orders'
-    return context
-
 class OrderDetailView(PermissionRequiredMixin, DetailView):
   model = Order
   context_object_name = "order"
@@ -216,13 +203,14 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
           self.object.status = orig_status #reset previous value
           messages.warning(self.request, "You don't have permission to change order status. Order status was reset to previous value.", extra_tags="alert")
         
-      #save order
-      self.object.save()
       
       # save customer
       if new_customer:
         cust = customer_form[0].save()
         self.object.customer = cust
+
+      #save order
+      self.object.save()
 
       # save items
       if items_form.has_changed():
@@ -244,7 +232,6 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
             else:
               messages.add_message(self.request, messages.ERROR, "<strong>Delivery</strong> was not saved, there needs to be at least 1 in stock item OR special order item with status of 'Delivered'. The rest of the changes have been successfully saved.", extra_tags="alert alert-danger")
 
-            
       return HttpResponseRedirect(self.get_success_url())
     else:
       return self.form_invalid(**kwargs)
@@ -630,16 +617,8 @@ class DeliveriesTableView(LoginRequiredMixin, SingleTableView):
   template_name = "orders/delivery_list.html"
   paginate_by = 20 
 
-class UnpaidDeliveriesTableView(DeliveriesTableView):
-  template_name = "core/alerts_table.html"
-
   def get_queryset(self, **kwargs):
-    return  OrderDelivery.objects.filter(Q(paid=False) & ~Q(delivery_type='SELF'))
-
-  def get_context_data(self, **kwargs):
-    context = super(UnpaidDeliveriesTableView, self).get_context_data(**kwargs)
-    context['alert_title'] = 'Unpaid Deliveries'
-    return context
+    return OrderDelivery.objects.filter(~Q(delivery_type='SELF'))
 
 class DeliveryDetailView(LoginRequiredMixin, DetailView):
   model = OrderDelivery

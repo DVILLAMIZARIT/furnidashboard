@@ -1,4 +1,6 @@
 from django.contrib.humanize.templatetags.humanize import intcomma
+from django.db.models import Q
+from orders.models import Order, OrderDelivery
 
 def dollars(dollars):
   dollars = round(float(dollars), 2)
@@ -16,3 +18,5 @@ def delivery_form_empty(form_data):
   '''
   return form_data['delivery_type'] == None
   
+def get_unpaid_deliveries_queryset():
+  return OrderDelivery.objects.filter(Q(paid=False) & ~Q(delivery_type='SELF'))

@@ -201,6 +201,10 @@ class OrderDeliveryForm(forms.ModelForm):
         self._errors['pickup_from'] = ErrorList([u'Please specify pickup from location'])
       elif cleaned_data['delivery_type'] == None and cleaned_data['pickup_from']:
         self._errors['delivery_type'] = ErrorList([u'Please specify delivery type'])
+
+      if cleaned_data['delivery_type'] == 'SELF' and cleaned_data['delivery_cost'] != None:
+        self._errors['delivery_cost'] = ErrorList([u"Cannot assign delivery cost to 'Self Pickup' orders"])
+
     except KeyError as e:
       pass
     

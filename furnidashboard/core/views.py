@@ -1,11 +1,44 @@
 import re
 from django.db.models import Q
-from orders.models import Order
-from customers.models import Customer
+from django_tables2 import RequestConfig, SingleTableView 
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from core.mixins import LoginRequiredMixin
+import core.utils as utils
+from customers.models import Customer
+from orders.models import Order, OrderDelivery
+from orders.views import DeliveriesTableView
+
+#TODO: add ETA Overdue Order Items alert
+#      add Ordered/no acknowledgement orders alert
+#      add Unpaid Commissions list alert
+
+class UnpaidDeliveriesTableView(DeliveriesTableView):
+  template_name = "core/alerts_table.html"
+
+  def get_queryset(self, **kwargs):
+    return utils.get_unplaced_orders_queryset() 
+
+  def get_context_data(self, **kwargs):
+    context = super(UnpaidDeliveriesTableView, self).get_context_data(**kwargs)
+    context['alert_title'] = 'Unpaid Deliveries'
+    return context
+
+class UnplacedOrderTableView(LoginRequiredMixin, SingleTableView):
+  model = Order
+  table_class = OrderTable
+  template_name = "core/alerts_table.html"
+
+  def get_queryset(self, **kwargs):
+    return  Order.objects.unplaced_orders()
+
+  def get_context_data(self, **kwargs):
+    context = super(UnplacedOrderTableView, self).get_context_data(**kwargs)
+    context['alert_title'] = 'Unplaced Orders'
+    return context
 
 
+# SEARCH VIEW and RELATED FUNCTIONS
 def normalize_query(query_string, findterms=re.compile(r'"([^"]+)"|(\S)').findall, normspaces=re.compile(r'\s{2,}').sub):
   """ Splits the query string in individual keywords, getting rid of unnecessary spaces and grouping quoted words together.
       Example:

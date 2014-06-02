@@ -91,7 +91,7 @@ class Order(TimeStampedModel, AuthStampedModel):
     return self.subtotal_after_discount + self.tax + self.shipping
 
   class Meta:
-    ordering = ["-created","-modified"]
+    ordering = ["-order_date"]
     db_table = "order_info"
     permissions = (
         ("view_orders", "Can View Orders"),
