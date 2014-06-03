@@ -8,34 +8,41 @@ import core.utils as utils
 from customers.models import Customer
 from orders.models import Order, OrderDelivery
 from orders.views import DeliveriesTableView
+from orders.tables import OrderTable
 
 #TODO: add ETA Overdue Order Items alert
-#      add Ordered/no acknowledgement orders alert
 #      add Unpaid Commissions list alert
 
 class UnpaidDeliveriesTableView(DeliveriesTableView):
   template_name = "core/alerts_table.html"
+  subtitle = 'Unpaid Deliveries'
 
   def get_queryset(self, **kwargs):
-    return utils.get_unplaced_orders_queryset() 
+    return utils.get_unpaid_deliveries_queryset() 
 
   def get_context_data(self, **kwargs):
     context = super(UnpaidDeliveriesTableView, self).get_context_data(**kwargs)
-    context['alert_title'] = 'Unpaid Deliveries'
+    context['alert_title'] = self.subtitle
     return context
 
 class UnplacedOrderTableView(LoginRequiredMixin, SingleTableView):
   model = Order
   table_class = OrderTable
   template_name = "core/alerts_table.html"
+  subtitle = 'Unplaced Orders'
 
   def get_queryset(self, **kwargs):
     return  Order.objects.unplaced_orders()
 
   def get_context_data(self, **kwargs):
     context = super(UnplacedOrderTableView, self).get_context_data(**kwargs)
-    context['alert_title'] = 'Unplaced Orders'
+    context['alert_title'] = self.subtitle
     return context
+
+class OrderedUnacknowledgedOrdersTableView(UnplacedOrderTableView):
+  subtitle = "Unconfirmed special orders"
+  def get_queryset(self, **kwargs):
+    return Order.objects.ordered_not_acknowledged()
 
 
 # SEARCH VIEW and RELATED FUNCTIONS

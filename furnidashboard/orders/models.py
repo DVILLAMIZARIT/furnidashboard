@@ -24,10 +24,10 @@ class OrderManager(models.Manager):
     qs = self.get_qs()
     return qs.filter(Q(status='N') | (Q(orderitem__in_stock=False) & Q(orderitem__po_num=""))).distinct()
     
-  def special_no_ack(self):
+  def ordered_not_acknowledged(self):
     #special order has been placed, but no acknowledgement number
     qs = self.get_qs()
-    return qs.filter(Q(orderitem__status__in=['O', 'P']) & Q(orderitem__ack_num="")).distinct()
+    return qs.filter(~Q(orderitem__po_num="") & Q(orderitem__ack_num="")).distinct()
   
   def special_acknowledged_no_eta(self):
     #special order has been placed and acknowledged, but no ETA
