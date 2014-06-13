@@ -4,7 +4,7 @@
 {% load render_table from django_tables2 %}
 {% load crispy_forms_tags %}
 
-{% block title %}Order List{% endblock %}
+{% block title %}Orders for {{ month|date:'F, Y'}} {% endblock title %}
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'django_tables2/themes/paleblue/css/screen.css' %}" />
 {% endblock %}
@@ -15,18 +15,13 @@
 
   <div id="order-list" class="monthly-orders">
 
-    {% comment %}
-    <h2>All Unplaced orders</h2>
-    {% render_table unplaced_orders_table %}
-    {% endcomment %}
-
-    <h2>Orders for {{ month|date:'F, Y'}}</h2>
-    
     <ul class="breadcrumb">
       <li> {{ month|date:'Y' }}:</li>
       {% for month, link in order_months_links %} 
         <li><a href="{{ link }}" class="-btn">{{ month}}</a>  <span class="divider">/</span></li>
       {% endfor %}      
+      {% url 'active_orders' as active_orders %}
+      <li class="pull-right"><a href={{ active_orders}}>View all active orders</a></li>
     </ul>
     
     {% if previous_year_links %}

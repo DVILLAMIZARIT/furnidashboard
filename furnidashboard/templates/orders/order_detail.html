@@ -172,7 +172,7 @@
   {% endif %}
 
   <h3>Referral</h3>
-  <p>{{order.referral}}</p>
+  <p>{{order.get_referral_display|upper}}</p>
 
   <h3>Comments</h3>
   <p>{{order.comments}}</p>

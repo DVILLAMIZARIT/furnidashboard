@@ -53,7 +53,7 @@
               {% url 'logout' as logout %}
 
               {% if perms.orders.view_orders %}
-                <li class="{% ifequal request.path order_list %}active{% endifequal %}"><a href="{{ order_list }}">All Orders</a></li>
+                <li class="{% ifequal request.path order_list %}active{% endifequal %}"><a href="{{ order_list }}">Orders</a></li>
               {% endif %}
               {% if perms.orders.view_orders %}
                 <li class="{% ifequal request.path alerts %}active{% endifequal %}"><a href="{{ alerts }}">Alerts</a></li>

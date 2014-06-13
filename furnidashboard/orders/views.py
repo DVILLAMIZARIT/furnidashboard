@@ -164,6 +164,13 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
       if new_status == 'C' and any([comm_data['paid'] == False for comm_data in commissions_form.cleaned_data]): 
         messages.add_message(self.request, messages.ERROR, "Cannot close the order while there are unpaid commissions due!", extra_tags="alert alert-danger")
         BR_passed = False
+      elif new_status == 'D' and not [f for f in delivery_form if not utils.delivery_form_empty(f.cleaned_data)]:
+        messages.add_message(self.request, messages.ERROR, "Cannot set order status to 'Delivered' because there are no deliveries recorded for this order.", extra_tags="alert alert-danger")
+        BR_passed = False
+      elif new_status == 'X' and any([i for i in items_form.cleaned_data if i['in_stock'] == False]):
+        messages.add_message(self.request, messages.ERROR, "Cannot set order status to 'Dummy' because there are special order items.", extra_tags="alert alert-danger")
+        BR_passed = False
+
 
     # validate customer
     if BR_passed:
@@ -345,8 +352,8 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
 
     # import pdb; pdb.set_trace()
 
-    if not form.data['status'] or form.data['status'] not in ('Q', 'N'):
-      messages.error(self.request, "Newly created order status must be either 'New' or 'Pending'!", extra_tags=error_tag)
+    if not form.data['status'] or form.data['status'] not in ('Q', 'N', 'X'):
+      messages.error(self.request, "Newly created order status must be either 'New', 'Pending', or 'Dummy'!", extra_tags=error_tag)
       BR_passed = False
 
     # validate customer
@@ -561,6 +568,23 @@ class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, Mo
     return qs
 
 
+class ActiveOrdersTableView(PermissionRequiredMixin, FilteredTableMixin, ListView):
+  model = Order
+  table_paginate_by = 20 
+  context_object_name = 'order_list'
+  template_name = "orders/order_filtered_list.html"
+  required_permissions = (
+    'orders.view_orders',
+  )
+  queryset = Order.objects.open_orders()
+
+  def get_context_data(self, **kwargs):
+    context = super(ActiveOrdersTableView, self).get_context_data(**kwargs)
+    table = self.get_table(data=context[self.context_object_name])
+    context[self.context_table_name] = table
+    context[self.context_filter_name] = self.filter
+    context['list_label'] = 'All Active Orders'
+    return context
 
 class MyOrderListView(PermissionRequiredMixin, FilteredTableMixin, ListView):
   model = Order

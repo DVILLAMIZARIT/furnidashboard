@@ -8,10 +8,27 @@ import core.utils as utils
 from customers.models import Customer
 from orders.models import Order, OrderDelivery
 from orders.views import DeliveriesTableView
-from orders.tables import OrderTable
+from orders.tables import OrderTable, UnpaidCommissionsTable
+from commissions.models import Commission
 
 #TODO: add ETA Overdue Order Items alert
-#      add Unpaid Commissions list alert
+
+class AlertsTableView(LoginRequiredMixin, SingleTableView):
+  model = Order
+  table_class = OrderTable
+  template_name = "core/alerts_table.html"
+  subtitle = ""
+
+  def get_context_data(self, **kwargs):
+    context = super(AlertsTableView, self).get_context_data(**kwargs)
+    context['alert_title'] = self.subtitle
+    return context
+
+class UnplacedOrderTableView(AlertsTableView):
+  subtitle = 'Unplaced Orders'
+
+  def get_queryset(self, **kwargs):
+    return  Order.objects.unplaced_orders()
 
 class UnpaidDeliveriesTableView(DeliveriesTableView):
   template_name = "core/alerts_table.html"
@@ -25,25 +42,18 @@ class UnpaidDeliveriesTableView(DeliveriesTableView):
     context['alert_title'] = self.subtitle
     return context
 
-class UnplacedOrderTableView(LoginRequiredMixin, SingleTableView):
-  model = Order
-  table_class = OrderTable
-  template_name = "core/alerts_table.html"
-  subtitle = 'Unplaced Orders'
-
-  def get_queryset(self, **kwargs):
-    return  Order.objects.unplaced_orders()
-
-  def get_context_data(self, **kwargs):
-    context = super(UnplacedOrderTableView, self).get_context_data(**kwargs)
-    context['alert_title'] = self.subtitle
-    return context
-
-class OrderedUnacknowledgedOrdersTableView(UnplacedOrderTableView):
+class OrderedUnacknowledgedOrdersTableView(AlertsTableView):
   subtitle = "Unconfirmed special orders"
   def get_queryset(self, **kwargs):
     return Order.objects.ordered_not_acknowledged()
 
+class UnpaidCommissionsTableView(AlertsTableView):
+  model = Commission
+  subtitle = "Unpaid Commissions"
+  table_class = UnpaidCommissionsTable
+
+  def get_table_data(self):
+    return utils.get_unpaid_commissions_data() 
 
 # SEARCH VIEW and RELATED FUNCTIONS
 def normalize_query(query_string, findterms=re.compile(r'"([^"]+)"|(\S)').findall, normspaces=re.compile(r'\s{2,}').sub):

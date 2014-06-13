@@ -4,8 +4,8 @@ from django.views.generic import TemplateView, ListView
 from orders.models import Order
 from customers.models import Customer
 from customers.views import CustomerCreateView, CustomerUpdateView, CustomerDetailView, CustomerTableView
-from orders.views import MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveTableView, OrderMonthArchiveTableView, DeliveriesTableView, DeliveryDetailView, DeliveryUpdateView, DeliveryDeleteView, SalesStandingsMonthTableView, HomePageRedirectView
-from core.views import UnpaidDeliveriesTableView, UnplacedOrderTableView, OrderedUnacknowledgedOrdersTableView   
+from orders.views import MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveTableView, OrderMonthArchiveTableView, DeliveriesTableView, DeliveryDetailView, DeliveryUpdateView, DeliveryDeleteView, SalesStandingsMonthTableView, HomePageRedirectView, ActiveOrdersTableView
+from core.views import UnpaidDeliveriesTableView, UnplacedOrderTableView, OrderedUnacknowledgedOrdersTableView, UnpaidCommissionsTableView   
 from django.views.generic.edit import FormView
 from orders.forms import OrderForm
 from datetime import date
@@ -36,19 +36,9 @@ urlpatterns = patterns('',
       name="order_list",
     ),
     url(
-      regex= r'^alerts/$', 
-      view=UnplacedOrderTableView.as_view(),
-      name="alerts_main",
-    ),
-    url(
-      regex= r'^alerts/unpaid-deliveries/$', 
-      view=UnpaidDeliveriesTableView.as_view(),
-      name="alerts_unpaid_deliveries",
-    ),
-    url(
-      regex= r'^alerts/unacknowledged-orders/$', 
-      view=OrderedUnacknowledgedOrdersTableView.as_view(),
-      name="alerts_unacknowledged_orders",
+      regex = r'^active-orders/$',
+      view = ActiveOrdersTableView.as_view(),
+      name = "active_orders",
     ),
     url(
       regex= r'^my-orders/$', 
@@ -105,6 +95,28 @@ urlpatterns = patterns('',
       regex = r'^orders/(?P<year>\d{4})/week/(?P<week>\d+)/$', 
       view=OrderWeekArchiveTableView.as_view(),
       name="archive_week",
+    ),
+
+    # Alerts pages
+    url(
+      regex= r'^alerts/$', 
+      view=UnplacedOrderTableView.as_view(),
+      name="alerts_main",
+    ),
+    url(
+      regex= r'^alerts/unpaid-deliveries/$', 
+      view=UnpaidDeliveriesTableView.as_view(),
+      name="alerts_unpaid_deliveries",
+    ),
+    url(
+      regex= r'^alerts/unacknowledged-orders/$', 
+      view=OrderedUnacknowledgedOrdersTableView.as_view(),
+      name="alerts_unacknowledged_orders",
+    ),
+    url(
+      regex= r'^alerts/unpaid-commissions/$', 
+      view=UnpaidCommissionsTableView.as_view(),
+      name="alerts_unpaid_commissions",
     ),
 
     # Customer links

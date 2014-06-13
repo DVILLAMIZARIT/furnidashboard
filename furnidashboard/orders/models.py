@@ -23,6 +23,9 @@ class OrderManager(models.Manager):
     #special order, not placed (no PO number)
     qs = self.get_qs()
     return qs.filter(Q(status='N') | (Q(orderitem__in_stock=False) & Q(orderitem__po_num=""))).distinct()
+
+  def open_orders(self):
+    return self.get_qs().filter(~Q(status='C'))
     
   def ordered_not_acknowledged(self):
     #special order has been placed, but no acknowledgement number
@@ -43,6 +46,11 @@ class OrderManager(models.Manager):
     #undelivered orders
     qs = self.get_qs()
     return qs.filter(Q(orderitem__status__in=['S', 'R']))
+
+  def commissions_unpaid(self):
+    # orders with unpaid commissions
+    qs = self.get_qs()
+    return qs.filter(Q(status__in=['D', 'C']) & Q(commission__paid=False))
   
 class Order(TimeStampedModel, AuthStampedModel):
   """
@@ -60,7 +68,17 @@ class Order(TimeStampedModel, AuthStampedModel):
     ('C', 'Closed'),
   )
 
-  number = models.CharField(max_length=50)
+  REFERRAL_SOURCES = (
+    ('NO', 'Not Referred'),
+    ('REF', 'Referred by friends/relatives/acquintance'),
+    ('WEB', 'Website'),
+    ('MAG', 'Magazine'),
+    ('SOC', 'Social networks'),
+    ('NWP', 'Newspaper'),
+    ('TV', 'TV'),
+  )
+
+  number = models.CharField(max_length=50, unique=True)
   order_date = models.DateTimeField(null=True)
   customer = models.ForeignKey(Customer, default=0, blank=True, null=True)
   status = models.CharField(max_length=5, choices=ORDER_STATUSES)
@@ -70,7 +88,7 @@ class Order(TimeStampedModel, AuthStampedModel):
   shipping = models.FloatField(blank=True, default=0.0)
   comments = models.TextField(blank=True)
   store = models.ForeignKey(Store)
-  referral = models.CharField(blank=True, null=True, max_length=50)
+  referral = models.CharField(blank=True, null=True, max_length=50, choices=REFERRAL_SOURCES)
   
   #objects = models.Manager()      #default
   objects = OrderManager() #customer manager

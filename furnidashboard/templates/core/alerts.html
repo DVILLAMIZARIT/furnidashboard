@@ -16,11 +16,13 @@
     {% url 'alerts_main' as alerts  %}
     {% url 'alerts_unpaid_deliveries' as unpaid_deliveries  %}
     {% url 'alerts_unacknowledged_orders' as unacknowledged_orders  %}
+    {% url 'alerts_unpaid_commissions' as unpaid_commissions  %}
     <div class="navbar-inner">
       <ul class="nav">
         <li class="{% ifequal request.path alerts %}active{% endifequal %} -btn"><a href="{{ alerts }}">Unplaced Orders</a></li>
         <li class="{% ifequal request.path unpaid_deliveries %}active{% endifequal %} -btn"><a href="{{ unpaid_deliveries }}">Unpaid Deliveries</a></li>
         <li class="{% ifequal request.path unacknowledged_orders %}active{% endifequal %} -btn"><a href="{{ unacknowledged_orders }}">Unconfirmed Orders</a></li>
+        <li class="{% ifequal request.path unpaid_commissions %}active{% endifequal %} -btn"><a href="{{ unpaid_commissions }}">Commissions Due</a></li>
       </ul>
     </div>
   </div>

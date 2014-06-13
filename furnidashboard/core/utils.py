@@ -1,5 +1,6 @@
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db.models import Q
+from django.conf import settings
 from orders.models import Order, OrderDelivery
 
 def dollars(dollars):
@@ -20,3 +21,32 @@ def delivery_form_empty(form_data):
   
 def get_unpaid_deliveries_queryset():
   return OrderDelivery.objects.filter(Q(paid=False) & ~Q(delivery_type='SELF'))
+
+def get_unpaid_commissions_data():
+  '''
+  returns 'commissions due' list for table display 
+  '''
+  res = []
+  
+  order_list = Order.objects.commissions_unpaid()
+  for o in order_list:
+    split_num = o.commission_set.count()
+    comm_queryset = o.commission_set.select_related().all() 
+    for com in comm_queryset:
+      sales_amount = o.subtotal_after_discount / split_num
+      comm_amount = sales_amount * settings.COMMISSION_PERCENT
+      commissions_due = 0.0
+
+      if not com.paid:
+        #if order is Delivered, or Closed, commission is due
+        commissions_due = comm_amount 
+
+      res.append({
+          'associate':com.associate,
+          'order_date':o.order_date.strftime("%m/%d/%y"),
+          'order': o, 
+          'order_total': '{0:.2f}'.format(sales_amount), 
+          'commissions_due': '{0:.2f}'.format(commissions_due) 
+          })
+  
+  return res
