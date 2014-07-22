@@ -234,7 +234,7 @@ def get_deliveries_formset(extra=1, max_num=1000, request=None):
   return formset
 
 def get_commissions_formset(extra=1, max_num=1000, request=None):
-  formset = inlineformset_factory(Order, Commission, extra=extra, max_num=max_num, can_delete=False)
+  formset = inlineformset_factory(Order, Commission, extra=extra, max_num=max_num, can_delete=True)
   formset.form = staticmethod(curry(CommissionForm, request=request))
   return formset
 

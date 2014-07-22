@@ -233,11 +233,10 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
       for del_form in delivery_form:
         if del_form.has_changed():
           if del_form.instance.pk or not utils.delivery_form_empty(del_form.cleaned_data):
-            if any(self.object.orderitem_set.filter(status__in=['S', 'R'])):
-              del_form.order = self.object
-              del_form.save()
-            else:
-              messages.add_message(self.request, messages.ERROR, "<strong>Delivery</strong> was not saved, there needs to be at least 1 in stock item OR special order item with status of 'Delivered'. The rest of the changes have been successfully saved.", extra_tags="alert alert-danger")
+            del_form.order = self.object
+            del_form.save()
+            if any(self.object.orderitem_set.filter(~Q(status__in=['S', 'R']))):
+              messages.add_message(self.request, messages.ERROR, "Warning: a delivery has been scheduled for this order BUT item(s) are not in stock/not delivered. Please check the order status for any issues.", extra_tags="alert")
 
       return HttpResponseRedirect(self.get_success_url())
     else:

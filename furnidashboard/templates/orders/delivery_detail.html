@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 
+{% load extras %}
 {% block title %}Delivery --Order -- {{delivery.order}}{% endblock %}
 
 {% block page_title %}Delivery for Order # {{delivery.order.number}}{% endblock page_title %}
@@ -31,7 +32,7 @@
       <td>Delivery type/by:</td><td>{{delivery.get_delivery_type_display|upper}}</td>
     </tr>
     <tr>
-      <td>Delivery Cost:</td><td>{{ delivery.delivery_cost }}</td>
+      <td>Delivery Cost:</td><td>{{ delivery.delivery_cost|dollars }}</td>
     </tr>
     <tr>
       <td>Delivery Fee Paid:</td><td>{{ delivery.paid|yesno:"Yes,No" }}</td>

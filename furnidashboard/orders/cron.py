@@ -32,7 +32,7 @@ class OrderCronJob(CronJobBase):
     for o in recent_orders:
        print "Order {0} created at {1}".format(o.number, o.order_date.strftime("%m-%d-%Y"))
        
-    orders_no_ack_no = Order.objects.special_no_ack()
+    orders_no_ack_no = Order.objects.ordered_not_acknowledged()
     print "Special Orders, acknowledgement not received from vendor:"
     print "{0} orders_no_ack_no(s)".format(orders_no_ack_no.count())
     for o in orders_no_ack_no:

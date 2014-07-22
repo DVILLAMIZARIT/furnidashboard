@@ -118,7 +118,7 @@ class Order(TimeStampedModel, AuthStampedModel):
     )
   
   def __unicode__(self):
-    return "{0}, {1}".format(self.number, self.grand_total)
+    return "#{0}".format(self.number)
 
   def get_absolute_url(self):
     return reverse("order_detail", kwargs={"pk":self.pk})
