@@ -11,11 +11,11 @@ class Migration(DataMigration):
         # Note: Don't use "from appname.models import ModelName". 
         # Use orm.ModelName to refer to models in this application,
         # and orm['appname.ModelName'] for models in other applications.
-        admin = orm['auth.User'].objects.get(username="admin")
-        for order in orm.Order.objects.all():
-          order.created_by = admin
-          order.modified_by = admin
-          order.save()
+        #admin = orm['auth.User'].objects.get(username="admin")
+        #for order in orm.Order.objects.all():
+        #  order.created_by = admin
+        #  order.modified_by = admin
+        #  order.save()
 
     def backwards(self, orm):
         "Write your backwards methods here."
