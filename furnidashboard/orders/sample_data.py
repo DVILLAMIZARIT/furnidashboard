@@ -40,7 +40,7 @@ def create_sample_data():
     user4 = users.get(username="user4")
 
     o = Order()
-    o.number = 1
+    o.number = 'SO-01-0001' 
     o.order_date = this_m_first
     o.customer = cust
     o.status = 'N'
@@ -56,13 +56,13 @@ def create_sample_data():
     item1.save()
 
     o = Order()
-    o.number = 2 
+    o.number = 'SO-01-0003'  
     o.order_date = last_m_mid
     o.customer = cust2
     o.status = 'Q'
     o.deposit_balance = 500
     o.subtotal_after_discount = 7000.00 
-    o.store = store2
+    o.store = store1
     o.save()
 
     commission = Commission(associate=user3, order=o)
@@ -76,13 +76,13 @@ def create_sample_data():
     item2.save()
 
     o = Order()
-    o.number = 3 
+    o.number = 'SO-03-0001'
     o.order_date = last_m_first
-    o.customer = cus3t
+    o.customer = cust
     o.status = 'C'
     o.deposit_balance = 5000
     o.subtotal_after_discount = 5000.00 
-    o.store = store1
+    o.store = store2
     o.save()
 
     commission = Commission(associate=user3, order=o)

@@ -279,3 +279,6 @@ FAILED_RUNS_CRONJOB_EMAIL_PREFIX = "[Furnitalia Dashboard]: "
 
 ### FINANCIAL SETTINGS ###
 COMMISSION_PERCENT = 0.025
+
+ORDER_FORMAT_REGEX = '(SO|SR|DR)-([0-9][0-9])-([0-9]{4})'
+ORDER_FORMAT_DESC = '<"SO" or "SR" or "DR">-<store#>-<4 numbers>. Examples: SO-01-0009 or SR-03-1000 or DR-01-0005'

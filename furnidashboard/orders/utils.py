@@ -1,5 +1,6 @@
 from django.conf import settings
 from orders.models import Order
+import re
 
 def calc_commissions_for_order(order):
   # returns the list containing key-value commissions data
@@ -86,3 +87,8 @@ def _calc_bonus_amount(sales_amount):
 
   return bonus
 
+def is_valid_order_number(number):
+  return re.match(settings.ORDER_FORMAT_REGEX, number) != None
+
+def is_order_exists(number):
+  return Order.objects.filter(number__iexact=number).exists()

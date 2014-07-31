@@ -32,7 +32,7 @@ class TestOrdersView(TestCase):
 
   def test_commission(self):
     # simple order, 'new', 1 stock item, 1 associate
-    o = Order.objects.get(number=1)
+    o = Order.objects.get(number='SO-01-0001')
     self.assertNotEqual(o, None)
 
     comm_data = order_utils._calc_sales_assoc_by_orders([o], False)
@@ -48,7 +48,7 @@ class TestOrdersView(TestCase):
     self.assertEqual(float(comm_data[0]['commissions_pending']), o.subtotal_after_discount * settings.COMMISSION_PERCENT)
 
     # complex order -- pending, with 2 items: 1 stock, 1 pending, 2 associates
-    o = Order.objects.get(number=2)
+    o = Order.objects.get(number='SO-01-0003')
     self.assertNotEqual(o, None)
     order_associates = [c.associate.first_name for c in o.commission_set.all()]
 
@@ -64,6 +64,22 @@ class TestOrdersView(TestCase):
     self.assertEqual(float(comm_data[0]['commissions_due']), 0)
     self.assertEqual(float(comm_data[1]['commissions_due']), 0)
     self.assertEqual(float(comm_data[1]['commissions_pending']), o.subtotal_after_discount / 2.00 * settings.COMMISSION_PERCENT)
+    
+  def test_order_utils_functions(self):
+    self.assertTrue(order_utils.is_valid_order_number('SO-01-0002'))
+    self.assertTrue(order_utils.is_valid_order_number('SR-03-0001'))
+    self.assertTrue(order_utils.is_valid_order_number('DR-01-1000'))
+    self.assertFalse(order_utils.is_valid_order_number(''))
+    self.assertFalse(order_utils.is_valid_order_number('01-01-0000'))
+    self.assertFalse(order_utils.is_valid_order_number('SO-SO-0000'))
+    self.assertFalse(order_utils.is_valid_order_number('SO-3-0001'))
+    self.assertFalse(order_utils.is_valid_order_number('SO-03-aaaa'))
+    self.assertFalse(order_utils.is_valid_order_number('SO-03-a100'))
+    self.assertFalse(order_utils.is_valid_order_number('DR-01-100'))
+
+    self.assertTrue (order_utils.is_order_exists('SO-01-0001'))
+    self.assertFalse(order_utils.is_order_exists('SR-01-0000'))
+    self.assertFalse(order_utils.is_order_exists(''))
 
   def tearDown(self):
     pass

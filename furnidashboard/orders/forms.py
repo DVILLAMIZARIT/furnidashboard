@@ -8,11 +8,13 @@ from django.forms.util import ErrorList
 from django.forms.widgets import Select
 from django.contrib.auth import get_user_model
 from django.utils.functional import curry
+from django.conf import settings
 from ajax_select.fields import AutoCompleteSelectField
 from bootstrap_toolkit.widgets import BootstrapDateInput, BootstrapTextInput
 from core.mixins import DisabledFieldsMixin
 from django.db.models import Q
 import core.utils as utils
+import orders.utils as order_utils
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, Submit, Div, Field, HTML
 from crispy_forms.bootstrap import AppendedText, InlineField
@@ -106,7 +108,7 @@ class OrderForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
     super(OrderForm, self).__init__(*args, **kwargs)
     
-    self.fields['number'].label = "SO#"
+    self.fields['number'].label = "Order/Receipt #"
     self.fields['number'].required = True
     
     self.fields['status'].initial='N'
@@ -121,12 +123,13 @@ class OrderForm(forms.ModelForm):
   def clean_number(self):
     ''' 
     SO number validation: make sure that order 
-    numbers are numerical. This is needed to validate
-    potentially missing orders.
+    numbers are valid according to specific format
     '''
     number = self.cleaned_data.get('number')
-    if not number.isdigit():
-      raise forms.ValidationError("Order number needs to be numeric!")
+    if not order_utils.is_valid_order_number(number):
+      raise forms.ValidationError("Order number should be in the following format: %s" % settings.ORDER_FORMAT_DESC)
+    elif order_utils.is_order_exists(number):
+      raise forms.ValidationError("Order with the same number already exists")
     return number
     
   class Meta:
