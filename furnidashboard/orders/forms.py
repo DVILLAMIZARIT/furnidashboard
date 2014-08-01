@@ -1,5 +1,5 @@
 from stores.models import Store
-from .models import Order, OrderItem, OrderDelivery
+from .models import Order, OrderItem, OrderDelivery, OrderAttachment
 from commissions.models import Commission
 from customers.models import Customer
 from django import forms
@@ -246,3 +246,4 @@ ItemFormSet = inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=
 DeliveryFormSet = inlineformset_factory(Order, OrderDelivery, form=OrderDeliveryForm, extra=1, max_num=100)
 CommissionFormSet = inlineformset_factory(Order, Commission, form=CommissionForm, extra=1, max_num=100, can_delete=False)
 CustomerFormSet = modelformset_factory(Customer, form=CustomerForm, extra=1, max_num=1)
+OrderAttachmentFormSet = inlineformset_factory(Order, OrderAttachment, extra=1, max_num=5)

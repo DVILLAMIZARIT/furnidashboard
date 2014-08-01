@@ -18,8 +18,8 @@
   </div>
   <hr/>
 
-  {% if object.not_placed %}
-    <div class="message error">Order has not been placed with the vendor!</div>
+  {% if order.not_placed %}
+    <div class="alert warning">Order has not been placed: some item(s) don't have PO# !</div>
   {% endif %}
 
   <h3>Order Info</h3>
@@ -176,5 +176,19 @@
 
   <h3>Comments</h3>
   <p>{{order.comments}}</p>
+
+  <h3>Attachments</h3>
+  <ul>
+  {% for attachment in order.orderattachment_set.all %}
+    <li>
+      <a href="{{ MEDIA_URL }}{{attachment.file}}" target="_blank">{{ attachment.filename }}</a>
+      {% if attachment.description %}
+        [{{attachment.description}}]
+      {% endif %}
+    </li>
+  {% empty %}
+  <p>No attachments.</p>
+  {% endfor %}
+  </ul>
 
 {% endblock content %}

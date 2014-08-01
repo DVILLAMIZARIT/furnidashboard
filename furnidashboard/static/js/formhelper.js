@@ -1,4 +1,6 @@
-var FurnFormHelper = (function() {
+( function (G, U) {
+
+  var FormHelper = G.FurnFormHelper || {};
 
   var init = function(form_container) {
 
@@ -68,45 +70,44 @@ var FurnFormHelper = (function() {
     });
   }
 
-  return {
-    applyItemFormRules: function(form_container) {
-      init(form_container);
-    },
+  //calc order total and balance due
+  var recalcOrderTotals =  function() {
+    var $total = $("#order-total");
+    var $balance_due = $("#balance-due");
 
-    //calc order total and balance due
-    recalcOrderTotals:  function() {
-      var $total = $("#order-total");
-      var $balance_due = $("#balance-due");
-
-      var subtotal = $("#id_subtotal_after_discount").val();
-      subtotal = parseFloat(subtotal.replace(',', ''));
-      if (isNaN(subtotal)) {
-        subtotal = 0.0;
-      }
-
-      var tax = $("#id_tax").val();
-      tax = parseFloat(tax.replace(',', ''));
-      if (isNaN(tax)) {
-        tax = 0.0;
-      }
-
-      var shipping = $("#id_shipping").val();
-      shipping = parseFloat(shipping.replace(',', ''));
-      if (isNaN(shipping)) {
-        shipping = 0.0;
-      }
-
-      var deposit_balance = $("#id_deposit_balance").val();
-      deposit_balance = parseFloat(deposit_balance.replace(',', ''));
-      if (isNaN(deposit_balance)) {
-        deposit_balance = 0.0;
-      }
-
-      var total_amount = subtotal + tax + shipping;
-      var due = total_amount - deposit_balance;
-      
-      $total.text("$" + total_amount.toFixed(2));
-      $balance_due.text("$" + due.toFixed(2));
+    var subtotal = $("#id_subtotal_after_discount").val();
+    subtotal = parseFloat(subtotal.replace(',', ''));
+    if (isNaN(subtotal)) {
+      subtotal = 0.0;
     }
+
+    var tax = $("#id_tax").val();
+    tax = parseFloat(tax.replace(',', ''));
+    if (isNaN(tax)) {
+      tax = 0.0;
+    }
+
+    var shipping = $("#id_shipping").val();
+    shipping = parseFloat(shipping.replace(',', ''));
+    if (isNaN(shipping)) {
+      shipping = 0.0;
+    }
+
+    var deposit_balance = $("#id_deposit_balance").val();
+    deposit_balance = parseFloat(deposit_balance.replace(',', ''));
+    if (isNaN(deposit_balance)) {
+      deposit_balance = 0.0;
+    }
+
+    var total_amount = subtotal + tax + shipping;
+    var due = total_amount - deposit_balance;
+    
+    $total.text("$" + total_amount.toFixed(2));
+    $balance_due.text("$" + due.toFixed(2));
   }
-})()
+
+  FormHelper.applyItemFormRules = init;
+  FormHelper.recalcOrderTotals = recalcOrderTotals;
+  G.FurnFormHelper = FormHelper;
+
+}(this, undefined))

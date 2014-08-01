@@ -72,6 +72,20 @@
           }
       });
 
+      // attachments formset
+      $("#attachment-fieldset").find("div.accordion-body:first").addClass("in"); //expand first item
+      $('#attachment-fieldset div.attachment-form').formset({
+          prefix: '{{attachment_form.prefix}}',
+          added: function($form) {
+            var accordions = $form.parent().find('div.accordion-group');
+            var form_ind = accordions.length - 1;
+            $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapseattachments-" + form_ind).text("Attachment " + (form_ind + 1));
+            $form.find("div.accordion-body").attr("id", "collapseattachments-" + form_ind);
+            $("#attachment-fieldset").find("div.accordion-body").removeClass("in");
+            $form.find("div.accordion-heading a").click();
+          }
+      });
+
       $("#id_subtotal_after_discount").change(function() {
           FurnFormHelper.recalcOrderTotals();
       });
@@ -122,6 +136,7 @@
       <li><a href="#order-items-fieldset" data-toggle="tab">Items</a></li>
       <li><a href="#deliveries" data-toggle="tab">Deliveries</a></li>
       <li><a href="#order-commissions-fieldset" data-toggle="tab">Commissions</a></li>
+      <li><a href="#attachment-fieldset" data-toggle="tab">Attachments</a></li>
     </ul>
 
     <!-- Tab panes -->
@@ -303,6 +318,34 @@
         </fieldset>
       </div>
     
+      <div class="tab-pane" id="attachment-fieldset">
+        <fieldset class="formset accordion">
+          <legend>Attachments</legend>
+          {{ attachment_form.management_form }}
+          {% if attachment_form %}
+            {{ attachment_form.non_field_errors }}    
+            {% for form in attachment_form %}
+              <div class="accordion-group attachment-form form-row" id="{{ attachment_form.prefix }}-{{forloop.counter}}-row">
+                <div class="accordion-heading">
+                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#attachment-fieldset" href="#collapse-{{ form.prefix }}">Attachment {{ forloop.counter }}</a>
+                </div>
+                <div id="collapse-{{ form.prefix }}" class="accordion-body collapse">
+                  <div class="accordion-inner">
+                    {{ form | as_bootstrap }}
+                  </div>
+                </div>       
+              </div>
+            {% endfor %}
+          {% else %}
+            {% ifequal object.pk None %}
+              <div class="alert warning">Save the order before uploading attachments.</div>
+            {% else %}
+              <div class="alert warning">Nothing uploaded yet</div>
+            {% endifequal %}
+          {% endif %}
+
+        </fieldset>
+      </div>
     </div>
 
     <div class="well clear order-totals-wrapper">

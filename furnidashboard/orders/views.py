@@ -11,7 +11,7 @@ from django.db.models import Q
 from datetime import timedelta, date, datetime
 from .models import Order, OrderItem, OrderDelivery
 from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable, SalesByAssociateWithBonusTable, DeliveriesTable, SalesTotalsTable
-from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset, OrderDeliveryForm, OrderItemFormHelper
+from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset, OrderDeliveryForm, OrderItemFormHelper, OrderAttachmentFormSet
 from .filters import OrderFilter
 from customers.models import Customer
 from crispy_forms.helper import FormHelper
@@ -82,12 +82,16 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     extra = 1 if self.object.orderitem_set.count() == 0 else 0
     SoldItemsFormSet = get_ordered_items_formset(extra=extra, max_num=100)
     items_form = SoldItemsFormSet(instance=self.object, prefix="ordered_items")
+
+    attachment_form = OrderAttachmentFormSet(instance=self.object, prefix="attachments")
+
     extra_forms = {
       'form':form,
       'customer_form':customer_form,
       'items_form':items_form,
       'commissions_form':commissions_form,
       'delivery_form':delivery_form,
+      'attachment_form':attachment_form,
     }
     context = self.get_context_data()
     context.update(extra_forms)
@@ -118,12 +122,15 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     DeliveriesFormSet = get_deliveries_formset(extra=0, max_num=100, request=self.request)
     delivery_form = DeliveriesFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="deliveries")
 
+    attachment_form = OrderAttachmentFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="attachments")
+
     forms = {
       'form':form,
       'customer_form':customer_form,
       'items_form':items_form,
       'commissions_form':commissions_form,
       'delivery_form':delivery_form,
+      'attachment_form':attachment_form,
     }
 
     #check if forms are valid
@@ -137,6 +144,8 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
         forms_valid = form.is_valid()
         if not forms_valid:
           break
+    if forms_valid and attachment_form.has_changed():  
+      forms_valid = attachment_form.is_valid()
       
     if forms_valid:
       return self.form_valid(**forms)
@@ -153,6 +162,7 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     items_form = kwargs['items_form']
     commissions_form = kwargs['commissions_form']
     delivery_form = kwargs['delivery_form']
+    attachment_form = kwargs['attachment_form']
     
     orig_status = self.object.status
     self.object = form.save(commit=False)
@@ -232,6 +242,11 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
             del_form.save()
             if any(self.object.orderitem_set.filter(~Q(status__in=['S', 'R']))):
               messages.add_message(self.request, messages.ERROR, "Warning: a delivery has been scheduled for this order BUT item(s) are not in stock/not delivered. Please check the order status for any issues.", extra_tags="alert")
+
+      # save attachments
+      if attachment_form.has_changed():
+        attachment_form.instance = self.object
+        attachment_form.save()
 
       return HttpResponseRedirect(self.get_success_url())
     else:

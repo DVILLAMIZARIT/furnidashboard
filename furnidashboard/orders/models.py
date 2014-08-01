@@ -22,7 +22,8 @@ class OrderManager(models.Manager):
   def unplaced_orders(self):
     #special order, not placed (no PO number)
     qs = self.get_qs()
-    return qs.filter(Q(status='N') | (Q(orderitem__in_stock=False) & Q(orderitem__po_num=""))).distinct()
+    #return qs.filter(Q(status='N') | (Q(orderitem__in_stock=False) & Q(orderitem__po_num=""))).distinct()
+    return qs.filter(Q(orderitem__in_stock=False) & Q(orderitem__po_num="")).distinct()
 
   def open_orders(self):
     return self.get_qs().filter(~Q(status='C'))
@@ -96,7 +97,8 @@ class Order(TimeStampedModel, AuthStampedModel):
   @property
   def not_placed(self):
            # no status        'new'                 'any item, which is not in stock, and does not have po#
-    return not self.status or self.status == 'N' or any([item for item in self.orderitem_set if not item.in_stock and not item.po_num])
+    #return not self.status or self.status == 'N' or any([item for item in self.orderitem_set if not item.in_stock and not item.po_num])
+    return any([item for item in self.orderitem_set.all() if item.status != "S" and item.po_num == ''])
 
   @property
   def balance_due(self):
@@ -187,3 +189,26 @@ class OrderDelivery(TimeStampedModel, AuthStampedModel):
     permissions = (
       ("modify_delivery_fee", "Modify Delivery Fee"),
     )
+
+class Attachment(models.Model):
+  file = models.FileField(upload_to='attachments/%Y/%m')
+  description = models.CharField(max_length=255, blank=True, null=True)
+
+  @property
+  def filename(self):
+    import os
+    return os.path.basename(self.file.name)
+
+  def __unicode__(self):
+    return self.description[:30]
+
+class DeliveryAttachment(Attachment):
+  delivery = models.ForeignKey(OrderDelivery)
+
+  class Meta:
+    db_table = "delivery_attachments"
+
+class OrderAttachment(Attachment):
+  order = models.ForeignKey(Order)
+  class Meta:
+    db_table = "order_attachments"
