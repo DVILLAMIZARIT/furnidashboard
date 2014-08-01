@@ -32,9 +32,6 @@ class OrderDetailView(PermissionRequiredMixin, DetailView):
   def get_context_data(self, **kwargs):
     context = super(OrderDetailView, self).get_context_data(**kwargs)
     user_model = get_user_model()
-    #context['created_by_user'] = user_model.objects.get(pk=context['object'].created_by)
-    #context['updated_by_user'] = user_model.objects.get(pk=context['object'].modified_by)
-
     return context
 
 class OrderDeleteView(PermissionRequiredMixin, DeleteView):
@@ -105,11 +102,22 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     form_class = self.get_form_class()
     form = self.get_form(form_class)
     self.request = request
+    
+    if not request.user.has_perm('orders.update_status'):
+      #disable order status for staff person without privilege
+      form.fields['status'].widget.attrs['readonly'] = 'readonly'
+
     customer_form = CustomerFormSet(self.request.POST, self.request.FILES, prefix="customers")
-    commissions_form = CommissionFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="commissions")
+
+    #commissions_form = CommissionFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="commissions")
+    extra = 1 if self.object.commission_set.count() == 0 else 0  #if no commissions were saved for this order, add a blank form
+    SpecialCommissionFormSet = get_commissions_formset(extra=extra, max_num=3, request=self.request)
+    commissions_form = SpecialCommissionFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="commissions")
+
     items_form = ItemFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="ordered_items")
     DeliveriesFormSet = get_deliveries_formset(extra=0, max_num=100, request=self.request)
     delivery_form = DeliveriesFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="deliveries")
+
     forms = {
       'form':form,
       'customer_form':customer_form,
@@ -271,7 +279,11 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
 
     customer_form = CustomerFormSet(queryset=Customer.objects.none(), prefix="customers")
     items_form = ItemFormSet(prefix="ordered_items")
-    commissions_form = CommissionFormSet(prefix="commissions")
+
+    extra = 1 
+    SpecialCommissionFormSet = get_commissions_formset(extra=extra, max_num=3, request=self.request)
+    commissions_form = SpecialCommissionFormSet(prefix="commissions")
+
     extra_forms = {
       'form':form,
       'customer_form':customer_form,
@@ -292,9 +304,15 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
     form_class = self.get_form_class()
     form = self.get_form(form_class)
 
+    # initialize form defaults
+    form.fields['status'].widget.attrs['readonly'] = True
+
     customer_form = CustomerFormSet(self.request.POST, self.request.FILES, prefix="customers")
     items_form = ItemFormSet(self.request.POST, self.request.FILES, prefix="ordered_items")
-    commissions_form = CommissionFormSet(self.request.POST, self.request.FILES, prefix="commissions")
+
+    SpecialCommissionFormSet = get_commissions_formset(extra=1, max_num=3, request=self.request)
+    commissions_form = SpecialCommissionFormSet(self.request.POST, self.request.FILES, prefix="commissions")
+
     forms = {
       'form':form,
       'customer_form':customer_form,
