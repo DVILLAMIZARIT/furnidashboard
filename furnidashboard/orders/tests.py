@@ -65,6 +65,10 @@ class TestOrdersView(TestCase):
     self.assertEqual(float(comm_data[1]['commissions_due']), 0)
     self.assertEqual(float(comm_data[1]['commissions_pending']), o.subtotal_after_discount / 2.00 * settings.COMMISSION_PERCENT)
     
+    o2 = Order.objects.get(number='SO-03-0001')
+    self.assertNotEqual(o2, None)
+
+
   def test_order_utils_functions(self):
     self.assertTrue(order_utils.is_valid_order_number('SO-01-0002'))
     self.assertTrue(order_utils.is_valid_order_number('SR-03-0001'))
@@ -77,9 +81,10 @@ class TestOrdersView(TestCase):
     self.assertFalse(order_utils.is_valid_order_number('SO-03-a100'))
     self.assertFalse(order_utils.is_valid_order_number('DR-01-100'))
 
-    self.assertTrue (order_utils.is_order_exists('SO-01-0001'))
-    self.assertFalse(order_utils.is_order_exists('SR-01-0000'))
-    self.assertFalse(order_utils.is_order_exists(''))
+    self.assertTrue (order_utils.is_duplicate_order_exists('SO-01-0001', None))
+    self.assertFalse (order_utils.is_duplicate_order_exists('SO-01-0001', Order.objects.get(number='SO-01-0001')))
+    self.assertFalse(order_utils.is_duplicate_order_exists('SR-01-0000', None))
+    self.assertFalse(order_utils.is_duplicate_order_exists('', None))
 
   def tearDown(self):
     pass

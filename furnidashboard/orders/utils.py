@@ -90,5 +90,14 @@ def _calc_bonus_amount(sales_amount):
 def is_valid_order_number(number):
   return re.match(settings.ORDER_FORMAT_REGEX, number) != None
 
-def is_order_exists(number):
-  return Order.objects.filter(number__iexact=number).exists()
+def is_duplicate_order_exists(number, instance):
+  try:
+    o = Order.objects.get(number__iexact=number)
+
+    if instance != None and instance.pk and o.pk == instance.pk:
+      return False
+    
+    return True
+
+  except Exception :
+    return False

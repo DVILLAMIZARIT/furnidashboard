@@ -129,6 +129,3 @@ def create_test_users():
     user4.set_password("secret")
     user4.groups.add(privileged_group)
     user4.save()
-
-def create_customers():
-  pass

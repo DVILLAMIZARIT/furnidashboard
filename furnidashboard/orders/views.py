@@ -174,7 +174,7 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
 
     # validate customer
     if BR_passed:
-      if form.cleaned_data['customer'] is None:
+      if self.object.customer is None:
         if customer_form.is_valid():
           # check that first and last name are filled
           try:
@@ -190,19 +190,6 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
           messages.error(self.request, "Error saving customer information!", extra_tags="alert alert-danger")
           BR_passed = False
   
-#    # validate items
-#    if BR_passed: 
-#      for ind in xrange(items_form.total_form_count()):
-#        try:
-#          if items_form.cleaned_data[ind]['description'] is None:
-#            BR_passed = False
-#        except KeyError:
-#          BR_passed = False
-#
-#      if not BR_passed:
-#        messages.error(self.request, "Please enter sold item(s) description")
-
-
     if BR_passed: 
       
       if not self.request.user.has_perm('orders.update_status'):
@@ -247,7 +234,7 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     """
     Called if any of the forms on order page is invalid. Returns a response with an invalid form in the context
     """
-    messages.add_message(self.request, messages.ERROR, "Error saving the form. Please go through tabs  to correct invalid information.", extra_tags="alert alert-danger")
+    messages.add_message(self.request, messages.ERROR, "Error updating the order. Please go through tabs to fix the invalid information.", extra_tags="alert alert-danger")
     context = self.get_context_data()
     context.update(kwargs)
 
@@ -325,8 +312,8 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
     Called if any of the forms on order page is invalid. Returns a response with an invalid form in the context
     """
     error_tag = "alert alert-danger"
-    messages.error(self.request, "Error saving order form information", extra_tags=error_tag)
-    messages.add_message(self.request, messages.ERROR, "Error saving the form. Please go through tabs  to correct invalid information.", extra_tags="alert alert-danger")
+    # messages.error(self.request, "Error saving order form information", extra_tags=error_tag)
+    messages.add_message(self.request, messages.ERROR, "Error saving the order information. Please go through tabs to fix invalid information.", extra_tags="alert alert-danger")
     context = self.get_context_data(messages=messages)
     context.update(kwargs)
     return self.render_to_response(context)
@@ -349,18 +336,17 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
     BR_passed = True
     new_customer=False
 
-    # import pdb; pdb.set_trace()
-
     if not form.data['status'] or form.data['status'] not in ('Q', 'N', 'X'):
       messages.error(self.request, "Newly created order status must be either 'New', 'Pending', or 'Dummy'!", extra_tags=error_tag)
       BR_passed = False
 
     # validate customer
     if BR_passed:
-      if form.cleaned_data['customer'] is None:
-        if customer_form.is_valid():
-          # check that first and last name are filled
+
+      if self.object.customer is None:
+        if customer_form.has_changed() and customer_form.is_valid():
           try:
+            # check that first and last name are filled
             if not customer_form[0].cleaned_data['first_name'] or not customer_form[0].cleaned_data['last_name']:
               messages.error(self.request, "Please select existing customer or fill in new customer information!", extra_tags=error_tag)
               BR_passed = False
@@ -373,27 +359,16 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
           messages.error(self.request, "Error saving customer form information!", extra_tags=error_tag)
           BR_passed = False
   
-#    # validate items
-#    if BR_passed: 
-#      for ind in xrange(items_form.total_form_count()):
-#        try:
-#          if items_form.cleaned_data[ind]['description'] is None:
-#            BR_passed = False
-#        except KeyError:
-#          BR_passed = False
-#
-#      if not BR_passed:
-#        messages.error(self.request, "Please enter sold item(s) description")
 
     if BR_passed: 
       
-      #save order
-      self.object.save()
-      
       # save customer
       if new_customer:
-          cust = customer_form[0].save()
-          self.object.customer = cust
+        cust = customer_form[0].save()
+        self.object.customer = cust
+
+      #save order
+      self.object.save()
 
       # save items
       items_form.instance = self.object

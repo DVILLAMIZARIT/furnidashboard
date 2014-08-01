@@ -128,7 +128,7 @@ class OrderForm(forms.ModelForm):
     number = self.cleaned_data.get('number')
     if not order_utils.is_valid_order_number(number):
       raise forms.ValidationError("Order number should be in the following format: %s" % settings.ORDER_FORMAT_DESC)
-    elif order_utils.is_order_exists(number):
+    elif order_utils.is_duplicate_order_exists(number, self.instance):
       raise forms.ValidationError("Order with the same number already exists")
     return number
     

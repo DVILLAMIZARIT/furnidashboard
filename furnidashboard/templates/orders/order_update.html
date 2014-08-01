@@ -2,191 +2,93 @@
 
 {% load bootstrap_toolkit %}
 {% load crispy_forms_tags %}
+{% load staticfiles %}
 
 {% block title %}Modify Order{% endblock %}
 
 {% block page_title %}Modify Order {{order}}{% endblock page_title %}
 
 {% block extra_js %}
+  <script src="{% static 'js/formhelper.js' %}"></script>
+
 <script type="text/javascript">
-    $(function() {
-      $(document).ready(function() {
+  $(function() {
+
+    $(document).ready(function() {
         
-        $('#tabs a').click(function (e) {
-          e.preventDefault();
-          $(this).tab('show');
-        })
+      $('#tabs a').click(function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+      })
 
-        var initItemForm = function() {
-          $("#order-items-fieldset div.items-form:not(.processed)").each(function() {
-            $form = $(this);
-            $form.addClass('processed');
-            var $special_fields = $form.find(".item-special-fields");
-            var $general_fields = $form.find(".item-general-fields");            
-            var $in_stock = $general_fields.find('input.order-item-in-stock');
-            var $status = $general_fields.find('select.order-item-status');
-            var $po_num = $form.find("input.order-item-po");
-            var $ack_num = $form.find("input.order-item-ack-num");
-            var date = $.datepicker.formatDate('yy-mm-dd', new Date());
+      FurnFormHelper.applyItemFormRules($("#order-items-fieldset"));
 
-            if ($in_stock.length && $in_stock.prop('checked')) {
-              $special_fields.find("input").val("");          // clear special order related values
-              $status.val("S");                               // select "In Stock"
-              $special_fields.hide();        // hide special order related fields
-              
-            } else {  
-              $status.val("P");                               // select "Pending"
-              $special_fields.show();
-            }
+      // items formset
+      $("#order-items-fieldset").find("div.accordion-body").eq(0).addClass("in"); //expand first item
+      $('#order-items-fieldset div.items-form').formset({
+          prefix: '{{items_form.prefix}}',
+          deleteText: 'Delete',
+          added: function($form) {
+            var accordions = $form.parent().find('div.accordion-group');
+            var form_ind = accordions.length - 1;
+            $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapseordered_items-" + form_ind).text("Item " + (form_ind + 1));
+            $form.find("div.accordion-body").attr("id", "collapseordered_items-" + form_ind);
+            $("#order-items-fieldset").find("div.accordion-body").removeClass("in");
+            $form.find("div.accordion-heading a").click();
 
-            $in_stock.change(function() {
-              if (this.checked) {
-                $special_fields.find("input").val("");        // clear special order related values
-                $status.val("S");                             // select "In Stock"
-                $special_fields.hide();                       // hide special order related fields
-              } else {
-                $status.val("P");                             // select "Pending"
-                $special_fields.show();
-              }
-            });
-            
-            //processing of dependent fields once item status is changed
-            $status.change(function() {
-              if ($(this).val() == "S") {
-                $special_fields.find("input").val("");        // clear special order related values
-                $in_stock.prop("checked", "checked");
-                $special_fields.hide();      // hide special order related fields
-              } else {
-                $in_stock.removeAttr("checked");
-                $special_fields.show();
-              }
-            });
-            
-            //default PO date to current date if PO number is entered
-            $po_num.change(function() {
-              if ($(this).val().trim() != "") {
-                $special_fields.find("input.order-item-po-date").val(date);
-              } else { 
-                $special_fields.find("input.order-item-po-date").val("");
-              }
-            });
-            
-            //default ack. date to current date if ack. number is entered
-            $ack_num.change(function() {
-              if ($(this).val().trim() != "") {
-                $special_fields.find("input.order-item-ack-date").val(date);
-              } else { 
-                $special_fields.find("input.order-item-ack-date").val("");
-              }
-            });            
-            
-          });
-        };
+            $form.removeClass("processed");
+            $form.find("input").off('change');
+            $form.find("select").off('change');
 
-        initItemForm();
-
-        // items formset
-        $("#order-items-fieldset").find("div.accordion-body").eq(0).addClass("in"); //expand first item
-        $('#order-items-fieldset div.items-form').formset({
-            prefix: '{{items_form.prefix}}',
-            deleteText: 'Delete',
-            added: function($form) {
-              var accordions = $form.parent().find('div.accordion-group');
-              var form_ind = accordions.length - 1;
-              $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapseordered_items-" + form_ind).text("Item " + (form_ind + 1));
-              $form.find("div.accordion-body").attr("id", "collapseordered_items-" + form_ind);
-              $("#order-items-fieldset").find("div.accordion-body").removeClass("in");
-              $form.find("div.accordion-heading a").click();
-
-              //var $in_stock = $(".item-general-fields", $form).find('input.order-item-in-stock');
-              //$in_stock.prop('checked', true);
-              $form.removeClass("processed");
-              initItemForm();
-
-            }
-        });
-        
-        // order delivery formset
-        $("#deliveries").find("div.accordion-body:first").addClass("in"); //expand first item
-        $('#deliveries div.delivery-form').formset({
-            prefix: '{{delivery_form.prefix}}',
-            added: function($form) {
-              var accordions = $form.parent().find('div.accordion-group');
-              var form_ind = accordions.length - 1;
-              $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapsedeliveries-" + form_ind).text("Delivery " + (form_ind + 1));
-              $form.find("div.accordion-body").attr("id", "collapsedeliveries-" + form_ind);
-              $("#deliveries").find("div.accordion-body").removeClass("in");
-              $form.find("div.accordion-heading a").click();
-            }
-        });
-
-        // commissions formset
-        $("#order-commissions-fieldset").find("div.accordion-body:first").addClass("in"); //expand first item
-        $('#order-commissions-fieldset div.commissions-form').formset({
-            prefix: '{{commissions_form.prefix}}',
-            added: function($form) {
-              var accordions = $form.parent().find('div.accordion-group');
-              var form_ind = accordions.length - 1;
-              $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapsecommissions-" + form_ind).text("Commissions " + (form_ind + 1));
-              $form.find("div.accordion-body").attr("id", "collapsecommissions-" + form_ind);
-              $("#order-commissions-fieldset").find("div.accordion-body").removeClass("in");
-              $form.find("div.accordion-heading a").click();
-            }
-        });
-
-        //calc order total and balance due
-        var recalcOrderTotals = function() {
-          var $total = $("#order-total");
-          var $balance_due = $("#balance-due");
-
-          var subtotal = $("#id_subtotal_after_discount").val();
-          subtotal = parseFloat(subtotal.replace(',', ''));
-          if (isNaN(subtotal)) {
-            subtotal = 0.0;
+            FurnFormHelper.applyItemFormRules($("#order-items-fieldset"));
           }
-
-          var tax = $("#id_tax").val();
-          tax = parseFloat(tax.replace(',', ''));
-          if (isNaN(tax)) {
-            tax = 0.0;
-          }
-
-          var shipping = $("#id_shipping").val();
-          shipping = parseFloat(shipping.replace(',', ''));
-          if (isNaN(shipping)) {
-            shipping = 0.0;
-          }
-
-          var deposit_balance = $("#id_deposit_balance").val();
-          deposit_balance = parseFloat(deposit_balance.replace(',', ''));
-          if (isNaN(deposit_balance)) {
-            deposit_balance = 0.0;
-          }
-
-          var total_amount = subtotal + tax + shipping;
-          var due = total_amount - deposit_balance;
-          
-          $total.text("$" + total_amount.toFixed(2));
-          $balance_due.text("$" + due.toFixed(2));
-        };
-
-        $("#id_subtotal_after_discount").change(function() {
-            recalcOrderTotals();
-        });
-        $("#id_deposit_balance").change(function() {
-            recalcOrderTotals();
-        });
-        $("#id_tax").change(function() {
-            recalcOrderTotals();
-        });
-        $("#id_shipping").change(function() {
-            recalcOrderTotals();
-        });
-
-        recalcOrderTotals();
-
       });
-    })
+      
+      // order delivery formset
+      $("#deliveries").find("div.accordion-body:first").addClass("in"); //expand first item
+      $('#deliveries div.delivery-form').formset({
+          prefix: '{{delivery_form.prefix}}',
+          added: function($form) {
+            var accordions = $form.parent().find('div.accordion-group');
+            var form_ind = accordions.length - 1;
+            $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapsedeliveries-" + form_ind).text("Delivery " + (form_ind + 1));
+            $form.find("div.accordion-body").attr("id", "collapsedeliveries-" + form_ind);
+            $("#deliveries").find("div.accordion-body").removeClass("in");
+            $form.find("div.accordion-heading a").click();
+          }
+      });
+
+      // commissions formset
+      $("#order-commissions-fieldset").find("div.accordion-body:first").addClass("in"); //expand first item
+      $('#order-commissions-fieldset div.commissions-form').formset({
+          prefix: '{{commissions_form.prefix}}',
+          added: function($form) {
+            var accordions = $form.parent().find('div.accordion-group');
+            var form_ind = accordions.length - 1;
+            $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapsecommissions-" + form_ind).text("Commissions " + (form_ind + 1));
+            $form.find("div.accordion-body").attr("id", "collapsecommissions-" + form_ind);
+            $("#order-commissions-fieldset").find("div.accordion-body").removeClass("in");
+            $form.find("div.accordion-heading a").click();
+          }
+      });
+
+      $("#id_subtotal_after_discount").change(function() {
+          FurnFormHelper.recalcOrderTotals();
+      });
+      $("#id_deposit_balance").change(function() {
+          FurnFormHelper.recalcOrderTotals();
+      });
+      $("#id_tax").change(function() {
+          FurnFormHelper.recalcOrderTotals();
+      });
+      $("#id_shipping").change(function() {
+          FurnFormHelper.recalcOrderTotals();
+      });
+
+      FurnFormHelper.recalcOrderTotals();
+
+    });
+  })
 </script>
 
   {{ form.media }}
@@ -371,7 +273,7 @@
               </div>
             {% endfor %}
           {% else %}
-            No deliveries are available.
+            <div class="alert warning">Deliveries can be added only after saving the order.</div>
           {% endif %}
         </fieldset>
       </div>
