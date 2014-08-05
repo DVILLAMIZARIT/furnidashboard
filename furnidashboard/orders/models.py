@@ -215,3 +215,23 @@ class OrderAttachment(Attachment):
   order = models.ForeignKey(Order)
   class Meta:
     db_table = "order_attachments"
+
+class OrderIssue(TimeStampedModel, AuthStampedModel):
+  ISSUE_STATUSES =  (
+    ('N', 'New'),
+    ('C', 'Claim submitted'),
+    ('T', 'Technician sent'),
+    ('E', 'Eligible for Credit'),
+    ('R', 'Resolved'),
+  )
+
+  order = models.ForeignKey(Order)
+  status = models.CharField(max_length=5, choices=ISSUE_STATUSES)
+  comments = models.TextField(blank=True, null=True)
+
+  class Meta:
+    db_table = "order_issues"
+    ordering = ['-created']
+    permissions = (
+      ("update_order_issues", "Can Update Order Issues (Claims)Information"),
+    )

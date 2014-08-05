@@ -86,6 +86,21 @@
           }
       });
 
+      // issues formset
+      $("#issues-fieldset").find("div.accordion-body:first").addClass("in"); //expand first item
+      $('#issues-fieldset div.issues-form').formset({
+          prefix: '{{issues_form.prefix}}',
+          added: function($form) {
+            var accordions = $form.parent().find('div.accordion-group');
+            var form_ind = accordions.length - 1;
+            $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapseissues-" + form_ind).text("Issue " + (form_ind + 1));
+            $form.find("div.accordion-body").attr("id", "collapseissues-" + form_ind);
+            $("#issues-fieldset").find("div.accordion-body").removeClass("in");
+            $form.find("div.accordion-heading a").click();
+          }
+      });
+
+      // ORDER TOTALS calculation
       $("#id_subtotal_after_discount").change(function() {
           FurnFormHelper.recalcOrderTotals();
       });
@@ -137,6 +152,7 @@
       <li><a href="#deliveries" data-toggle="tab">Deliveries</a></li>
       <li><a href="#order-commissions-fieldset" data-toggle="tab">Commissions</a></li>
       <li><a href="#attachment-fieldset" data-toggle="tab">Attachments</a></li>
+      <li><a href="#issues-fieldset" data-toggle="tab">Order Issues</a></li>
     </ul>
 
     <!-- Tab panes -->
@@ -341,6 +357,35 @@
               <div class="alert warning">Save the order before uploading attachments.</div>
             {% else %}
               <div class="alert warning">Nothing uploaded yet</div>
+            {% endifequal %}
+          {% endif %}
+
+        </fieldset>
+      </div>
+    
+      <div class="tab-pane" id="issues-fieldset">
+        <fieldset class="formset accordion">
+          <legend>Order Issues</legend>
+          {{ issues_form.management_form }}
+          {% if issues_form %}
+            {{ issues_form.non_field_errors }}    
+            {% for form in issues_form %}
+              <div class="accordion-group attachment-form form-row" id="{{ issues_form.prefix }}-{{forloop.counter}}-row">
+                <div class="accordion-heading">
+                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#issues-fieldset" href="#collapse-{{ form.prefix }}">Issue {{ forloop.counter }}</a>
+                </div>
+                <div id="collapse-{{ form.prefix }}" class="accordion-body collapse">
+                  <div class="accordion-inner">
+                    {{ form | as_bootstrap }}
+                  </div>
+                </div>       
+              </div>
+            {% endfor %}
+          {% else %}
+            {% ifequal object.pk None %}
+              <div class="alert warning">Save the order before entering order issues.</div>
+            {% else %}
+              <div class="alert warning">No issues yet.</div>
             {% endifequal %}
           {% endif %}
 

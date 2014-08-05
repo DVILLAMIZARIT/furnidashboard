@@ -9,9 +9,9 @@ from django.contrib.auth import get_user_model
 from django_tables2 import RequestConfig, SingleTableView
 from django.db.models import Q
 from datetime import timedelta, date, datetime
-from .models import Order, OrderItem, OrderDelivery
+from .models import Order, OrderItem, OrderDelivery, OrderIssue
 from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable, SalesByAssociateWithBonusTable, DeliveriesTable, SalesTotalsTable
-from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset, OrderDeliveryForm, OrderItemFormHelper, OrderAttachmentFormSet
+from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset, OrderDeliveryForm, OrderItemFormHelper, OrderAttachmentFormSet, get_order_issues_formset
 from .filters import OrderFilter
 from customers.models import Customer
 from crispy_forms.helper import FormHelper
@@ -83,7 +83,13 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     SoldItemsFormSet = get_ordered_items_formset(extra=extra, max_num=100)
     items_form = SoldItemsFormSet(instance=self.object, prefix="ordered_items")
 
+    # attachments
     attachment_form = OrderAttachmentFormSet(instance=self.object, prefix="attachments")
+
+    # issues form
+    OrderIssuesFormSet = get_order_issues_formset()
+    issues_form = OrderIssuesFormSet(instance=self.object, prefix='issues')
+
 
     extra_forms = {
       'form':form,
@@ -92,6 +98,7 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
       'commissions_form':commissions_form,
       'delivery_form':delivery_form,
       'attachment_form':attachment_form,
+      'issues_form':issues_form,
     }
     context = self.get_context_data()
     context.update(extra_forms)
@@ -124,6 +131,9 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
 
     attachment_form = OrderAttachmentFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="attachments")
 
+    OrderIssuesFormSet = get_order_issues_formset()
+    issues_form = OrderIssuesFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="issues")
+
     forms = {
       'form':form,
       'customer_form':customer_form,
@@ -131,6 +141,7 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
       'commissions_form':commissions_form,
       'delivery_form':delivery_form,
       'attachment_form':attachment_form,
+      'issues_form': issues_form,
     }
 
     #check if forms are valid
@@ -163,6 +174,7 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     commissions_form = kwargs['commissions_form']
     delivery_form = kwargs['delivery_form']
     attachment_form = kwargs['attachment_form']
+    issues_form = kwargs.get('issues_form')
     
     orig_status = self.object.status
     self.object = form.save(commit=False)
@@ -207,7 +219,14 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
         else:
           messages.error(self.request, "Error saving customer information!", extra_tags="alert alert-danger")
           BR_passed = False
+
+    # validate issues
+    if BR_passed and not issues_form.is_valid():
+      messages.error(self.request, "Error saving 'order issues' information!", extra_tags="alert alert-danger")
+      BR_passed = False
   
+
+    # Final check
     if BR_passed: 
       
       if not self.request.user.has_perm('orders.update_status'):
@@ -248,6 +267,11 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
         attachment_form.instance = self.object
         attachment_form.save()
 
+      # save issues
+      if issues_form.has_changed():
+        issues_form.instance = self.object
+        issues_form.save()
+
       return HttpResponseRedirect(self.get_success_url())
     else:
       return self.form_invalid(**kwargs)
@@ -271,7 +295,15 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
   def get_success_url(self):
     return self.get_object().get_absolute_url() #reverse('order_detail', kwargs={'pk': self.object.pk})
 
+
+
+#------------------------------------------------------------------------
+
 class OrderCreateView(PermissionRequiredMixin, CreateView):
+  """
+  Order Creation view. Presents blank forms for inputting new orders.
+  """
+
   model = Order
   template_name = "orders/order_update.html"
   form_class = OrderForm
@@ -423,6 +455,7 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
   def get_success_url(self):
     return reverse('order_detail', kwargs={'pk': self.object.pk})
 
+#-----------------------------------------------------------------------
 
 class OrderDeleteView(PermissionRequiredMixin, DeleteView):
   model = Order

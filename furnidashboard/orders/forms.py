@@ -1,5 +1,5 @@
 from stores.models import Store
-from .models import Order, OrderItem, OrderDelivery, OrderAttachment
+from .models import Order, OrderItem, OrderDelivery, OrderAttachment, OrderIssue
 from commissions.models import Commission
 from customers.models import Customer
 from django import forms
@@ -163,6 +163,7 @@ class OrderDeliveryForm(forms.ModelForm):
     self.fields['delivered_date'].widget = BootstrapDateInput()
     self.fields['pickup_from'].required = False
     self.fields['delivery_cost'].widget = BootstrapTextInput(prepend='$')
+    self.fields['delivery_cost'].initial = 0.0
     self.fields['paid'].widget = Select(choices = ((0,"No"), (1, "Yes")));
     self.fields['paid'].initial = False
     #self.fields['delivery_cost'].initial = 0.00
@@ -205,7 +206,10 @@ class OrderDeliveryForm(forms.ModelForm):
       elif cleaned_data['delivery_type'] == None and cleaned_data['pickup_from']:
         self._errors['delivery_type'] = ErrorList([u'Please specify delivery type'])
 
-      if cleaned_data['delivery_type'] == 'SELF' and cleaned_data['delivery_cost'] != None:
+      if cleaned_data['delivery_cost'] is None:
+        cleaned_data['delivery_cost'] = 0.0
+
+      if cleaned_data['delivery_type'] == 'SELF' and cleaned_data['delivery_cost'] > 0:
         self._errors['delivery_cost'] = ErrorList([u"Cannot assign delivery cost to 'Self Pickup' orders"])
 
     except KeyError as e:
@@ -227,7 +231,9 @@ class CustomerDetailReadOnlyForm(DisabledFieldsMixin, CustomerForm):
   def __init__(self, *args, **kwargs):
     super(CustomerDetailReadOnlyForm, self).__init__(*args, **kwargs)
 
-
+class OrderIssueForm(forms.ModelForm):
+  pass
+    
 def get_ordered_items_formset(extra=1, max_num=1000):
   return inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=extra, max_num=max_num)
 
@@ -240,6 +246,9 @@ def get_commissions_formset(extra=1, max_num=1000, request=None):
   formset = inlineformset_factory(Order, Commission, extra=extra, max_num=max_num, can_delete=True)
   formset.form = staticmethod(curry(CommissionForm, request=request))
   return formset
+
+def get_order_issues_formset(extra=1, max_num=1000, request=None):
+  return inlineformset_factory(Order, OrderIssue, form=OrderIssueForm, extra=extra, max_num=max_num, can_delete=True)
 
 #inline formsets
 ItemFormSet = inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=1, max_num=100)

@@ -177,6 +177,28 @@
   <h3>Comments</h3>
   <p>{{order.comments}}</p>
 
+  <h3>Order issues:</h3>
+  {% if order.orderissue_set.count %}  
+  <table id="order-issues-table" class="dashed-table">
+    <thead>
+      <th>Date</th>
+      <th>Status</th>
+      <th>Description</th>
+    </thead>
+    <tbody>
+      {% for issue in order.orderissue_set.all %}
+        <tr>
+          <td>{{ issue.created|date:'j F, Y' }}</td>
+          <td>{{ issue.get_status_display|upper }}</td>
+          <td> {{ issue.comments }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p>No order issues.</p>
+  {% endif %}
+
   <h3>Attachments</h3>
   <ul>
   {% for attachment in order.orderattachment_set.all %}
