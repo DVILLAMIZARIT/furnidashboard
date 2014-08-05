@@ -16,7 +16,8 @@ class OrderManager(models.Manager):
     launch_dt = timezone.make_aware(launch_dt, timezone.get_current_timezone())
 
   def get_qs(self):
-    qs = super(OrderManager, self).get_query_set().filter(order_date__gte=self.launch_dt)
+    #qs = super(OrderManager, self).get_query_set().filter(order_date__gte=self.launch_dt)
+    qs = super(OrderManager, self).get_query_set().filter(~Q(status='I'))
     return qs
   
   def unplaced_orders(self):
@@ -66,6 +67,7 @@ class Order(TimeStampedModel, AuthStampedModel):
     ('S', 'Scheduled for Delivery'),
     ('D', 'Delivered'),
     ('X', 'Dummy'),
+    ('I', 'Historical (Excel Import)'),
     ('C', 'Closed'),
   )
 
@@ -98,7 +100,7 @@ class Order(TimeStampedModel, AuthStampedModel):
   def not_placed(self):
            # no status        'new'                 'any item, which is not in stock, and does not have po#
     #return not self.status or self.status == 'N' or any([item for item in self.orderitem_set if not item.in_stock and not item.po_num])
-    return any([item for item in self.orderitem_set.all() if item.status != "S" and item.po_num == ''])
+    return any([item for item in self.orderitem_set.all() if item.status not in ("S", "I") and item.po_num == ''])
 
   @property
   def balance_due(self):
@@ -136,6 +138,7 @@ class OrderItem(TimeStampedModel, AuthStampedModel):
     ('R', 'Received'),
     ('D', 'Delivered'),
     ('S', 'In Stock'),
+    ('I', 'Historical (Excel Import)'),
   )
 
   order = models.ForeignKey(Order)
