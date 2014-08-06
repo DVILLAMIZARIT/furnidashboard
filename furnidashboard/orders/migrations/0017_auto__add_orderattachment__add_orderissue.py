@@ -8,6 +8,15 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding model 'OrderAttachment'
+        db.create_table('order_attachments', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('file', self.gf('django.db.models.fields.files.FileField')(max_length=100)),
+            ('description', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
+            ('order', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['orders.Order'])),
+        ))
+        db.send_create_signal(u'orders', ['OrderAttachment'])
+
         # Adding model 'OrderIssue'
         db.create_table('order_issues', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -25,6 +34,9 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
+        # Deleting model 'OrderAttachment'
+        db.delete_table('order_attachments')
+
         # Deleting model 'OrderIssue'
         db.delete_table('order_issues')
 
@@ -76,17 +88,6 @@ class Migration(SchemaMigration):
             'phone': ('django.db.models.fields.CharField', [], {'max_length': '30', 'null': 'True', 'blank': 'True'}),
             'shipping_address': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'})
         },
-        u'orders.attachment': {
-            'Meta': {'object_name': 'Attachment'},
-            'description': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
-            'file': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
-        },
-        u'orders.deliveryattachment': {
-            'Meta': {'object_name': 'DeliveryAttachment', 'db_table': "'delivery_attachments'", '_ormbases': [u'orders.Attachment']},
-            u'attachment_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['orders.Attachment']", 'unique': 'True', 'primary_key': 'True'}),
-            'delivery': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['orders.OrderDelivery']"})
-        },
         u'orders.order': {
             'Meta': {'ordering': "['-order_date']", 'object_name': 'Order', 'db_table': "'order_info'"},
             'comments': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -99,7 +100,7 @@ class Migration(SchemaMigration):
             'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
             'modified_by': ('audit_log.models.fields.LastUserField', [], {'related_name': "'modified_order_set'", 'to': u"orm['auth.User']"}),
             'modified_with_session_key': ('audit_log.models.fields.LastSessionKeyField', [], {'max_length': '40', 'null': 'True'}),
-            'number': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
+            'number': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
             'order_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
             'referral': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
             'shipping': ('django.db.models.fields.FloatField', [], {'default': '0.0', 'blank': 'True'}),
@@ -109,8 +110,10 @@ class Migration(SchemaMigration):
             'tax': ('django.db.models.fields.FloatField', [], {'default': '0.0', 'blank': 'True'})
         },
         u'orders.orderattachment': {
-            'Meta': {'object_name': 'OrderAttachment', 'db_table': "'order_attachments'", '_ormbases': [u'orders.Attachment']},
-            u'attachment_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['orders.Attachment']", 'unique': 'True', 'primary_key': 'True'}),
+            'Meta': {'object_name': 'OrderAttachment', 'db_table': "'order_attachments'"},
+            'description': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
+            'file': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'order': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['orders.Order']"})
         },
         u'orders.orderdelivery': {
@@ -134,7 +137,7 @@ class Migration(SchemaMigration):
             'scheduled_delivery_date': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'})
         },
         u'orders.orderissue': {
-            'Meta': {'object_name': 'OrderIssue', 'db_table': "'order_issues'"},
+            'Meta': {'ordering': "['-created']", 'object_name': 'OrderIssue', 'db_table': "'order_issues'"},
             'comments': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
             'created_by': ('audit_log.models.fields.CreatingUserField', [], {'related_name': "'created_orderissue_set'", 'to': u"orm['auth.User']"}),

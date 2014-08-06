@@ -81,7 +81,7 @@ class Order(TimeStampedModel, AuthStampedModel):
     ('TV', 'TV'),
   )
 
-  number = models.CharField(max_length=50, unique=True)
+  number = models.CharField(max_length=50)
   order_date = models.DateTimeField(null=True)
   customer = models.ForeignKey(Customer, default=0, blank=True, null=True)
   status = models.CharField(max_length=5, choices=ORDER_STATUSES)
@@ -197,6 +197,9 @@ class Attachment(models.Model):
   file = models.FileField(upload_to='attachments/%Y/%m')
   description = models.CharField(max_length=255, blank=True, null=True)
 
+  class Meta:
+    abstract = True
+
   @property
   def filename(self):
     import os
@@ -204,12 +207,6 @@ class Attachment(models.Model):
 
   def __unicode__(self):
     return self.description[:30]
-
-class DeliveryAttachment(Attachment):
-  delivery = models.ForeignKey(OrderDelivery)
-
-  class Meta:
-    db_table = "delivery_attachments"
 
 class OrderAttachment(Attachment):
   order = models.ForeignKey(Order)
