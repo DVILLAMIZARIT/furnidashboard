@@ -29,12 +29,7 @@
           prefix: '{{items_form.prefix}}',
           deleteText: 'Delete',
           added: function($form) {
-            var accordions = $form.parent().find('div.accordion-group');
-            var form_ind = accordions.length - 1;
-            $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapseordered_items-" + form_ind).text("Item " + (form_ind + 1));
-            $form.find("div.accordion-body").attr("id", "collapseordered_items-" + form_ind);
-            $("#order-items-fieldset").find("div.accordion-body").removeClass("in");
-            $form.find("div.accordion-heading a").click();
+            FurnFormHelper.initFormset($form, 'ordered_items', 'Item');
 
             $form.removeClass("processed");
             $form.find("input").off('change');
@@ -49,12 +44,7 @@
       $('#deliveries div.delivery-form').formset({
           prefix: '{{delivery_form.prefix}}',
           added: function($form) {
-            var accordions = $form.parent().find('div.accordion-group');
-            var form_ind = accordions.length - 1;
-            $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapsedeliveries-" + form_ind).text("Delivery " + (form_ind + 1));
-            $form.find("div.accordion-body").attr("id", "collapsedeliveries-" + form_ind);
-            $("#deliveries").find("div.accordion-body").removeClass("in");
-            $form.find("div.accordion-heading a").click();
+            FurnFormHelper.initFormset($form, 'deliveries', 'Delivery');
           }
       });
 
@@ -63,12 +53,7 @@
       $('#order-commissions-fieldset div.commissions-form').formset({
           prefix: '{{commissions_form.prefix}}',
           added: function($form) {
-            var accordions = $form.parent().find('div.accordion-group');
-            var form_ind = accordions.length - 1;
-            $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapsecommissions-" + form_ind).text("Commissions " + (form_ind + 1));
-            $form.find("div.accordion-body").attr("id", "collapsecommissions-" + form_ind);
-            $("#order-commissions-fieldset").find("div.accordion-body").removeClass("in");
-            $form.find("div.accordion-heading a").click();
+            FurnFormHelper.initFormset($form, 'commissions', 'Commissions');
           }
       });
 
@@ -77,12 +62,7 @@
       $('#attachment-fieldset div.attachment-form').formset({
           prefix: '{{attachment_form.prefix}}',
           added: function($form) {
-            var accordions = $form.parent().find('div.accordion-group');
-            var form_ind = accordions.length - 1;
-            $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapseattachments-" + form_ind).text("Attachment " + (form_ind + 1));
-            $form.find("div.accordion-body").attr("id", "collapseattachments-" + form_ind);
-            $("#attachment-fieldset").find("div.accordion-body").removeClass("in");
-            $form.find("div.accordion-heading a").click();
+            FurnFormHelper.initFormset($form, 'attachments', 'Attachment');
           }
       });
 
@@ -91,29 +71,20 @@
       $('#issues-fieldset div.issues-form').formset({
           prefix: '{{issues_form.prefix}}',
           added: function($form) {
-            var accordions = $form.parent().find('div.accordion-group');
-            var form_ind = accordions.length - 1;
-            $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapseissues-" + form_ind).text("Issue " + (form_ind + 1));
-            $form.find("div.accordion-body").attr("id", "collapseissues-" + form_ind);
-            $("#issues-fieldset").find("div.accordion-body").removeClass("in");
-            $form.find("div.accordion-heading a").click();
+            FurnFormHelper.initFormset($form, 'issues', 'Issue');
           }
       });
 
       // ORDER TOTALS calculation
-      $("#id_subtotal_after_discount").change(function() {
+      var totals_triggers = ["#id_subtotal_after_discount", "#id_deposit_balance", '#id_tax', '#id_shipping'];
+      var len = totals_triggers.length;
+      for (var i=0; i< len; i++) {
+        $(totals_triggers[i]).change(function() { 
           FurnFormHelper.recalcOrderTotals();
-      });
-      $("#id_deposit_balance").change(function() {
-          FurnFormHelper.recalcOrderTotals();
-      });
-      $("#id_tax").change(function() {
-          FurnFormHelper.recalcOrderTotals();
-      });
-      $("#id_shipping").change(function() {
-          FurnFormHelper.recalcOrderTotals();
-      });
-
+        });
+      }
+      
+      // show totals on initial load
       FurnFormHelper.recalcOrderTotals();
 
     });

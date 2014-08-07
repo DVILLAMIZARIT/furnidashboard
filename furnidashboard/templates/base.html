@@ -41,8 +41,9 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="/">Furnitalia Dashboard</a>
+          <a class="brand" href="/">FurniCloud</a>
           <div class="nav-collapse collapse">
+
             <ul class="nav">
               {% url 'order_list' as order_list %}
               {% url 'alerts_main' as alerts  %}
@@ -51,6 +52,7 @@
               {% url 'delivery_list' as delivery_list %}
               {% url 'sales_standings_cur' as sales_standings %}
               {% url 'logout' as logout %}
+              {% url 'my_order_list' as my_orders %}
 
               {% if perms.orders.view_orders %}
                 <li class="{% ifequal request.path order_list %}active{% endifequal %}"><a href="{{ order_list }}">Orders</a></li>
@@ -69,7 +71,7 @@
                 <li class="{% ifequal request.path sales_standings %}active{% endifequal %}"><a href="{% url 'sales_standings_cur' %}">Sales Totals</a></li>
               {% endif %}
               {% if user.is_authenticated %}
-                <li><a href="{{ logout }}">Log out</a></li>
+                <li><span style="float:left;padding:10px 0 10px 15px">Hi, {{ request.user.first_name }}</span> <a href="{{ logout }}" style="float:left; padding-left:5px; padding-right:5px">(Log out)</a> <a href="{{ my_orders }}" style="float:left; padding-left:5px">My orders</a></li>
               {% endif %}
             </ul>
           </div><!--/.nav-collapse -->

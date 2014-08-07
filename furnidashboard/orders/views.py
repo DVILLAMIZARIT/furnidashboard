@@ -629,7 +629,8 @@ class ActiveOrdersTableView(PermissionRequiredMixin, FilteredTableMixin, ListVie
 class MyOrderListView(PermissionRequiredMixin, FilteredTableMixin, ListView):
   model = Order
   context_object_name = "order_list"
-  template_name = "orders/order_filtered_table.html"
+  #template_name = "orders/order_filtered_table.html"
+  template_name = "orders/order_filtered_list.html"
   table_paginate_by = 20 
  
   required_permissions = (
@@ -641,6 +642,11 @@ class MyOrderListView(PermissionRequiredMixin, FilteredTableMixin, ListView):
     qs = Order.objects.select_related().filter(commission__associate=me).all()
     self.setup_filter(queryset=qs)
     return self.filter.qs
+
+  def get_context_data(self, **kwargs):
+    context = super(MyOrderListView, self).get_context_data(**kwargs)
+    context['list_label'] = 'Just my orders'
+    return context
 
 class OrderWeekArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, WeekArchiveView):
   model = Order
