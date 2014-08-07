@@ -23,7 +23,10 @@
         $special_fields.hide();                         // hide special order related fields
         
       } else {  
-        $status.val("P");                               // select "Pending"
+        if ($status.val().trim() === "") {
+          $status.val("P");                             // select "Pending"
+        }
+
         $special_fields.show();
       }
 
