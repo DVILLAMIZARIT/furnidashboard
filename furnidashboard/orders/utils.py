@@ -59,12 +59,12 @@ def _calc_sales_assoc_by_orders(order_list, include_bonus=True):
   for associate, temp_subtotal in res.items():
     bonus = _calc_bonus_amount(temp_subtotal['sale'])
     sales_list.append({
-      'associate':associate, 
-      'sales':'{0:.2f}'.format(temp_subtotal['sale']), 
-      'commissions_due':'{0:.2f}'.format(temp_subtotal['commissions_due']), 
-      'commissions_paid':'{0:.2f}'.format(temp_subtotal['commissions_paid']),
-      'commissions_pending':'{0:.2f}'.format(temp_subtotal['commissions_pending']),
-      'bonus':bonus
+      'associate':          associate, 
+      'sales':              temp_subtotal['sale'], 
+      'commissions_due':    temp_subtotal['commissions_due'], 
+      'commissions_paid':   temp_subtotal['commissions_paid'],
+      'commissions_pending':temp_subtotal['commissions_pending'],
+      'bonus':              bonus
     })
 
   return sales_list
