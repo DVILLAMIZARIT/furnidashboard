@@ -509,7 +509,7 @@ class FilteredTableMixin(object):
 
 class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, MonthArchiveView):
   model = Order
-  table_paginate_by = 20 
+  table_paginate_by = 50 
 
   # archive view specific fields
   date_field = "order_date"
@@ -610,7 +610,7 @@ class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, Mo
 
 class ActiveOrdersTableView(PermissionRequiredMixin, FilteredTableMixin, ListView):
   model = Order
-  table_paginate_by = 20 
+  table_paginate_by = 50 
   context_object_name = 'order_list'
   template_name = "orders/order_filtered_list.html"
   required_permissions = (
@@ -631,7 +631,7 @@ class MyOrderListView(PermissionRequiredMixin, FilteredTableMixin, ListView):
   context_object_name = "order_list"
   #template_name = "orders/order_filtered_table.html"
   template_name = "orders/order_filtered_list.html"
-  table_paginate_by = 20 
+  table_paginate_by = 50 
  
   required_permissions = (
     'orders.view_orders',
@@ -650,7 +650,7 @@ class MyOrderListView(PermissionRequiredMixin, FilteredTableMixin, ListView):
 
 class OrderWeekArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, WeekArchiveView):
   model = Order
-  table_paginate_by = 20 
+  table_paginate_by = 50 
 
   # archive view specific fields
   date_field = "order_date"
