@@ -25,12 +25,13 @@ class OrderTable(tables.Table):
   # detail = tables.TemplateColumn('<a href="{% url \'order_detail\' record.pk %}">Detail</a>', verbose_name="Actions", orderable=False)
   pk = CustomTextLinkColumn('order_detail', args=[A('pk')], custom_text="Detail", orderable=False, verbose_name="Actions")
   associate = OrderAssociatesColumn(accessor="commission_set", verbose_name="Associate")
+  subtotal_after_discount = DollarAmountColumn(verbose_name="Subtotal")
   grand_total = DollarAmountColumn(orderable=False)
 
   class Meta:
     model = Order
     attrs = {"class": "paleblue"}
-    fields = ("number", "order_date", "status", "store", "customer", "grand_total", "modified", "associate")
+    fields = ("number", "order_date", "status", "store", "customer", "subtotal_after_discount", "grand_total", "modified", "associate")
 
 class UnplacedOrdersTable(tables.Table):
 
