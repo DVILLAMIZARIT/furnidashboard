@@ -47,7 +47,8 @@ class OrderCronJob(CronJobBase):
     if settings.USE_TZ:
       launch_dt = timezone.make_aware(launch_dt, timezone.get_current_timezone())
 
-    orders = Order.objects.filter(order_date__gte=launch_dt, number__istartswith="SO") 
+    #orders = Order.objects.filter(order_date__gte=launch_dt, number__istartswith="SO") 
+    orders = Order.objects.get_qs().filter(number__istartswith="SO")
     
     sac_orders = orders.filter(store=Store.objects.get(name="Sacramento"))
     fnt_orders = orders.filter(store=Store.objects.get(name="Roseville"))
