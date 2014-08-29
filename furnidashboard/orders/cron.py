@@ -4,6 +4,7 @@ from django_cron import CronJobBase, Schedule
 from .models import Order
 from stores.models import Store
 from datetime import datetime
+from django.core.mail.message import EmailMessage
 
 class OrderCronJob(CronJobBase):
   RUN_EVERY_MINS = 1 # every hours
@@ -11,41 +12,51 @@ class OrderCronJob(CronJobBase):
 
   schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
   code = 'orders.cron.OrderCronJob'
+  msg = []
 
   def do(self):
-    print "Checking for MISSING orders:"
+
+    self.msg = []
+
+    self.trace("Checking for MISSING orders:", important=True)
     orders_missing = self.determine_potentially_missed_orders()
-    print "{0} potentially missed order(s)".format(len(orders_missing))
+    self.trace("{0} potentially missed order(s)".format(len(orders_missing)), important=True)
     if orders_missing:
       for o in orders_missing:
-        print o
-      print "-" * 20
+        self.trace(str(o))
+    self.trace("-" * 40)
+    self.trace("")
 
+    self.trace("Checking for UNPLACED orders: ", important=True)
     unplaced = Order.objects.unplaced_orders()
-    print "Checking for UNPLACED orders: "
-    print "{0} item(s)".format(unplaced.count())
+    self.trace("{0} item(s)".format(unplaced.count()), important=True)
     for o in unplaced:
-      print "#{0} unplaced. View details: {1}".format(o.number, o.get_absolute_url())
-    print "-" * 20
+      self.trace("#{0} unplaced. View details: {1}".format(o.number, o.get_absolute_url()))
+    self.trace("-" * 40)
+    self.trace("")
 
+    self.trace("5 most recent orders:", important=True)
     recent_orders = Order.objects.filter(status__exact='N').order_by('-order_date')[:5]
-    print "5 most recent orders:"
     for o in recent_orders:
-       print "Order {0}, created {1}".format(o.number, o.order_date.strftime("%m-%d-%Y"))
-    print "-" * 20
+       self.trace("Order {0}, created {1}, status {2}".format(o.number, o.order_date.strftime("%m-%d-%Y"), o.get_status_display()))
+    self.trace("-" * 40)
+    self.trace("")
        
+    self.trace("Special Orders, acknowledgement not received from vendor:", important=True)
     orders_no_ack_no = Order.objects.ordered_not_acknowledged()
-    print "Special Orders, acknowledgement not received from vendor:"
-    print "{0} orders_no_ack_no(s)".format(orders_no_ack_no.count())
+    self.trace("{0} orders_no_ack_no(s)".format(orders_no_ack_no.count(), important = True))
     for o in orders_no_ack_no:
-      print "#{0} order item(s) not acknowledged. View order: {1}".format(o.number, o.get_absolute_url())
-    print "-" * 20
+      self.trace("#{0} order item(s) not acknowledged. View order: {1}".format(o.number, o.get_absolute_url()))
+    self.trace("-" * 40)
+
+    # SEND EMAIL
+    self.send_emails()
 
   def determine_potentially_missed_orders(self):
     res = []
-    launch_dt = datetime(2014, 6, 1)
-    if settings.USE_TZ:
-      launch_dt = timezone.make_aware(launch_dt, timezone.get_current_timezone())
+    #launch_dt = datetime(2014, 6, 1)
+    #if settings.USE_TZ:
+    #  launch_dt = timezone.make_aware(launch_dt, timezone.get_current_timezone())
 
     #orders = Order.objects.filter(order_date__gte=launch_dt, number__istartswith="SO") 
     orders = Order.objects.get_qs().filter(number__istartswith="SO")
@@ -87,3 +98,23 @@ class OrderCronJob(CronJobBase):
           expected = num + 1
 
     return res
+
+  def trace(self, txt, important=False):
+    print txt
+
+    if txt.strip() == "":
+      txt = "<br/>"
+
+    if important:
+      txt = "<strong>" + txt + "</strong>"
+
+    self.msg.append(txt)
+
+  def send_emails(self):
+
+    report_date = datetime.now().strftime('%m-%d-%Y')
+    to = ['akhmirem@gmail.com', 'lana@furnitalia.com', 'd.aks@furnitalia.com']
+    self.msg[:0] = ['Report created on ' + report_date, ""]
+    email_msg = EmailMessage("FurniCloud Report (" + report_date + ")", "<br/>".join(self.msg), "admin@furnitalia.com", to) 
+    email_msg.content_subtype = "html"
+    email_msg.send()
