@@ -8,7 +8,7 @@
 
 {% block content %}
   
-  <div class="well">
+  <div class="well hidden-print">
     {% if perms.orders.change_order %}
     <a href="{% url 'order_edit' object.pk %}" title="Edit Order">Edit Order</a>  
     {% endif %}
@@ -27,7 +27,9 @@
 
   <br/>
 
-  <div class="row">
+  <div class="row-fluid">
+    <div class="span12">
+      <div class="row-fluid">
     <div class="span2">
       <h5>Order Date:</h5>
       {{order.order_date|date:'f F, Y'}}
@@ -49,6 +51,8 @@
     <div class="span1">
       <h5>Referral</h5>
       <p>{{order.get_referral_display|upper}}</p>
+    </div>
+      </div>
     </div>
   </div>
 

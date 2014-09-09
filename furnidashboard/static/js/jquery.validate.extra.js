@@ -1,8 +1,8 @@
 ( function (G, U) {
 
-  $.validator.addMethod('double', function(value, element, param) {
+  $.validator.addMethod('positive_num', function(value, element, param) {
       return (value !== "") && (value == parseFloat(value, 10)) && (value >= 0);
-  }, 'Please enter a numeric value!');
+  }, 'Please enter a positive numeric value!');
 
   $.validator.addMethod(
     "regex",

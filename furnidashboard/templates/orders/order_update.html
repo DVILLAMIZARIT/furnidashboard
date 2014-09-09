@@ -101,10 +101,10 @@
             required: true,
             regex: /^(SO|SR|DR)-([0-9][0-9])-([0-9]{4})$/
           },
-          subtotal_after_discount: {double: true },
-          deposit_balance:         {double: true },
-          tax:                     {double: true },
-          shipping:                {double: true }
+          subtotal_after_discount: {positive_num: true },
+          deposit_balance:         {positive_num: true },
+          tax:                     {positive_num: true },
+          shipping:                {positive_num: true }
         },
         messages: {
           number: {
