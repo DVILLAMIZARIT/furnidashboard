@@ -31,7 +31,7 @@ class OrderCronJob(CronJobBase):
     unplaced = Order.objects.unplaced_orders()
     self.trace("{0} item(s)".format(unplaced.count()), important=True)
     for o in unplaced:
-      self.trace("#{0} unplaced. View details: {1}".format(o.number, o.get_absolute_url()))
+      self.trace("#{0} unplaced. View details: http://cloud.furnitalia.com{1}".format(o.number, o.get_absolute_url()))
     self.trace("-" * 40)
     self.trace("")
 
