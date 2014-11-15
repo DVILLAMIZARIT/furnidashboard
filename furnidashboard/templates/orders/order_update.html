@@ -99,7 +99,7 @@
         rules: {
           number: {
             required: true,
-            regex: /^(SO|SR|DR)-([0-9][0-9])-([0-9]{4})$/
+            regex: /^(SO|SR|DR)-([0-9]{5})$/
           },
           subtotal_after_discount: {positive_num: true },
           deposit_balance:         {positive_num: true },
@@ -108,7 +108,7 @@
         },
         messages: {
           number: {
-            regex:'Please enter order number is the format: <"SO" or "SR" or "DR">-<store#>-<4 numbers>. Examples: SO-01-0009 or SR-03-1000 or DR-01-0005',
+            regex:'Please enter order number is the format: <"SO" or "SR" or "DR">-<5 digits>. Examples: SO-10009 or SR-31000 or DR-10005',
             required: 'Order number is required'
           }
         },
