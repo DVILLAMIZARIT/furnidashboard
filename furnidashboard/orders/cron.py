@@ -46,7 +46,7 @@ class OrderCronJob(CronJobBase):
     orders_no_ack_no = Order.objects.ordered_not_acknowledged()
     self.trace("{0} orders_no_ack_no(s)".format(orders_no_ack_no.count(), important = True))
     for o in orders_no_ack_no:
-      self.trace("#{0} order item(s) not acknowledged. View order: {1}".format(o.number, o.get_absolute_url()))
+      self.trace("#{0} order item(s) not acknowledged. View order: http://cloud.furnitalia.com{1}".format(o.number, o.get_absolute_url()))
     self.trace("-" * 40)
 
     # SEND EMAIL
@@ -67,11 +67,11 @@ class OrderCronJob(CronJobBase):
     sac_order_nums = sorted(map(lambda o: int(o.number[-4:]), sac_orders))
     fnt_order_nums = sorted(map(lambda o: int(o.number[-4:]), fnt_orders))
     
-    lst = self.find_skipped_order_nums(sac_order_nums, "SO-01-")
+    lst = self.find_skipped_order_nums(sac_order_nums, "SO-1")
     if lst:
       res += lst
 
-    lst = self.find_skipped_order_nums(fnt_order_nums, "SO-03-")
+    lst = self.find_skipped_order_nums(fnt_order_nums, "SO-3")
     if lst:
       res += lst
 
