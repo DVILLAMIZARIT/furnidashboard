@@ -19,6 +19,7 @@ from crispy_forms.layout import Submit
 import core.utils as utils
 from core.mixins import LoginRequiredMixin, PermissionRequiredMixin
 import orders.utils as order_utils
+import json
 
 class OrderDetailView(PermissionRequiredMixin, DetailView):
   model = Order
@@ -558,6 +559,8 @@ class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, Mo
     context['previous_year_links'] = self._get_month_list_for_year(datetime.now().year-1)
     context['prev_year'] = datetime.now().year-1
 
+    context['months_2013'] = self._get_month_list_for_year(datetime.now().year-2)
+
     #unplaced orders
     unplaced_orders = Order.objects.unplaced_orders()
     unplaced_orders_table = OrderTable(unplaced_orders)
@@ -738,6 +741,7 @@ class SalesStandingsMonthTableView(PermissionRequiredMixin, MonthArchiveView):
     sales_by_assoc_ytd = SalesByAssociateTable(sales_by_assoc_data_ytd)
     RequestConfig(self.request).configure(sales_by_assoc_ytd)
     context['sales_by_associate_ytd'] = sales_by_assoc_ytd 
+    context['sales_data_ytd_raw'] = json.dumps([{'key':data['associate'], 'value':data['sales']} for data in sales_by_assoc_data_ytd])
 
     return context
 

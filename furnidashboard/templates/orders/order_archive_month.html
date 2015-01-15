@@ -33,6 +33,15 @@
       </ul>
     {% endif %}
 
+    {% if months_2013 %}
+      <ul class="breadcrumb">
+        <li> 2013: </li>
+        {% for month, link in months_2013 %} 
+          <li><a href="{{ link }}" class="-btn">{{ month}}</a>   <span class="divider">/</span></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
     {% crispy filter.form filter.helper %}
     {% render_table table %}
 
