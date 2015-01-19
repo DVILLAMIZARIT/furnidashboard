@@ -73,6 +73,7 @@ class Order(TimeStampedModel, AuthStampedModel):
 
   REFERRAL_SOURCES = (
     ('NO', 'Not Referred'),
+    ('RVL', 'Roseville Store'),
     ('REF', 'Referred by friends/relatives/acquintance'),
     ('WEB', 'Website'),
     ('MAG', 'Magazine'),
