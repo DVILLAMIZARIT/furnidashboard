@@ -732,7 +732,7 @@ class SalesStandingsMonthTableView(PermissionRequiredMixin, ListView):
     date_range = ""
     if self.request.GET.has_key("date_range"):
       date_range = self.request.GET['date_range']
-    context['caption'] = "Sales Orders for {0} - {1}".format(self.from_date.strftime("%Y-%m-%d"), self.to_date.strftime("%Y-%m-%d"))
+    context['dates_caption'] = "{0} - {1}".format(self.from_date.strftime("%Y-%m-%d"), self.to_date.strftime("%Y-%m-%d"))
 
     orders = context[self.context_object_name]
     sales_by_assoc_data = order_utils._calc_sales_assoc_by_orders(orders)

@@ -76,10 +76,9 @@ input.order-item-desc {
 }
 #bonus_scale {
   float:right;
+  position:relative;
+  bottom:55px;
 }
-#monthly-sales-report .table-container {
-  float:left; 
-} 
 #order-filter .control-group {
   display:inline-block;
   margin-right:1.5em;
@@ -120,6 +119,10 @@ table.dashed-table th,
   display:inline-block;
   margin-left:15px;
 }
+.slice text {
+ font-size: 16pt;
+ font-family: Arial;
+}   
 /* \ORDER REPORTS */
 
 a.delete-row {
