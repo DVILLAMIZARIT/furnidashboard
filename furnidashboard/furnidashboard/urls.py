@@ -145,15 +145,16 @@ urlpatterns = patterns('',
     url(
       # /sales-standings/
       regex = r'^sales-standings/$', 
-      view=SalesStandingsMonthTableView.as_view(year=str(date.today().year), month=str(date.today().month), month_format='%m'),
+      #view=SalesStandingsMonthTableView.as_view(year=str(date.today().year), month=str(date.today().month), month_format='%m'),
+      view=SalesStandingsMonthTableView.as_view(),
       name="sales_standings_cur",
     ),
-    url(
-      # /sales-standings/2013/02
-      regex = r'^sales-standings/(?P<year>\d{4})/(?P<month>\d+)/$',
-      view=SalesStandingsMonthTableView.as_view(month_format='%m'),
-      name="sales_standings",
-    ),
+    # url(
+    #  /sales-standings/2013/02
+      # regex = r'^sales-standings/(?P<year>\d{4})/(?P<month>\d+)/$',
+      # view=SalesStandingsMonthTableView.as_view(month_format='%m'),
+      # name="sales_standings",
+    # ),
     url(
       regex = r'^sales-standings/commissions-scale/$',
       view=TemplateView.as_view(template_name="orders/commissions_scale.html"),

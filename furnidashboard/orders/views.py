@@ -12,6 +12,7 @@ from datetime import timedelta, date, datetime
 from .models import Order, OrderItem, OrderDelivery, OrderIssue
 from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable, SalesByAssociateWithBonusTable, DeliveriesTable, SalesTotalsTable
 from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset, OrderDeliveryForm, OrderItemFormHelper, OrderAttachmentFormSet, get_order_issues_formset
+import orders.forms as order_forms
 from .filters import OrderFilter
 from customers.models import Customer
 from crispy_forms.helper import FormHelper
@@ -529,7 +530,7 @@ class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, Mo
     context = super(OrderMonthArchiveTableView, self).get_context_data(**kwargs)
 
     # get monthly sales totals
-    month_totals_table = self._get_sales_totals(unfiltered_orders)
+    month_totals_table = _get_sales_totals(unfiltered_orders)
     RequestConfig(self.request).configure(month_totals_table)
     context['month_totals_table'] = month_totals_table
 
@@ -544,7 +545,7 @@ class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, Mo
         '%s__lt' % date_field: until,
     }
     ytd_orders = self.model._default_manager.filter(**lookup_kwargs)
-    ytd_totals_table =  self._get_sales_totals(ytd_orders)
+    ytd_totals_table =  _get_sales_totals(ytd_orders)
     RequestConfig(self.request).configure(ytd_totals_table)
     context['ytd_totals_table'] = ytd_totals_table
 
@@ -579,21 +580,6 @@ class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, Mo
       if cur_date > datetime.now():
         break
     return [(name, reverse('archive_month_numeric', kwargs={'year':year, 'month':m})) for m,name in sorted(months_data)]
-
-
-  def _get_sales_totals(self, qs):
-    totals_data = []
-    if qs.count():
-      subtotal_hq = sum([o.subtotal_after_discount for o in qs if o.store.name == "Sacramento"])
-      subtotal_fnt = sum([o.subtotal_after_discount for o in qs if o.store.name == "Roseville"])
-      total_hq = sum([o.grand_total for o in qs if o.store.name == "Sacramento"])
-      total_fnt = sum([o.grand_total for o in qs if o.store.name == "Roseville"])
-      totals_data = [
-        {'item':'Subtotal After Discount', 'hq':utils.dollars(subtotal_hq), 'fnt':utils.dollars(subtotal_fnt), 'total':utils.dollars(subtotal_hq + subtotal_fnt)},
-        {'item':'Grand Total', 'hq':utils.dollars(total_hq), 'fnt':utils.dollars(total_fnt), 'total':utils.dollars(total_hq + total_fnt)},
-        ]
-    totals_table = SalesTotalsTable(totals_data)
-    return totals_table
   
   def get_month_dated_queryset(self):
     year = self.get_year()
@@ -713,35 +699,58 @@ class DeliveryUpdateView(LoginRequiredMixin, UpdateView):
     kwargs.update({'request':self.request})
     return kwargs
 
-class SalesStandingsMonthTableView(PermissionRequiredMixin, MonthArchiveView):
-  # archive view specific fields
-  date_field = "order_date"
-  make_object_list = True
-  allow_future = True
-  allow_empty = True
+class SalesStandingsMonthTableView(PermissionRequiredMixin, ListView):
+  model = Order
+  context_object_name = "order_list"
   template_name = "orders/commissions_monthly.html"
-  month_format = '%b'
-  queryset = Order.objects.all()
+  from_date = ""
+  to_date = ""
 
   required_permissions = (
     'orders.view_sales',
   )
+  
+  def get_queryset(self, **kwargs):
+    #qs = super(FilteredTableMixin, self).get_queryset(**kwargs)
+    date_range = ""
+    try:
+      date_range = self.request.GET['date_range']
+    except KeyError, e:
+      pass
+    
+    self.from_date, self.to_date = order_utils.get_date_range(date_range, self.request);   
+    
+    qs = Order.objects.get_dated_qs(self.from_date, self.to_date)
+    
+    return qs
 
   def get_context_data(self, **kwargs):
     context = super(SalesStandingsMonthTableView, self).get_context_data(**kwargs)
 
-    orders = context['object_list']
+    context['date_range_filter'] = order_forms.SalesReportForm(self.request.GET)
+    
+    date_range = ""
+    if self.request.GET.has_key("date_range"):
+      date_range = self.request.GET['date_range']
+    context['caption'] = "Sales Orders for {0} - {1}".format(self.from_date.strftime("%Y-%m-%d"), self.to_date.strftime("%Y-%m-%d"))
+
+    orders = context[self.context_object_name]
     sales_by_assoc_data = order_utils._calc_sales_assoc_by_orders(orders)
     sales_by_assoc = SalesByAssociateWithBonusTable(sales_by_assoc_data)
 
     RequestConfig(self.request).configure(sales_by_assoc)
     context['sales_by_associate'] = sales_by_assoc 
+    
+    store_totals_table =  _get_sales_totals(orders)
+    RequestConfig(self.request).configure(store_totals_table)
+    context['store_totals_table'] = store_totals_table
 
-    sales_by_assoc_data_ytd = order_utils._calc_sales_assoc_by_orders(self.queryset)
-    sales_by_assoc_ytd = SalesByAssociateTable(sales_by_assoc_data_ytd)
-    RequestConfig(self.request).configure(sales_by_assoc_ytd)
-    context['sales_by_associate_ytd'] = sales_by_assoc_ytd 
-    context['sales_data_ytd_raw'] = json.dumps([{'key':data['associate'], 'value':data['sales']} for data in sales_by_assoc_data_ytd])
+    # sales_by_assoc_data_ytd = order_utils._calc_sales_assoc_by_orders(self.queryset)
+    # sales_by_assoc_ytd = SalesByAssociateTable(sales_by_assoc_data_ytd)
+    # RequestConfig(self.request).configure(sales_by_assoc_ytd)
+    # context['sales_by_associate_ytd'] = sales_by_assoc_ytd 
+    
+    context['sales_data_ytd_raw'] = json.dumps([{'key':data['associate'], 'value':data['sales']} for data in sales_by_assoc_data])
 
     return context
 
@@ -754,3 +763,17 @@ class HomePageRedirectView(LoginRequiredMixin, RedirectView):
       self.url = reverse('delivery_list')
 
     return super(HomePageRedirectView, self).get_redirect_url(**kwargs)
+
+def _get_sales_totals(qs):
+    totals_data = []
+    if qs.count():
+      subtotal_hq = sum([o.subtotal_after_discount for o in qs if o.store.name == "Sacramento"])
+      subtotal_fnt = sum([o.subtotal_after_discount for o in qs if o.store.name == "Roseville"])
+      total_hq = sum([o.grand_total for o in qs if o.store.name == "Sacramento"])
+      total_fnt = sum([o.grand_total for o in qs if o.store.name == "Roseville"])
+      totals_data = [
+        {'item':'Subtotal After Discount', 'hq':utils.dollars(subtotal_hq), 'fnt':utils.dollars(subtotal_fnt), 'total':utils.dollars(subtotal_hq + subtotal_fnt)},
+        {'item':'Grand Total', 'hq':utils.dollars(total_hq), 'fnt':utils.dollars(total_fnt), 'total':utils.dollars(total_hq + total_fnt)},
+        ]
+    totals_table = SalesTotalsTable(totals_data)
+    return totals_table    

@@ -115,6 +115,13 @@ table.dashed-table th,
 }
 /* \ORDER DETAIL */
 
+/* ORDER REPORTS */
+#dateRangeFilter .control-group {
+  display:inline-block;
+  margin-left:15px;
+}
+/* \ORDER REPORTS */
+
 a.delete-row {
   float: right;
   position: relative;

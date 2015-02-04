@@ -233,6 +233,23 @@ class CustomerDetailReadOnlyForm(DisabledFieldsMixin, CustomerForm):
 
 class OrderIssueForm(forms.ModelForm):
   pass
+  
+class SalesReportForm(forms.Form):
+  REPORT_FILTER_CHOICES = (
+    ("", "<Default>"),
+    ("week", "This Week"),
+    ("last-week", "Last Week"),
+    ("month", "This month"),
+    ("last-month", "Last month"),
+    ("year", "Year-to-date"),
+    ("custom", "Select date range"),
+  )
+  date_range = forms.ChoiceField(label="Filter Orders", required=False, choices=REPORT_FILTER_CHOICES)
+  range_from = forms.DateField(label="From", required=False, widget=BootstrapDateInput())
+  range_to = forms.DateField(label="To", required=False, widget=BootstrapDateInput())
+  
+  def __init__(self, *args, **kwargs):
+    super(SalesReportForm, self).__init__(*args, **kwargs)
     
 def get_ordered_items_formset(extra=1, max_num=1000):
   return inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=extra, max_num=max_num)

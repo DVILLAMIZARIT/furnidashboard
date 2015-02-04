@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load render_table from django_tables2 %}
+{% load bootstrap_toolkit %}
 
 {% block title %}Sales Standings Report{% endblock %}
 
@@ -86,6 +87,8 @@
 
   </script>
 
+  {{ date_range_filter.media }}
+  
 {% endblock %}
 
 {% block extra_css %}
@@ -124,9 +127,22 @@
   <!--<div class="well">
     <a href="{% url 'commissions_scale' %}" title="Bonus Commissions Chart">Bonus Commissions Scale Chart</a>
   </div>-->
+  
+  <div>
+    {{ args }}
+  </div>
+  <div>
+    <form action="" method="GET" id="dateRangeFilter" class="well form-inline">
+      {{ date_range_filter.non_field_errors }} 
+      <div class="controls-row">
+        {{ date_range_filter | as_bootstrap }}
+        <input type="submit" class="btn btn-submit btn-default" value="Apply"/>
+      </div>
+    </form>
+  </div>
 
   <div id="monthly-sales-report">
-    <h2>Sales by Associate for  {{ month|date:'F, Y' }} </h2>
+    <h2>{{caption}} - by Associates </h2>
     {% render_table sales_by_associate %}
 
     <div id="bonus_scale">
@@ -134,16 +150,26 @@
     </div>
 
   </div>
-  <div id="ytd-sales-report">
+  
+  {% comment %}
+  <!--<div id="ytd-sales-report">
     <h2>Year-to-date Sales Report</h2>
     {% render_table sales_by_associate_ytd %}
-  </div>
+  </div>-->
+  {% endcomment %}
 
-  <div id="sales_chart_container" style="height:270px">
+  <div id="sales_chart_container">
     <h2>Year-to-Date Sales Chart</h2>
     <div id="sales_chart"></div>
   </div>
+  
+  <div id="totals-ytd">
+    <h4>Sales by Stores</h4>
+    {% render_table store_totals_table %}
+  </div>
 
+{% comment %}
+<!--
 <p class="pagination">
 
   {% if previous_month %}
@@ -153,5 +179,7 @@
   {% if next_month %}
     <a href="{% url 'sales_standings' year=next_month.year month=next_month.month %}" class="btn pull-right">{{ next_month|date:"F Y" }} &rarr;</a>
   {% endif %}
-</p>
+</p>-->
+{% endcomment %}
+
 {% endblock content %}

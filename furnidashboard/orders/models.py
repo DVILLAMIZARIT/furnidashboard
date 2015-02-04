@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
@@ -19,6 +19,17 @@ class OrderManager(models.Manager):
     #qs = super(OrderManager, self).get_query_set().filter(order_date__gte=self.launch_dt)
     qs = super(OrderManager, self).get_query_set().filter(~Q(status='I'))
     return qs
+   
+  def get_dated_qs(self, start, end):
+    if settings.USE_TZ:
+      start = timezone.make_aware(start, timezone.get_current_timezone())
+      end = timezone.make_aware(end, timezone.get_current_timezone())
+    #import pdb; pdb.set_trace()  
+    lookup_kwargs = {
+        '%s__gte' % 'order_date': start -  timedelta(minutes=1),
+        '%s__lt' % 'order_date': end,
+    }
+    return super(OrderManager, self).get_query_set().filter(**lookup_kwargs)
   
   def unplaced_orders(self):
     #special order, not placed (no PO number)
