@@ -10,7 +10,7 @@ from django_tables2 import RequestConfig, SingleTableView
 from django.db.models import Q
 from datetime import timedelta, date, datetime
 from .models import Order, OrderItem, OrderDelivery, OrderIssue
-from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable, SalesByAssociateWithBonusTable, DeliveriesTable, SalesTotalsTable
+from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable, SalesByAssociateWithBonusTable, DeliveriesTable, SalesTotalsTable,SalesByAssocSalesTable
 from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset, OrderDeliveryForm, OrderItemFormHelper, OrderAttachmentFormSet, get_order_issues_formset
 import orders.forms as order_forms
 from .filters import OrderFilter
@@ -735,12 +735,23 @@ class SalesStandingsMonthTableView(PermissionRequiredMixin, ListView):
     context['dates_caption'] = "{0} - {1}".format(self.from_date.strftime("%Y-%m-%d"), self.to_date.strftime("%Y-%m-%d"))
 
     orders = context[self.context_object_name]
-    sales_by_assoc_data = order_utils._calc_sales_assoc_by_orders(orders)
-    sales_by_assoc = SalesByAssociateWithBonusTable(sales_by_assoc_data)
+    sales_by_assoc_data, sales_by_assoc_expanded_data = order_utils._calc_sales_assoc_by_orders(orders)
 
-    RequestConfig(self.request).configure(sales_by_assoc)
-    context['sales_by_associate'] = sales_by_assoc 
+    #total sales table
+    sales_by_assoc_table = SalesByAssociateTable(sales_by_assoc_data)
+    RequestConfig(self.request).configure(sales_by_assoc_table)
+    context['sales_by_associate'] = sales_by_assoc_table 
     
+    #prepare expanded tables per each associate
+    sales_by_assoc_expanded_tables= {}
+    count = 1
+    for assoc, sales in sales_by_assoc_expanded_data.items():
+      sales_by_assoc_expanded_tables[assoc] = SalesByAssocSalesTable(sales, prefix="tbl"+ str(count)) 
+      RequestConfig(self.request).configure(sales_by_assoc_expanded_tables[assoc])
+      count += 1
+    context['sales_by_assoc_expanded_tables'] = sales_by_assoc_expanded_tables
+
+    #sales by stores table 
     store_totals_table =  _get_sales_totals(orders)
     RequestConfig(self.request).configure(store_totals_table)
     context['store_totals_table'] = store_totals_table
@@ -750,7 +761,7 @@ class SalesStandingsMonthTableView(PermissionRequiredMixin, ListView):
     # RequestConfig(self.request).configure(sales_by_assoc_ytd)
     # context['sales_by_associate_ytd'] = sales_by_assoc_ytd 
     
-    context['sales_data_ytd_raw'] = json.dumps([{'key':data['associate'], 'value':data['sales']} for data in sales_by_assoc_data])
+    #context['sales_data_ytd_raw'] = json.dumps([{'key':data['associate'], 'value':data['sales']} for data in sales_by_assoc_data])
 
     return context
 

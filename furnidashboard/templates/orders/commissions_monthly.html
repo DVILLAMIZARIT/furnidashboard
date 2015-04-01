@@ -7,9 +7,33 @@
 
 {% block page_title %}Sales Standings Report{% endblock page_title %}
 
+{% block header_bottom %}
+  <ul class="nav nav-pills">
+    <li class="active">
+      <a href="{% url 'sales_standings_cur' %}">Sales Report</a>
+    </li>
+    <li>
+      <a href="{% url 'bonus_report' %}">Bonus Report</a>
+    </li>
+  </ul>
+{%  endblock %}
+
 {% block extra_js %}
   <script src="http://d3js.org/d3.v3.min.js"></script>
   
+  <script type="text/javascript">
+    $(function() {
+
+      $(document).ready(function() {
+          
+        $('#tabs a').click(function (e) {
+          e.preventDefault();
+          $(this).tab('show');
+        });
+      });
+    });
+  </script>
+
   <script>
 
   var $rangeFrom = $("#id_range_from").parents('.control-group'); 
@@ -197,15 +221,46 @@
     </form>
   </div>
 
-  <div id="monthly-sales-report">
-    <h3>Sales Totals - by Associates </h3>
-    <h4>For date range: {{ dates_caption }}</h4>
-    {% render_table sales_by_associate %}
+  <div id="totals-tables" class="clearfix">
+    <div id="monthly-sales-report">
+      <h3>Sales Totals - by Associates </h3>
+      <h4>Date range: {{ dates_caption }}</h4>
+      {% render_table sales_by_associate %}
 
-    <div id="bonus_scale">
-      <img src="{{ STATIC_URL }}img/bonus_scale.png" alt="Bonus Scale"/>
+      <!--<div id="bonus_scale">
+        <img src="{{ STATIC_URL }}img/bonus_scale.png" alt="Bonus Scale"/>
+      </div>-->
+
     </div>
 
+    <div id="totals-ytd">
+      <h4>Sales by Stores</h4>
+      {% render_table store_totals_table %}
+    </div>
+  </div>  
+
+  <div id="associate-order-tabs" class="tabbable tabs">
+  
+    <h4>View order list by associates</h4>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" id="tabs">
+      {% for assoc, sales_table in sales_by_assoc_expanded_tables.items %}
+        <li class="{% ifequal forloop.counter 1 %}active{% endifequal %}"><a href="#assoc{{ forloop.counter }}" data-toggle="tab">{{ assoc }}</a></li>
+      {% endfor %}
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">  
+      {% for assoc, sales_table in sales_by_assoc_expanded_tables.items %}
+        <div class="tab-pane" id="assoc{{ forloop.counter }}">
+          <fieldset>
+            <legend>{{ assoc }}</legend>
+            <div>
+              {% render_table sales_table %}
+            </div>
+          </fieldset>
+        </div>
+      {% endfor %}
   </div>
   
   {% comment %}
@@ -215,15 +270,11 @@
   </div>-->
   {% endcomment %}
 
-  <div id="sales_chart_container">
+  <!--<div id="sales_chart_container">
     <h3>Sales Chart</h3>
     <div id="sales_chart"></div>
-  </div>
+  </div>-->
   
-  <div id="totals-ytd">
-    <h4>Sales by Stores</h4>
-    {% render_table store_totals_table %}
-  </div>
 
 {% comment %}
 <!--

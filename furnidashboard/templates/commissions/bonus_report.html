@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% load render_table from django_tables2 %}
+{% load bootstrap_toolkit %}
+
+{% block title %}Bonus Report{% endblock %}
+
+{% block page_title %}Bonus Report{% endblock page_title %}
+
+{% block extra_js %}
+
+  {{ date_range_filter.media }}
+  
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+{% endblock %}
+
+{% block header_bottom %}
+  <ul class="nav nav-pills">
+    <li>
+      <a href="{% url 'sales_standings_cur' %}">Sales Report</a>
+    </li>
+    <li class="active">
+      <a href="#">Bonus Report</a>
+    </li>
+  </ul>
+{%  endblock %}
+
+{% block content %}
+  
+  <!--<div class="well">
+    <a href="{% url 'commissions_scale' %}" title="Bonus Commissions Chart">Bonus Commissions Scale Chart</a>
+  </div>-->
+  
+  <div>
+    <form action="" method="GET" id="dateRangeFilter" class="well form-inline">
+      {{ date_range_filter.non_field_errors }} 
+      <div class="controls-row">
+        {{ date_range_filter | as_bootstrap }}
+        <input type="submit" class="btn btn-submit btn-default" value="Apply"/>
+      </div>
+    </form>
+  </div>
+
+  <div id="monthly-bonus-report">
+    <h3>Sales Bonus by Associates </h3>
+    {% render_table sales_by_associate %}
+  </div>
+
+  <div id="bonus_scale">
+    <h3>Bonus scale as of 02/01/2015</h3>
+    <img src="{{ STATIC_URL }}img/bonus_scale_feb_2015.png" alt="Bonus Scale"/>
+    
+    <h3>Bonus scale prior to 02/01/2015</h3>
+    <img src="{{ STATIC_URL }}img/bonus_scale.png" alt="Bonus Scale"/>
+  </div>
+
+{% endblock content %}

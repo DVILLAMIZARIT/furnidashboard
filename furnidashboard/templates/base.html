@@ -91,6 +91,9 @@
 
     <div class="container">
 
+      {% block header_bottom %}{% endblock header_bottom %}
+
+
       <h1>{% block page_title %}{% endblock page_title %}</h1>
 
       {% if messages %}

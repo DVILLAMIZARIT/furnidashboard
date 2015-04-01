@@ -2,6 +2,8 @@ from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db.models import Q
 from django.conf import settings
 from orders.models import Order, OrderDelivery
+from datetime import datetime, timedelta
+import calendar
 
 def dollars(dollars):
   dollars = round(float(dollars), 2)
@@ -50,3 +52,19 @@ def get_unpaid_commissions_data():
           })
   
   return res
+  
+def get_month_date_range(month, year):
+	#1st day of month
+  from_date = datetime(year, month, 1)
+  
+  #get last day of month
+  wkday, num_days = calendar.monthrange(year, month)
+  to_date = from_date + timedelta(days=num_days)
+  
+  return (from_date, to_date)
+	
+def get_current_month_date_range():
+	to_date = datetime.now()	#cur date
+	
+	return get_month_date_range(to_date.month, to_date.year)
+	

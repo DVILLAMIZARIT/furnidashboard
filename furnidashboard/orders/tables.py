@@ -47,7 +47,7 @@ class UnplacedOrdersTable(tables.Table):
 
 class SalesByAssociateTable(tables.Table):
   associate = tables.Column(orderable=False)
-  sales = DollarAmountColumn()
+  sales = DollarAmountColumn(verbose_name="Sales (Subtotal after discount)")
   commissions_paid = DollarAmountColumn(verbose_name="Commissions Paid")
   commissions_pending = DollarAmountColumn(verbose_name="Commissions Pending")
   commissions_due = DollarAmountColumn(verbose_name="Commissions Due")
@@ -56,11 +56,28 @@ class SalesByAssociateTable(tables.Table):
     order_by='-sales'
     attrs = {"class":"paleblue"}
 
-class SalesByAssociateWithBonusTable(SalesByAssociateTable):
+class SalesByAssocSalesTable(tables.Table):
+  order_number = tables.Column(verbose_name="Order #")
+  order_date = tables.Column(verbose_name="Order date")
+  item = tables.Column(verbose_name="Sold items")
+  amount = DollarAmountColumn(verbose_name="Order Subtotal")
+  commissions_paid = DollarAmountColumn(verbose_name="Commissions Paid")
+  commissions_pending = DollarAmountColumn(verbose_name="Commissions Pending")
+  commissions_due = DollarAmountColumn(verbose_name="Commissions Due")
+
+  class Meta:
+    order_by='-order_date'
+    attrs = {"class":"paleblue"}
+
+
+class SalesByAssociateWithBonusTable(tables.Table):
+  associate = tables.Column(orderable=False)
+  sales = DollarAmountColumn()
   bonus = DollarAmountColumn(verbose_name="Bonus amount")
 
-  class Meta(SalesByAssociateTable.Meta):
-    pass
+  class Meta:
+    order_by='-sales'
+    attrs = {'class':'paleblue'}
 
 class UnpaidCommissionsTable(tables.Table):
   associate = AssociateNameColumn(verbose_name="Associate")
@@ -92,7 +109,7 @@ class SalesTotalsTable(tables.Table):
   item = tables.Column(verbose_name="-", orderable=False)
   hq = tables.Column(verbose_name="HQ/Sacramento", orderable=False)
   fnt = tables.Column(verbose_name="Roseville", orderable=False)
-  total = tables.Column(verbose_name="Total", orderable=False)
+  total = tables.Column(verbose_name="Stores Total", orderable=False)
 
   class Meta:
     attrs = {"class":"paleblue"}

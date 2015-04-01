@@ -71,13 +71,23 @@ input.order-item-desc {
 #order-list div.table-container > table {
   width:100%;
 }
+#monthly-sales-report, #totals-ytd{
+  float:left;
+}
+#monthly-sales-report {
+  padding-right:20px;
+}
+#totals-ytd {
+  margin-top:50px;
+}
+#monthly-bonus-report {
+  float:left;
+}
 #ytd-sales-report {
   clear:both;
 }
 #bonus_scale {
   float:right;
-  position:relative;
-  bottom:55px;
 }
 #order-filter .control-group {
   display:inline-block;
@@ -92,6 +102,9 @@ input.order-item-desc {
 }
 #pager {
   padding-bottom:3em;
+}
+#associate-order-tabs {
+  margin-top:40px;
 }
 /* \ORDER LIST */
 
@@ -123,6 +136,10 @@ table.dashed-table th,
  font-size: 16pt;
  font-family: Arial;
 }   
+#totals-ytd td.total {
+  font-weight:bold;
+  font-size: larger;
+}
 /* \ORDER REPORTS */
 
 a.delete-row {

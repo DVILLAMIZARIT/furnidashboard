@@ -5,6 +5,7 @@ from orders.models import Order
 from customers.models import Customer
 from customers.views import CustomerCreateView, CustomerUpdateView, CustomerDetailView, CustomerTableView
 from orders.views import MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveTableView, OrderMonthArchiveTableView, DeliveriesTableView, DeliveryDetailView, DeliveryUpdateView, DeliveryDeleteView, SalesStandingsMonthTableView, HomePageRedirectView, ActiveOrdersTableView
+from commissions.views import BonusMonthlyReportView
 from core.views import UnpaidDeliveriesTableView, UnplacedOrderTableView, OrderedUnacknowledgedOrdersTableView, UnpaidCommissionsTableView   
 from django.views.generic.edit import FormView
 from orders.forms import OrderForm
@@ -159,6 +160,11 @@ urlpatterns = patterns('',
       regex = r'^sales-standings/commissions-scale/$',
       view=TemplateView.as_view(template_name="orders/commissions_scale.html"),
       name = "commissions_scale",
+    ),
+    url(
+    	regex = r'^bonus-report/$',
+    	view = BonusMonthlyReportView.as_view(),
+      name = "bonus_report"
     ),
 
     # authentication-related URLs
