@@ -1,4 +1,5 @@
 import django_tables2 as tables
+from django_tables2.utils import Accessor
 from django.utils.safestring import mark_safe
 from django_tables2.utils import A #accessor
 from .models import Order, OrderDelivery
@@ -64,6 +65,8 @@ class SalesByAssocSalesTable(tables.Table):
   commissions_paid = DollarAmountColumn(verbose_name="Commissions Paid")
   commissions_pending = DollarAmountColumn(verbose_name="Commissions Pending")
   commissions_due = DollarAmountColumn(verbose_name="Commissions Due")
+  #view = tables.LinkColumn("order_detail", kwargs={"pk": Accessor("order_pk")}, verbose_name="View Order")
+  pk = CustomTextLinkColumn('order_detail', args=[A('order_pk')], custom_text="Detail", orderable=False, verbose_name="Actions")
 
   class Meta:
     order_by='-order_date'

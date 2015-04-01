@@ -252,7 +252,7 @@
     <!-- Tab panes -->
     <div class="tab-content">  
       {% for assoc, sales_table in sales_by_assoc_expanded_tables.items %}
-        <div class="tab-pane" id="assoc{{ forloop.counter }}">
+      <div class="tab-pane {% ifequal forloop.counter 1 %}active{% endifequal %}" id="assoc{{ forloop.counter }}">
           <fieldset>
             <legend>{{ assoc }}</legend>
             <div>

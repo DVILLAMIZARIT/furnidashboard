@@ -66,6 +66,7 @@ def _calc_sales_assoc_by_orders(order_list, **kwargs):
           'commissions_pending':com['commissions_pending'], 
           'commissions_due':com['commissions_due'], 
           'commissions_paid':com['commissions_paid'],
+          'order_pk':o.pk, 
         }
         expand_res[com['associate']].append(sales_data)
       else:
