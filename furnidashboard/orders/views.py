@@ -550,7 +550,7 @@ class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, Mo
     context['ytd_totals_table'] = ytd_totals_table
 
     #calc sales totals by associate
-    sales_by_assoc_data = order_utils._calc_sales_assoc_by_orders(unfiltered_orders)
+    sales_by_assoc_data, tmp = order_utils._calc_sales_assoc_by_orders(unfiltered_orders)
     sales_by_assoc = SalesByAssociateTable(sales_by_assoc_data)
     RequestConfig(self.request).configure(sales_by_assoc)
     context['sales_by_associate'] = sales_by_assoc 
