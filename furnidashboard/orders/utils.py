@@ -54,23 +54,23 @@ def _calc_sales_assoc_by_orders(order_list, **kwargs):
     for com in order_coms:
 
       #save order info into expanded result list
-      if expand_res.has_key(com['associate']):
-        item = o.orderitem_set.all()[:1].get().description
-        if len(item) > 30:
-          item = item[:30] + "..." 
-        sales_data = {
-          'order_number':o.number, 
-          'order_date': datetime.strftime(o.order_date, '%m-%d-%Y'), 
-          'item':item, 
-          'amount':com['sale'], 
-          'commissions_pending':com['commissions_pending'], 
-          'commissions_due':com['commissions_due'], 
-          'commissions_paid':com['commissions_paid'],
-          'order_pk':o.pk, 
-        }
-        expand_res[com['associate']].append(sales_data)
-      else:
+      if not expand_res.has_key(com['associate']):
         expand_res[com['associate']] = []
+
+      item = o.orderitem_set.all()[:1].get().description
+      if len(item) > 30:
+        item = item[:30] + "..." 
+      sales_data = {
+        'order_number':o.number, 
+        'order_date': datetime.strftime(o.order_date, '%m-%d-%Y'), 
+        'item':item, 
+        'amount':com['sale'], 
+        'commissions_pending':com['commissions_pending'], 
+        'commissions_due':com['commissions_due'], 
+        'commissions_paid':com['commissions_paid'],
+        'order_pk':o.pk, 
+      }
+      expand_res[com['associate']].append(sales_data)        
 
       #count up subtotals
       if res.has_key(com['associate']):
@@ -80,7 +80,7 @@ def _calc_sales_assoc_by_orders(order_list, **kwargs):
         res[com['associate']]['commissions_paid'] += com['commissions_paid'] 
       else:
         res[com['associate']] =  com
-  
+
   sales_list = []
   for associate, temp_subtotal in res.items():
     
