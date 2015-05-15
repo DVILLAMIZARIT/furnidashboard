@@ -1,0 +1,14 @@
+<!-- date filter form -->
+
+{% load bootstrap_toolkit %}
+
+<div>
+    <form action="" method="GET" id="dateRangeFilter" class="well form-inline">
+        {{ date_range_filter.non_field_errors }} 
+        <div class="controls-row">
+            {{ date_range_filter | as_bootstrap }}
+            <input type="submit" class="btn btn-submit btn-default" value="Apply"/>
+        </div>
+    </form>
+</div>
+<!-- \date filter form -->

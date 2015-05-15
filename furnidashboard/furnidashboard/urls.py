@@ -6,7 +6,8 @@ from customers.models import Customer
 from customers.views import CustomerCreateView, CustomerUpdateView, CustomerDetailView, CustomerTableView
 from orders.views import MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveTableView, OrderMonthArchiveTableView, DeliveriesTableView, DeliveryDetailView, DeliveryUpdateView, DeliveryDeleteView, SalesStandingsMonthTableView, HomePageRedirectView, ActiveOrdersTableView
 from commissions.views import BonusMonthlyReportView
-from core.views import UnpaidDeliveriesTableView, UnplacedOrderTableView, OrderedUnacknowledgedOrdersTableView, UnpaidCommissionsTableView   
+#from core.views import UnpaidDeliveriesTableView, UnplacedOrderTableView, OrderedUnacknowledgedOrdersTableView, UnpaidCommissionsTableView   
+import core.views as core_views
 from django.views.generic.edit import FormView
 from orders.forms import OrderForm
 from datetime import date
@@ -30,9 +31,7 @@ urlpatterns = patterns('',
     # url(r'^$', FormView.as_view(form_class=OrderForm, template_name = 'orders/form.html')),    
     
     url(
-      regex= r'^orders/$', 
-      # view=OrderListView.as_view(),
-      # view=OrderMonthArchiveTableView.as_view(year=str(date.today().year), month=str(date.today().month), month_format='%m'),
+      regex= r'^orders/$',
       view=OrderMonthArchiveTableView.as_view(month_format='%m', **this_month_args),
       name="order_list",
     ),
@@ -101,23 +100,33 @@ urlpatterns = patterns('',
     # Alerts pages
     url(
       regex= r'^alerts/$', 
-      view=UnplacedOrderTableView.as_view(),
+      view=core_views.UnplacedOrderTableView.as_view(),
       name="alerts_main",
     ),
     url(
       regex= r'^alerts/unpaid-deliveries/$', 
-      view=UnpaidDeliveriesTableView.as_view(),
+      view=core_views.UnpaidDeliveriesTableView.as_view(),
       name="alerts_unpaid_deliveries",
     ),
     url(
       regex= r'^alerts/unacknowledged-orders/$', 
-      view=OrderedUnacknowledgedOrdersTableView.as_view(),
+      view=core_views.OrderedUnacknowledgedOrdersTableView.as_view(),
       name="alerts_unacknowledged_orders",
     ),
     url(
       regex= r'^alerts/unpaid-commissions/$', 
-      view=UnpaidCommissionsTableView.as_view(),
+      view=core_views.UnpaidCommissionsTableView.as_view(),
       name="alerts_unpaid_commissions",
+    ),
+    url(
+      regex= r'^alerts/protection-plan/$', 
+      view=core_views.CryptonProtectionAlertTableView.as_view(),
+      name="alerts_protection_plan",
+    ),
+     url(
+      regex= r'^alerts/order-financing/$', 
+      view=core_views.OrderFinancingAlertTableView.as_view(),
+      name="alerts_order_financing",
     ),
 
     # Customer links
@@ -146,16 +155,9 @@ urlpatterns = patterns('',
     url(
       # /sales-standings/
       regex = r'^sales-standings/$', 
-      #view=SalesStandingsMonthTableView.as_view(year=str(date.today().year), month=str(date.today().month), month_format='%m'),
       view=SalesStandingsMonthTableView.as_view(),
       name="sales_standings_cur",
     ),
-    # url(
-    #  /sales-standings/2013/02
-      # regex = r'^sales-standings/(?P<year>\d{4})/(?P<month>\d+)/$',
-      # view=SalesStandingsMonthTableView.as_view(month_format='%m'),
-      # name="sales_standings",
-    # ),
     url(
       regex = r'^sales-standings/commissions-scale/$',
       view=TemplateView.as_view(template_name="orders/commissions_scale.html"),

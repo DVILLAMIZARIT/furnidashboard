@@ -1,5 +1,5 @@
 from stores.models import Store
-from .models import Order, OrderItem, OrderDelivery, OrderAttachment, OrderIssue
+from .models import Order, OrderItem, OrderDelivery, OrderAttachment, OrderIssue, OrderItemProtectionPlan, OrderFinancing
 from commissions.models import Commission
 from customers.models import Customer
 from django import forms
@@ -234,7 +234,7 @@ class CustomerDetailReadOnlyForm(DisabledFieldsMixin, CustomerForm):
 class OrderIssueForm(forms.ModelForm):
   pass
   
-class SalesReportForm(forms.Form):
+class DateRangeForm(forms.Form):
   REPORT_FILTER_CHOICES = (
     #("", "<Default>"),
     ("week", "This Week"),
@@ -249,7 +249,7 @@ class SalesReportForm(forms.Form):
   range_to = forms.DateField(label="To", required=False, widget=BootstrapDateInput())
   
   def __init__(self, *args, **kwargs):
-    super(SalesReportForm, self).__init__(*args, **kwargs)
+    super(DateRangeForm, self).__init__(*args, **kwargs)
     self.fields['date_range'].initial = 'week'  #default selection
 
     
@@ -275,3 +275,5 @@ DeliveryFormSet = inlineformset_factory(Order, OrderDelivery, form=OrderDelivery
 CommissionFormSet = inlineformset_factory(Order, Commission, form=CommissionForm, extra=1, max_num=100, can_delete=False)
 CustomerFormSet = modelformset_factory(Customer, form=CustomerForm, extra=1, max_num=1)
 OrderAttachmentFormSet = inlineformset_factory(Order, OrderAttachment, extra=1, max_num=5)
+CryptonProtectionFormSet = inlineformset_factory(Order, OrderItemProtectionPlan, extra=1, max_num=1)
+OrderFinancingFormSet = inlineformset_factory(Order, OrderFinancing, extra=1, max_num=1)

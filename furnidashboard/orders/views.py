@@ -22,6 +22,10 @@ from core.mixins import LoginRequiredMixin, PermissionRequiredMixin
 import orders.utils as order_utils
 import json
 
+crypton_orphan_info_error = "Crypton protection information has been entered but 'Protection plan purchased' option is not selected. Either check the protection plan checkbox or delete Crypton protection information by selecting the 'Delete' checkbox."
+order_financing_orphan_info_error = "Order financing information has been entered but 'Order financing' option is not selected. Either check the order financing checkbox or delete Order financing information by selecting the 'Delete' checkbox."
+err_saving_order_info_msg = "Error saving the order information. Please go through tabs to fix invalid information."
+
 class OrderDetailView(PermissionRequiredMixin, DetailView):
   model = Order
   context_object_name = "order"
@@ -92,6 +96,11 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     OrderIssuesFormSet = get_order_issues_formset()
     issues_form = OrderIssuesFormSet(instance=self.object, prefix='issues')
 
+    # crypton protection plan form
+    crypton_protection_form = order_forms.CryptonProtectionFormSet(instance=self.object, prefix="crypton")
+
+    # special financing option form
+    order_financing_form = order_forms.OrderFinancingFormSet(instance=self.object, prefix="financing")
 
     extra_forms = {
       'form':form,
@@ -101,6 +110,8 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
       'delivery_form':delivery_form,
       'attachment_form':attachment_form,
       'issues_form':issues_form,
+      'crypton_form': crypton_protection_form,
+      'financing_form': order_financing_form,
     }
     context = self.get_context_data()
     context.update(extra_forms)
@@ -136,6 +147,9 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     OrderIssuesFormSet = get_order_issues_formset()
     issues_form = OrderIssuesFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="issues")
 
+    crypton_protection_form = order_forms.CryptonProtectionFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="crypton")
+    order_financing_form = order_forms.OrderFinancingFormSet(self.request.POST, self.request.FILES, instance=self.object, prefix="financing")
+
     forms = {
       'form':form,
       'customer_form':customer_form,
@@ -144,6 +158,8 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
       'delivery_form':delivery_form,
       'attachment_form':attachment_form,
       'issues_form': issues_form,
+      'crypton_form': crypton_protection_form,
+      'financing_form': order_financing_form,
     }
 
     #check if forms are valid
@@ -159,10 +175,15 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
           break
     if forms_valid and attachment_form.has_changed():  
       forms_valid = attachment_form.is_valid()
+    if forms_valid and crypton_protection_form.has_changed():
+      forms_valid = crypton_protection_form.is_valid()
+    if forms_valid and order_financing_form.has_changed():
+      forms_valid = order_financing_form.is_valid()
       
     if forms_valid:
       return self.form_valid(**forms)
     else:
+      messages.add_message(self.request, messages.ERROR, err_saving_order_info_msg, extra_tags="alert alert-danger")
       return self.form_invalid(**forms)
 
   def form_valid(self, *args, **kwargs):
@@ -177,6 +198,8 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     delivery_form = kwargs['delivery_form']
     attachment_form = kwargs['attachment_form']
     issues_form = kwargs.get('issues_form')
+    crypton_protection_form = kwargs['crypton_form']
+    order_financing_form  = kwargs['financing_form']
     
     orig_status = self.object.status
     self.object = form.save(commit=False)
@@ -226,6 +249,19 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     if BR_passed and not issues_form.is_valid():
       messages.error(self.request, "Error saving 'order issues' information!", extra_tags="alert alert-danger")
       BR_passed = False
+
+    # validate crypton protection plan
+    if BR_passed and \
+      not self.object.protection_plan and \
+      (crypton_protection_form.cleaned_data[0]['approval_no'] or crypton_protection_form.cleaned_data[0]['details']):
+      messages.error(self.request, crypton_orphan_info_error, extra_tags="alert alert-danger")
+      BR_passed = False
+
+    # validate order financing information
+    if BR_passed and not self.object.financing_option and \
+      (order_financing_form.cleaned_data[0]['approval_no'] or order_financing_form.cleaned_data[0]['details']):
+      messages.error(self.request, order_financing_orphan_info_error, extra_tags="alert alert-danger")
+      BR_passed = False
   
 
     # Final check
@@ -268,13 +304,24 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
       if attachment_form.has_changed():
         attachment_form.instance = self.object
         attachment_form.save()
-
+ 
       # save issues
       if issues_form.has_changed():
         issues_form.instance = self.object
         issues_form.save()
 
+      #save order protection plan form
+      if crypton_protection_form.has_changed():
+        crypton_protection_form.instance = self.object
+        crypton_protection_form.save()
+
+      #save order financing option form
+      if order_financing_form.has_changed():
+        order_financing_form.instance = self.object
+        order_financing_form.save()
+
       return HttpResponseRedirect(self.get_success_url())
+
     else:
       return self.form_invalid(**kwargs)
 
@@ -283,7 +330,6 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     """
     Called if any of the forms on order page is invalid. Returns a response with an invalid form in the context
     """
-    messages.add_message(self.request, messages.ERROR, "Error updating the order. Please go through tabs to fix the invalid information.", extra_tags="alert alert-danger")
     context = self.get_context_data()
     context.update(kwargs)
 
@@ -333,11 +379,17 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
     SpecialCommissionFormSet = get_commissions_formset(extra=extra, max_num=3, request=self.request)
     commissions_form = SpecialCommissionFormSet(prefix="commissions")
 
+    crypton_protection_form = order_forms.CryptonProtectionFormSet(prefix="crypton")
+
+    order_financing_form = order_forms.OrderFinancingFormSet(prefix="financing")
+
     extra_forms = {
       'form':form,
       'customer_form':customer_form,
       'items_form':items_form,
       'commissions_form':commissions_form,
+      'crypton_form': crypton_protection_form,
+      'financing_form': order_financing_form,
     }
     context = self.get_context_data()
     context.update(extra_forms)
@@ -362,25 +414,28 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
     SpecialCommissionFormSet = get_commissions_formset(extra=1, max_num=3, request=self.request)
     commissions_form = SpecialCommissionFormSet(self.request.POST, self.request.FILES, prefix="commissions")
 
+    crypton_protection_form = order_forms.CryptonProtectionFormSet(self.request.POST, self.request.FILES, prefix="crypton")
+    order_financing_form = order_forms.OrderFinancingFormSet(self.request.POST, self.request.FILES, prefix="financing")
+
     forms = {
       'form':form,
       'customer_form':customer_form,
       'items_form':items_form,
       'commissions_form':commissions_form,
+      'crypton_form': crypton_protection_form,
+      'financing_form': order_financing_form,
     }
 
-    if form.is_valid() and items_form.is_valid() and commissions_form.is_valid(): 
+    if form.is_valid() and items_form.is_valid() and commissions_form.is_valid() and crypton_protection_form.is_valid() and order_financing_form.is_valid(): 
       return self.form_valid(**forms)
     else:
+      messages.add_message(self.request, messages.ERROR, err_saving_order_info_msg, extra_tags="alert alert-danger")
       return self.form_invalid(**forms)
 
   def form_invalid(self, *args, **kwargs): 
     """
     Called if any of the forms on order page is invalid. Returns a response with an invalid form in the context
-    """
-    error_tag = "alert alert-danger"
-    # messages.error(self.request, "Error saving order form information", extra_tags=error_tag)
-    messages.add_message(self.request, messages.ERROR, "Error saving the order information. Please go through tabs to fix invalid information.", extra_tags="alert alert-danger")
+    """    
     context = self.get_context_data(messages=messages)
     context.update(kwargs)
     return self.render_to_response(context)
@@ -394,6 +449,8 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
     customer_form = kwargs['customer_form']
     items_form = kwargs['items_form']
     commissions_form = kwargs['commissions_form']
+    crypton_protection_form = kwargs['crypton_form']
+    order_financing_form  = kwargs['financing_form']
 
     self.object = form.save(commit=False)
     
@@ -425,7 +482,19 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
         else:
           messages.error(self.request, "Error saving customer form information!", extra_tags=error_tag)
           BR_passed = False
-  
+
+    # validate crypton protection plan
+    if BR_passed and \
+      not self.object.protection_plan and \
+      (crypton_protection_form.cleaned_data[0]['approval_no'] or crypton_protection_form.cleaned_data[0]['details']):
+      messages.error(self.request, crypton_orphan_info_error, extra_tags="alert alert-danger")
+      BR_passed = False
+
+    # validate order financing information
+    if BR_passed and not self.object.financing_option and \
+      (order_financing_form.cleaned_data[0]['approval_no'] or order_financing_form.cleaned_data[0]['details']):
+      messages.error(self.request, order_financing_orphan_info_error, extra_tags="alert alert-danger")
+      BR_passed = False
 
     if BR_passed: 
       
@@ -444,6 +513,16 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
       # save commissions
       commissions_form.instance = self.object
       commissions_form.save()
+
+      #save order protection plan form
+      if crypton_protection_form.has_changed():
+        crypton_protection_form.instance = self.object
+        crypton_protection_form.save()
+
+      #save order financing option form
+      if order_financing_form.has_changed():
+        order_financing_form.instance = self.object
+        order_financing_form.save()
 
       return HttpResponseRedirect(self.get_success_url())
     else:
@@ -675,9 +754,41 @@ class DeliveriesTableView(LoginRequiredMixin, SingleTableView):
   context_table_name = 'table' 
   template_name = "orders/delivery_list.html"
   paginate_by = 20 
+  from_date = ""
+  to_date = ""
 
   def get_queryset(self, **kwargs):
-    return OrderDelivery.objects.filter(~Q(delivery_type='SELF'))
+    qs = OrderDelivery.objects.filter(~Q(delivery_type='SELF'))
+
+    date_range = ""
+    try:
+      date_range = self.request.GET['date_range']
+      self.from_date, self.to_date = order_utils.get_date_range(date_range, self.request)    
+    except KeyError, e:
+      self.from_date, self.to_date = order_utils.get_date_range('month', self.request);
+    
+    lookup_kwargs = {
+      '%s__gte' % 'scheduled_delivery_date': self.from_date,
+      '%s__lt'  % 'scheduled_delivery_date': self.to_date,
+    }
+    qs = qs.filter(**lookup_kwargs)
+
+    return qs
+
+  def get_context_data(self, **kwargs):
+    context = super(DeliveriesTableView, self).get_context_data(**kwargs)
+
+    context['date_range_filter'] = order_forms.DateRangeForm(self.request.GET)
+    
+    date_range = ""
+    if self.request.GET.has_key("date_range"):
+      date_range = self.request.GET['date_range']
+
+    if self.from_date and self.to_date:
+      context['dates_caption'] = "{0} - {1}".format(self.from_date.strftime("%Y-%m-%d"), self.to_date.strftime("%Y-%m-%d"))
+
+    return context
+    
 
 class DeliveryDetailView(LoginRequiredMixin, DetailView):
   model = OrderDelivery
@@ -727,7 +838,7 @@ class SalesStandingsMonthTableView(PermissionRequiredMixin, ListView):
   def get_context_data(self, **kwargs):
     context = super(SalesStandingsMonthTableView, self).get_context_data(**kwargs)
 
-    context['date_range_filter'] = order_forms.SalesReportForm(self.request.GET)
+    context['date_range_filter'] = order_forms.DateRangeForm(self.request.GET)
     
     date_range = ""
     if self.request.GET.has_key("date_range"):

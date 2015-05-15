@@ -55,6 +55,21 @@ class UnpaidCommissionsTableView(AlertsTableView):
   def get_table_data(self):
     return utils.get_unpaid_commissions_data() 
 
+class CryptonProtectionAlertTableView(AlertsTableView):
+  model = Order
+  subtitle = "Unactivated Crypton Protection"
+
+  def get_table_data(self):
+    return Order.objects.protection_plan_inactive() 
+
+class OrderFinancingAlertTableView(AlertsTableView):
+  model = Order
+  subtitle = "Unactivated Order Financing"
+
+  def get_table_data(self):
+    return Order.objects.financing_unactivated()     
+
+
 # SEARCH VIEW and RELATED FUNCTIONS
 def normalize_query(query_string, findterms=re.compile(r'"([^"]+)"|(\S)').findall, normspaces=re.compile(r'\s{2,}').sub):
   """ Splits the query string in individual keywords, getting rid of unnecessary spaces and grouping quoted words together.

@@ -2,6 +2,7 @@
 
 {% load render_table from django_tables2 %}
 {% load bootstrap_toolkit %}
+{% load staticfiles %}
 
 {% block title %}Sales Standings Report{% endblock %}
 
@@ -19,44 +20,24 @@
 {%  endblock %}
 
 {% block extra_js %}
-  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <!--<script src="http://d3js.org/d3.v3.min.js"></script>-->
+  <script src="{% static 'js/date_range_form_helper.js' %}"></script>
   
   <script type="text/javascript">
-    $(function() {
 
-      $(document).ready(function() {
-          
-        $('#tabs a').click(function (e) {
-          e.preventDefault();
-          $(this).tab('show');
-        });
+    $(document).ready(function() {
+        
+      $('#tabs a').click(function (e) {
+        e.preventDefault();
+        $(this).tab('show');
       });
+
+      DateRangeFormHelper.init();
+
     });
-  </script>
 
-  <script>
 
-  var $rangeFrom = $("#id_range_from").parents('.control-group'); 
-  var $rangeTo = $("#id_range_to").parents('.control-group'); 
-
-  function refreshDateRangeControls() {
-    if($("#id_date_range").val() === 'custom') {
-      $rangeFrom.show();
-      $rangeTo.show(); 
-    } else {
-      $rangeFrom.hide();
-      $rangeTo.hide(); 
-      $rangeFrom.find('input').val('');
-      $rangeTo.find('input').val('');
-    }
-  }
-
-  refreshDateRangeControls();
-  $("#id_date_range").on('change', function (){
-    refreshDateRangeControls();
-  });
-
-  var data = {{ sales_data_ytd_raw | safe}};
+  /*var data = {{ sales_data_ytd_raw | safe}};
 
   var w = 500,                        //width
   h = 500,                            //height
@@ -95,79 +76,7 @@
       })
       .attr("text-anchor", "middle")                          //center the text on it's origin
       .text(function(d, i) { return data[i].key; });        //get the label from our original data array 
-
-  /*
-  var margin = {top: 20, right: 20, bottom: 50, left: 60},
-    width = 500 - margin.left - margin.right,
-    height = 250 - margin.top - margin.bottom;
-  var barPadding = 1;
-
-  var x = d3.scale.ordinal()
-      .rangeRoundBands([0, width], .1);
-
-  var y = d3.scale.linear()
-      .range([height, 0]);
-
-  var xAxis = d3.svg.axis()
-      .scale(x)
-      .orient("bottom");
-
-  var yAxis = d3.svg.axis()
-      .scale(y)
-      .orient("left")
-      .ticks(10, "$");
-
-  var svg = d3.select("#sales_chart").append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-  x.domain(data.map(function(d) { return d.key; }));
-  y.domain([0, d3.max(data, function(d) { return d.value; })]);
-
-  svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
-
-  svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
-    .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Sales");
-
-  svg.selectAll(".bar")
-      .data(data)
-    .enter().append("rect")
-      .attr("class", "bar")
-      .attr("x", function(d) { return x(d.key); })
-      .attr("width", x.rangeBand())
-      .attr("y", function(d) { return y(d.value); })
-      .attr("height", function(d) { return height - y(d.value); });
-
-  svg.selectAll("text")
-     .data(data)
-     .enter()
-     .append("text")
-     .text(function(d) {
-        return d.value;
-     })
-     .attr("text-anchor", "middle")
-     .attr("x", function(d, i) {
-        return i * (width / data.length) + (width / data.length - barPadding) / 2;
-     })
-     .attr("y", function(d) {
-        return height - (d * 4) + 14;  //15 is now 14
-     })
-     .attr("font-family", "sans-serif")
-     .attr("font-size", "11px")
-     .attr("fill", "white");
-  */
+*/
   </script>
 
   {{ date_range_filter.media }}
@@ -207,29 +116,14 @@
 
 {% block content %}
   
-  <!--<div class="well">
-    <a href="{% url 'commissions_scale' %}" title="Bonus Commissions Chart">Bonus Commissions Scale Chart</a>
-  </div>-->
   
-  <div>
-    <form action="" method="GET" id="dateRangeFilter" class="well form-inline">
-      {{ date_range_filter.non_field_errors }} 
-      <div class="controls-row">
-        {{ date_range_filter | as_bootstrap }}
-        <input type="submit" class="btn btn-submit btn-default" value="Apply"/>
-      </div>
-    </form>
-  </div>
+  {% include "partial/_date_range_form.html" %}
 
   <div id="totals-tables" class="clearfix">
     <div id="monthly-sales-report">
       <h3>Sales Totals - by Associates </h3>
       <h4>Date range: {{ dates_caption }}</h4>
       {% render_table sales_by_associate %}
-
-      <!--<div id="bonus_scale">
-        <img src="{{ STATIC_URL }}img/bonus_scale.png" alt="Bonus Scale"/>
-      </div>-->
 
     </div>
 
@@ -262,32 +156,5 @@
         </div>
       {% endfor %}
   </div>
-  
-  {% comment %}
-  <!--<div id="ytd-sales-report">
-    <h2>Year-to-date Sales Report</h2>
-    {% render_table sales_by_associate_ytd %}
-  </div>-->
-  {% endcomment %}
-
-  <!--<div id="sales_chart_container">
-    <h3>Sales Chart</h3>
-    <div id="sales_chart"></div>
-  </div>-->
-  
-
-{% comment %}
-<!--
-<p class="pagination">
-
-  {% if previous_month %}
-    <a href="{% url 'sales_standings' year=previous_month.year month=previous_month.month %}" class="btn pull-left">&larr; {{ previous_month|date:"F Y" }}</a>
-  {% endif %}
-
-  {% if next_month %}
-    <a href="{% url 'sales_standings' year=next_month.year month=next_month.month %}" class="btn pull-right">{{ next_month|date:"F Y" }} &rarr;</a>
-  {% endif %}
-</p>-->
-{% endcomment %}
 
 {% endblock content %}

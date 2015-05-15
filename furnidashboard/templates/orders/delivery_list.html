@@ -2,18 +2,36 @@
 {% extends "base.html" %}
 
 {% load render_table from django_tables2 %}
+{% load staticfiles %}
 
 {% block title %}Deliveries{% endblock %}
 
 {% block page_title %}Deliveries{% endblock page_title %}
+
+{% block extra_js %}
+	<script src="{% static 'js/date_range_form_helper.js' %}"></script>
+
+	<script>
+		$(document).ready(function() {
+			DateRangeFormHelper.init();
+		});			
+	</script>
+	{{ date_range_filter.media }}
+{% endblock extra_js %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
 {% endblock %}
 
 {% block content %}
-  <div id="deliveries">
-    {% render_table table %}
-  </div>
+
+	<h3>Deliveries</h3>
+ 	<h4>Date range: {{ dates_caption }}</h4>
+
+ 	{% include "partial/_date_range_form.html" %}
+
+ 	<div id="deliveries">
+    	{% render_table table %}
+	</div>
 
 {% endblock content %}

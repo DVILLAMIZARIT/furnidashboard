@@ -130,6 +130,8 @@
   {{ items_form.media }}
   {{ commissions_form.media }}
   {{ delivery_form.media }}
+  {{ crypton_form.media }}
+  {{ financing_form.media }}
   
 {% endblock %}
 
@@ -221,51 +223,68 @@
     
       <div class="tab-pane" id="payment-info">
         <fieldset>
-          <legend>Payment Information</legend>
-          
-          {% with form.subtotal_after_discount as field %}
-            <div class="field-wrapper control-group {% if field.errors %} error{% endif %}{% if field.field.required %} required{% endif %}">
-              <div class="input-prepend">
-                {{ field.label_tag }}
-                <span class="add-on">$</span> 
-                {{ field }}
-              </div>
-              {% include "bootstrap_toolkit/field_errors.html" with field=field %}
+          <div class="row">
+            <div class="span4">
+              <legend>Payment Information</legend>
+              
+              {% include "partial/bootstrap_field.html" with field=form.subtotal_after_discount addon="$" %}
+             
+              {% include "partial/bootstrap_field.html" with field=form.deposit_balance addon="$" %}
+
+              {% include "partial/bootstrap_field.html" with field=form.tax addon="$" %}
+              
+              {% include "partial/bootstrap_field.html" with field=form.shipping addon="$" %} 
+
+              <hr/>
+            </div>            
+
+            <div class="span4">
+              {% include "partial/bootstrap_field.html" with field=form.protection_plan label_tag="Protection plan purchased" %}
+              <div class="accordion-group items-form form-row" id="crypton-form-row">
+                <div class="accordion-heading">
+                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#payment-info" href="#collapse-crypton">Crypton Protection Plan (expand)</a>
+                </div>
+                <div id="collapse-crypton" class="accordion-body collapse">
+                  <div class="accordion-inner">
+                       <legend>Crypton Protection Plan</legend>
+
+                      {% if crypton_form %}
+                        {{ crypton_form.management_form }}
+                        {{ crypton_form.non_form_errors }}
+                        {% for form in crypton_form %}
+                         {{ form | as_bootstrap }}
+                        {% endfor %}
+                      {% endif %}
+
+                  </div>
+                </div>       
+              </div>   
+
+              <hr/>
+              {% include "partial/bootstrap_field.html" with field=form.financing_option label_tag="Order financing" %}
+              <div class="accordion-group items-form form-row" id="financing-form-row">
+                <div class="accordion-heading">
+                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#payment-info" href="#collapse-financing">Order Financing (expand)</a>
+                </div>
+                <div id="collapse-financing" class="accordion-body collapse">
+                  <div class="accordion-inner">
+                       <legend>Order Financing</legend>                  
+                      
+                      {% if financing_form %}
+                        {{ financing_form.management_form }}
+                        {{ financing_form.non_form_errors }}
+                        {% for form in financing_form %}
+                         {{ form | as_bootstrap }}
+                        {% endfor %}
+                      {% endif %}
+
+                  </div>
+                </div>       
+              </div>   
             </div>
-          {% endwith %}
-          
-          {% with form.deposit_balance as field %}
-            <div class="field-wrapper control-group {% if field.errors %} error{% endif %}{% if field.field.required %} required{% endif %}">
-              <div class="input-prepend">
-                {{ field.label_tag }}
-                <span class="add-on">$</span> 
-                {{ field }}
-              </div>
-              {% include "bootstrap_toolkit/field_errors.html" with field=field %}
-            </div>
-          {% endwith %}
-          
-          {% with form.tax as field %}
-            <div class="field-wrapper control-group {% if field.errors %} error{% endif %}{% if field.field.required %} required{% endif %}">
-              <div class="input-prepend">
-                {{ field.label_tag }}
-                <span class="add-on">$</span> 
-                {{ field }}
-              </div>
-              {% include "bootstrap_toolkit/field_errors.html" with field=field %}
-            </div>
-          {% endwith %}
-          
-          {% with form.shipping as field %}
-            <div class="field-wrapper control-group {% if field.errors %} error{% endif %}{% if field.field.required %} required{% endif %}">
-              <div class="input-prepend">
-                {{ field.label_tag }}
-                <span class="add-on">$</span> 
-                {{ field }}
-              </div>
-              {% include "bootstrap_toolkit/field_errors.html" with field=field %}
-            </div>
-          {% endwith %}
+
+          </div>  
+
         </fieldset>
       </div>
       

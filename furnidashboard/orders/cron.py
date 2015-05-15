@@ -27,27 +27,29 @@ class OrderCronJob(CronJobBase):
     self.trace("-" * 40)
     self.trace("")
 
-    self.trace("Checking for UNPLACED orders: ", important=True)
-    unplaced = Order.objects.unplaced_orders()
-    self.trace("{0} item(s)".format(unplaced.count()), important=True)
-    for o in unplaced:
-      self.trace("#{0} unplaced. View details: http://cloud.furnitalia.com{1}".format(o.number, o.get_absolute_url()))
-    self.trace("-" * 40)
-    self.trace("")
+    # TEMPORARILY COMMENT OUT
+    # self.trace("Checking for UNPLACED orders: ", important=True)
+    # unplaced = Order.objects.unplaced_orders()
+    # self.trace("{0} item(s)".format(unplaced.count()), important=True)
+    # for o in unplaced:
+    #   self.trace("#{0} unplaced. View details: http://cloud.furnitalia.com{1}".format(o.number, o.get_absolute_url()))
+    # self.trace("-" * 40)
+    # self.trace("")
 
-    self.trace("5 most recent orders:", important=True)
-    recent_orders = Order.objects.filter(status__exact='N').order_by('-order_date')[:5]
+    self.trace("10 most recent orders:", important=True)
+    recent_orders = Order.objects.filter(status__exact='N').order_by('-order_date')[:10]
     for o in recent_orders:
        self.trace("Order {0}, created {1}, status {2}".format(o.number, o.order_date.strftime("%m-%d-%Y"), o.get_status_display()))
     self.trace("-" * 40)
     self.trace("")
        
-    self.trace("Special Orders, acknowledgement not received from vendor:", important=True)
-    orders_no_ack_no = Order.objects.ordered_not_acknowledged()
-    self.trace("{0} orders_no_ack_no(s)".format(orders_no_ack_no.count(), important = True))
-    for o in orders_no_ack_no:
-      self.trace("#{0} order item(s) not acknowledged. View order: http://cloud.furnitalia.com{1}".format(o.number, o.get_absolute_url()))
-    self.trace("-" * 40)
+    # TEMPORARILY COMMENT OUT
+    # self.trace("Special Orders, acknowledgement not received from vendor:", important=True)
+    # orders_no_ack_no = Order.objects.ordered_not_acknowledged()
+    # self.trace("{0} orders_no_ack_no(s)".format(orders_no_ack_no.count(), important = True))
+    # for o in orders_no_ack_no:
+    #   self.trace("#{0} order item(s) not acknowledged. View order: http://cloud.furnitalia.com{1}".format(o.number, o.get_absolute_url()))
+    # self.trace("-" * 40)
 
     # SEND EMAIL
     self.send_emails()

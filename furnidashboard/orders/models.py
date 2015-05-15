@@ -1,69 +1,10 @@
-from datetime import datetime, timedelta
 from django.db import models
-from django.db.models import Q
-from django.utils import timezone
-from django.conf import settings
 from django.core.urlresolvers import reverse
 from audit_log.models import AuthStampedModel
 from django_extensions.db.models import TimeStampedModel
 from customers.models import Customer
 from stores.models import Store
-
-class OrderManager(models.Manager):
-  #launch_dt = datetime(2014, 6, 1)
-  launch_dt = datetime(2014, 5, 1)
-  if settings.USE_TZ:
-    launch_dt = timezone.make_aware(launch_dt, timezone.get_current_timezone())
-
-  def get_qs(self):
-    #qs = super(OrderManager, self).get_query_set().filter(order_date__gte=self.launch_dt)
-    qs = super(OrderManager, self).get_query_set().filter(~Q(status='I'))
-    return qs
-   
-  def get_dated_qs(self, start, end):
-    if settings.USE_TZ:
-      start = timezone.make_aware(start, timezone.get_current_timezone())
-      end = timezone.make_aware(end, timezone.get_current_timezone())
-    #import pdb; pdb.set_trace()  
-    lookup_kwargs = {
-        '%s__gte' % 'order_date': start -  timedelta(minutes=1),
-        '%s__lt' % 'order_date': end,
-    }
-    return super(OrderManager, self).get_query_set().filter(**lookup_kwargs)
-  
-  def unplaced_orders(self):
-    #special order, not placed (no PO number)
-    qs = self.get_qs()
-    #return qs.filter(Q(status='N') | (Q(orderitem__in_stock=False) & Q(orderitem__po_num=""))).distinct()
-    return qs.filter(Q(orderitem__in_stock=False) & Q(orderitem__po_num="")).distinct()
-
-  def open_orders(self):
-    return self.get_qs().filter(~Q(status='C'))
-    
-  def ordered_not_acknowledged(self):
-    #special order has been placed, but no acknowledgement number
-    qs = self.get_qs()
-    return qs.filter(~Q(orderitem__po_num="") & Q(orderitem__ack_num="")).distinct()
-  
-  def special_acknowledged_no_eta(self):
-    #special order has been placed and acknowledged, but no ETA
-    qs = self.get_qs()
-    return qs.filter(Q(orderitem__status__in=['O', 'P']) & ~Q(orderitem__ack_num="") & Q(orderitem__eta__isnull=True)).distinct()
-  
-  def special_eta_passed_not_received(self):
-    #special order ETA has passed, but item status is not 'Received'
-    qs = self.get_qs()
-    return qs.filter(Q(orderitem__status__in=['O', 'P']) & Q(orderitem__eta__gte=datetime.now())).distinct()
-  
-  def not_yet_delivered(self):
-    #undelivered orders
-    qs = self.get_qs()
-    return qs.filter(Q(orderitem__status__in=['S', 'R']))
-
-  def commissions_unpaid(self):
-    # orders with unpaid commissions
-    qs = self.get_qs()
-    return qs.filter(Q(status__in=['D', 'C']) & Q(commission__paid=False))
+from orders.managers import OrderManager
   
 class Order(TimeStampedModel, AuthStampedModel):
   """
@@ -87,6 +28,7 @@ class Order(TimeStampedModel, AuthStampedModel):
     ('RVL', 'Roseville Store'),
     ('REF', 'Referred by friends/relatives/acquintance'),
     ('WEB', 'Website'),
+    ('EBL', 'E-mail (or Eblast)'),
     ('MAG', 'Magazine'),
     ('SOC', 'Social networks'),
     ('NWP', 'Newspaper'),
@@ -104,6 +46,8 @@ class Order(TimeStampedModel, AuthStampedModel):
   comments = models.TextField(blank=True)
   store = models.ForeignKey(Store)
   referral = models.CharField(blank=True, null=True, max_length=50, choices=REFERRAL_SOURCES)
+  protection_plan = models.BooleanField(default=False, blank=True)
+  financing_option = models.BooleanField(default=False, blank=True)
   
   #objects = models.Manager()      #default
   objects = OrderManager() #customer manager
@@ -116,12 +60,12 @@ class Order(TimeStampedModel, AuthStampedModel):
 
   @property
   def balance_due(self):
-    "Balance due after the deposits"
+    """ Balance due after the deposits """
     return self.grand_total - self.deposit_balance
 
   @property
   def grand_total(self):
-    "Grand Total (Subtotal + tax + shipping)"
+    """ Grand Total (Subtotal + tax + shipping) """
     return self.subtotal_after_discount + self.tax + self.shipping
 
   class Meta:
@@ -139,7 +83,7 @@ class Order(TimeStampedModel, AuthStampedModel):
   def get_absolute_url(self):
     return reverse("order_detail", kwargs={"pk":self.pk})
 
-#class OrderItem(models.Model):
+
 class OrderItem(TimeStampedModel, AuthStampedModel):
   """
   A model class representing Items Ordered (stock items, special order items, etc).
@@ -169,7 +113,7 @@ class OrderItem(TimeStampedModel, AuthStampedModel):
   
 class OrderDelivery(TimeStampedModel, AuthStampedModel):
   """
-  A model class representing deliveries  tracking for Orders 
+  A model class representing deliveries tracking for Orders 
   """
 
   DELIVERY_TYPES = (
@@ -221,11 +165,17 @@ class Attachment(models.Model):
     return self.description[:30]
 
 class OrderAttachment(Attachment):
+  """
+  A class representing file attachments for an order
+  """
   order = models.ForeignKey(Order)
   class Meta:
     db_table = "order_attachments"
 
 class OrderIssue(TimeStampedModel, AuthStampedModel):
+  """
+  A class representing order issues
+  """
   ISSUE_STATUSES =  (
     ('N', 'New'),
     ('C', 'Claim submitted'),
@@ -244,3 +194,22 @@ class OrderIssue(TimeStampedModel, AuthStampedModel):
     permissions = (
       ("update_order_issues", "Can Update Order Issues (Claims)Information"),
     )
+
+class OrderFinancing(models.Model):
+  """ 
+  Stores financing details for sold orders 
+  """
+
+  order = models.ForeignKey(Order)
+  approval_no = models.CharField(max_length=50, blank=False, null=False)
+  details = models.TextField(blank=True, null=True)
+
+class OrderItemProtectionPlan(models.Model):
+  """ 
+  Stores protection plan details for sold items 
+  """
+
+  order = models.ForeignKey(Order)
+  approval_no = models.CharField(max_length=50, blank=False, null=False)
+  details = models.TextField(blank=True, null=True)
+

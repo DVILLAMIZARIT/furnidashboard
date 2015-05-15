@@ -34,15 +34,7 @@
     <a href="{% url 'commissions_scale' %}" title="Bonus Commissions Chart">Bonus Commissions Scale Chart</a>
   </div>-->
   
-  <div>
-    <form action="" method="GET" id="dateRangeFilter" class="well form-inline">
-      {{ date_range_filter.non_field_errors }} 
-      <div class="controls-row">
-        {{ date_range_filter | as_bootstrap }}
-        <input type="submit" class="btn btn-submit btn-default" value="Apply"/>
-      </div>
-    </form>
-  </div>
+  {% include "partial/_date_range_form.html" %}
 
   <div id="monthly-bonus-report">
     <h3>Sales Bonus by Associates </h3>

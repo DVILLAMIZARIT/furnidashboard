@@ -178,6 +178,40 @@
   </div>
   
   <hr/>
+
+  <div class="row">
+    <div class="span6">
+      <h3>Special Financing Option</h3>
+      {% if order.orderfinancing_set.count %}
+        {% for financing_plan in order.orderfinancing_set.all %}
+        <div class="row customer-info">
+          <div class="span2">
+            {{ financing_plan.approval_no }}<br/>
+            Details: {{ financing_plan.details }}<br/>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        N/A
+      {% endif %}
+    </div>
+
+    <div class="span6">
+      <h3>Crypton Protection Plan</h3>
+      {% if order.orderitemprotectionplan_set.count %}
+        {% for crypton_plan in order.orderitemprotectionplan_set.all %}
+        <div class="row customer-info">
+          <div class="span2">
+            {{ crypton_plan.approval_no }}<br/>
+            Details: {{ crypton_plan.details }}<br/>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        NOT PURCHASED
+      {% endif %}
+    </div>
+  </div>
   
   <h3>Deliveries</h3>
   {% if order.orderdelivery_set.count %}

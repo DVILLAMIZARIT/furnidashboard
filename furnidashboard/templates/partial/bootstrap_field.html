@@ -1,0 +1,16 @@
+<div class="field-wrapper control-group {% if field.errors %} error{% endif %}{% if field.field.required %} required{% endif %}">
+  <div class="input-prepend">
+  	{% if label_tag %}
+  		<label for="id_{{ field.name }}">{{ label_tag }}</label>  		
+  	{% else %}
+    	{{ field.label_tag }}
+    {% endif %}
+
+    {% if addon %}
+    	<span class="add-on">{{ addon }}</span> 
+    {% endif %}
+
+    {{ field }}
+  </div>
+  {% include "bootstrap_toolkit/field_errors.html" with field=field %}
+</div>
