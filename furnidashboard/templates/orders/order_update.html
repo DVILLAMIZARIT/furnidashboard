@@ -16,6 +16,8 @@
   $(function() {
 
     $(document).ready(function() {
+
+      var warnBeforeExit = true;
         
       $('#tabs a').click(function (e) {
         e.preventDefault();
@@ -122,6 +124,18 @@
           .closest('.control-group').removeClass('error').addClass('success');
         } 
       });
+
+      //disable warning message if Submit button was clicked
+      $("#submitButton").on('click', function () { warnBeforeExit = false; });
+      $("#orderForm").on('submit', function () { warnBeforeExit = false; });
+
+      //show warning if page is about to be closed.
+      window.onbeforeunload = function() {
+        if (warnBeforeExit) {
+          return "Are you sure you want to close this page? All unsaved changes might be lost.";
+        }
+      }
+
     });
   })
 </script>
@@ -438,7 +452,7 @@
     
     <br/>
             
-    <input type="submit" class="btn btn-primary btn-large" value="Save"/>
+    <input type="submit" id="submitButton" class="btn btn-primary btn-large" value="Save"/>
 
 </form>
 

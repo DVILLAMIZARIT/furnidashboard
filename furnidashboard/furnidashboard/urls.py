@@ -4,7 +4,10 @@ from django.views.generic import TemplateView, ListView
 from orders.models import Order
 from customers.models import Customer
 from customers.views import CustomerCreateView, CustomerUpdateView, CustomerDetailView, CustomerTableView
-from orders.views import MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderWeekArchiveTableView, OrderMonthArchiveTableView, DeliveriesTableView, DeliveryDetailView, DeliveryUpdateView, DeliveryDeleteView, SalesStandingsMonthTableView, HomePageRedirectView, ActiveOrdersTableView
+#from orders.views import MyOrderListView, OrderUpdateView, OrderDetailView, OrderCreateView, OrderDeleteView, OrderMonthArchiveTableView, DeliveriesTableView, DeliveryDetailView, DeliveryUpdateView, DeliveryDeleteView, SalesStandingsMonthTableView, HomePageRedirectView, ActiveOrdersTableView
+import orders.views.general as general_views
+import orders.views.order_crud as order_crud_views
+import orders.views.deliveries as deliveries_views
 from commissions.views import BonusMonthlyReportView
 #from core.views import UnpaidDeliveriesTableView, UnplacedOrderTableView, OrderedUnacknowledgedOrdersTableView, UnpaidCommissionsTableView   
 import core.views as core_views
@@ -24,7 +27,7 @@ urlpatterns = patterns('',
     #home page template
     url(
       regex=r'^$',
-      view=HomePageRedirectView.as_view(),
+      view=general_views.HomePageRedirectView.as_view(),
       name="home",
     ),
     # url(r'^$', TemplateView.as_view(template_name='base.html')),  
@@ -32,69 +35,56 @@ urlpatterns = patterns('',
     
     url(
       regex= r'^orders/$',
-      view=OrderMonthArchiveTableView.as_view(month_format='%m', **this_month_args),
+      view=general_views.OrderMonthArchiveTableView.as_view(month_format='%m', **this_month_args),
       name="order_list",
     ),
     url(
       regex = r'^active-orders/$',
-      view = ActiveOrdersTableView.as_view(),
+      view = general_views.ActiveOrdersTableView.as_view(),
       name = "active_orders",
     ),
     url(
       regex= r'^my-orders/$', 
-      view=MyOrderListView.as_view(),
+      view=general_views.MyOrderListView.as_view(),
       name="my_order_list",
     ),
     url(
       regex = r'^orders/(?P<pk>\d+)/$', 
-      view=OrderDetailView.as_view(),
+      view=order_crud_views.OrderDetailView.as_view(),
       name="order_detail",
     ),
     url(
       regex = r'^orders/(?P<pk>\d+)/edit/$', 
-      view=login_required(OrderUpdateView.as_view()),
+      view=login_required(order_crud_views.OrderUpdateView.as_view()),
       name="order_edit",
     ),
     url(
       regex = r'^orders/(?P<pk>\d+)/delete/$', 
-      view=login_required(OrderDeleteView.as_view()),
+      view=login_required(order_crud_views.OrderDeleteView.as_view()),
       name="order_delete",
     ),
-    url(r'orders/add/$', login_required(OrderCreateView.as_view()), name="order_add"),
-    url(r'orders/(?P<pk>\d+)/delete/$', login_required(OrderDeleteView.as_view()), name="order_delete"),
+    url(r'orders/add/$', login_required(order_crud_views.OrderCreateView.as_view()), name="order_add"),
+    url(r'orders/(?P<pk>\d+)/delete/$', login_required(order_crud_views.OrderDeleteView.as_view()), name="order_delete"),
 
     # Archive Views
     # Month:
     url(
       # /2014/mar/
       regex = r'^orders/(?P<year>\d{4})/(?P<month>[a-zA-z]+)/$', 
-      view=OrderMonthArchiveTableView.as_view(),
+      view=general_views.OrderMonthArchiveTableView.as_view(),
       name="archive_month",
     ),
     url(
       # /2014/03/
       regex = r'^orders/(?P<year>\d{4})/(?P<month>\d+)/$', 
-      view=OrderMonthArchiveTableView.as_view(month_format='%m'),
+      view=general_views.OrderMonthArchiveTableView.as_view(month_format='%m'),
       name="archive_month_numeric",
     ),
     url(
       # /this-month
       regex = r'^orders/this-month/$', 
-      view=OrderMonthArchiveTableView.as_view(year=str(date.today().year), month=str(date.today().month), month_format='%m'),
+      view=general_views.OrderMonthArchiveTableView.as_view(year=str(date.today().year), month=str(date.today().month), month_format='%m'),
       name="archive_this_month",
-    ),
-    # Weekly
-    url(
-      # /this-week
-      regex = r'^orders/this-week/$', 
-      view=OrderWeekArchiveTableView.as_view(year=str(date.today().year), week=str(int(date.today().isocalendar()[1]) - 1)),
-      name="archive_this_week",
-    ),
-    url(
-      # /2014/week/01/
-      regex = r'^orders/(?P<year>\d{4})/week/(?P<week>\d+)/$', 
-      view=OrderWeekArchiveTableView.as_view(),
-      name="archive_week",
     ),
 
     # Alerts pages
@@ -155,7 +145,7 @@ urlpatterns = patterns('',
     url(
       # /sales-standings/
       regex = r'^sales-standings/$', 
-      view=SalesStandingsMonthTableView.as_view(),
+      view=general_views.SalesStandingsMonthTableView.as_view(),
       name="sales_standings_cur",
     ),
     url(
@@ -188,22 +178,22 @@ urlpatterns = patterns('',
     # deliveries
     url(
       regex = r'^deliveries/$',
-      view = DeliveriesTableView.as_view() ,
+      view = deliveries_views.DeliveriesTableView.as_view() ,
       name = "delivery_list",
     ),
     url(
       regex = r'^deliveries/(?P<pk>\d+)/$', 
-      view=DeliveryDetailView.as_view(),
+      view=deliveries_views.DeliveryDetailView.as_view(),
       name="delivery_detail",
     ),
     url(
       regex = r'^deliveries/(?P<pk>\d+)/edit/$', 
-      view=DeliveryUpdateView.as_view(),
+      view=deliveries_views.DeliveryUpdateView.as_view(),
       name="delivery_edit",
     ),
     url(
       regex = r'^deliveries(?P<pk>\d+)/delete/$', 
-      view=DeliveryDeleteView.as_view(),
+      view=deliveries_views.DeliveryDeleteView.as_view(),
       name="delivery_delete",
     ),
 

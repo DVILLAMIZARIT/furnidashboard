@@ -7,7 +7,7 @@ from core.mixins import LoginRequiredMixin
 import core.utils as utils
 from customers.models import Customer
 from orders.models import Order, OrderDelivery
-from orders.views import DeliveriesTableView
+from orders.views.deliveries import DeliveriesTableView
 from orders.tables import OrderTable, UnpaidCommissionsTable
 from commissions.models import Commission
 

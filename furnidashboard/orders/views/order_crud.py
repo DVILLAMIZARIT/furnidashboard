@@ -1,30 +1,34 @@
-from django.views.generic import ListView, DetailView, UpdateView, RedirectView
+from django.views.generic import ListView, DetailView, UpdateView
 from django.views.generic.edit import CreateView, DeleteView
-from django.views.generic.dates import MonthArchiveView, WeekArchiveView
+from django.views.generic.dates import MonthArchiveView
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django_tables2 import RequestConfig, SingleTableView
 from django.db.models import Q
-from datetime import timedelta, date, datetime
-from .models import Order, OrderItem, OrderDelivery, OrderIssue
-from .tables import OrderTable, UnplacedOrdersTable, SalesByAssociateTable, SalesByAssociateWithBonusTable, DeliveriesTable, SalesTotalsTable,SalesByAssocSalesTable
-from .forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset, OrderDeliveryForm, OrderItemFormHelper, OrderAttachmentFormSet, get_order_issues_formset
-import orders.forms as order_forms
-from .filters import OrderFilter
-from customers.models import Customer
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
+from orders.models import Order, OrderItem, OrderDelivery, OrderIssue
+from orders.tables import OrderTable
+from orders.forms import OrderForm, CustomerFormSet, CommissionFormSet, ItemFormSet, get_ordered_items_formset, DeliveryFormSet, get_deliveries_formset, get_commissions_formset, OrderDeliveryForm, OrderItemFormHelper, OrderAttachmentFormSet, get_order_issues_formset
+import orders.forms as order_forms
+from orders.filters import OrderFilter
+from customers.models import Customer
 import core.utils as utils
 from core.mixins import LoginRequiredMixin, PermissionRequiredMixin
-import orders.utils as order_utils
-import json
 
 crypton_orphan_info_error = "Crypton protection information has been entered but 'Protection plan purchased' option is not selected. Either check the protection plan checkbox or delete Crypton protection information by selecting the 'Delete' checkbox."
 order_financing_orphan_info_error = "Order financing information has been entered but 'Order financing' option is not selected. Either check the order financing checkbox or delete Order financing information by selecting the 'Delete' checkbox."
 err_saving_order_info_msg = "Error saving the order information. Please go through tabs to fix invalid information."
+
+err_invalid_delivered_status_msg = "Cannot set order status to 'Delivered' because there are no deliveries recorded for this order."
+err_invalid_order_dummy_status_msg = "Cannot set order status to 'Dummy' because there are special order items."
+err_invalid_new_order_status_msg = "Newly created order status must be either 'New', 'Pending', or 'Dummy'!"
+err_missing_customer_info_msg = "Please select existing customer or fill in new customer information!"
+err_cant_close_order_msg = "Cannot close the order while there are unpaid commissions due!"
+err_blank_order_status_msg = "Order status cannot be blank!"
+
+error_message_tag = "alert alert-danger"
 
 class OrderDetailView(PermissionRequiredMixin, DetailView):
   model = Order
@@ -40,6 +44,8 @@ class OrderDetailView(PermissionRequiredMixin, DetailView):
     user_model = get_user_model()
     return context
 
+#-----------------------------------------------------------------------
+
 class OrderDeleteView(PermissionRequiredMixin, DeleteView):
   model = Order
   context_object_name = "order"
@@ -48,6 +54,8 @@ class OrderDeleteView(PermissionRequiredMixin, DeleteView):
   required_permissions = (
     'orders.delete_order',
   )
+
+#-----------------------------------------------------------------------
 
 class OrderUpdateView(PermissionRequiredMixin, UpdateView):
   model = Order
@@ -183,7 +191,7 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     if forms_valid:
       return self.form_valid(**forms)
     else:
-      messages.add_message(self.request, messages.ERROR, err_saving_order_info_msg, extra_tags="alert alert-danger")
+      messages.add_message(self.request, messages.ERROR, err_saving_order_info_msg, extra_tags=error_message_tag)
       return self.form_invalid(**forms)
 
   def form_valid(self, *args, **kwargs):
@@ -212,18 +220,18 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
 
     # validate order status
     if not form.data['status'] :
-      messages.error(self.request, "Order status cannot be blank!", extra_tags="alert")
+      messages.error(self.request, err_blank_order_status_msg, extra_tags="alert")
       BR_passed = False
     else:
       new_status = form.cleaned_data['status']
       if new_status == 'C' and any([comm_data['paid'] == False for comm_data in commissions_form.cleaned_data]): 
-        messages.add_message(self.request, messages.ERROR, "Cannot close the order while there are unpaid commissions due!", extra_tags="alert alert-danger")
+        messages.add_message(self.request, messages.ERROR, err_cant_close_order_msg, extra_tags=error_message_tag)
         BR_passed = False
       elif new_status == 'D' and not [f for f in delivery_form if not utils.delivery_form_empty(f.cleaned_data)]:
-        messages.add_message(self.request, messages.ERROR, "Cannot set order status to 'Delivered' because there are no deliveries recorded for this order.", extra_tags="alert alert-danger")
+        messages.add_message(self.request, messages.ERROR, err_invalid_delivered_status_msg, extra_tags=error_message_tag)
         BR_passed = False
       elif new_status == 'X' and any([i for i in items_form.cleaned_data if i['in_stock'] == False]):
-        messages.add_message(self.request, messages.ERROR, "Cannot set order status to 'Dummy' because there are special order items.", extra_tags="alert alert-danger")
+        messages.add_message(self.request, messages.ERROR, err_invalid_order_dummy_status_msg, extra_tags=error_message_tag)
         BR_passed = False
 
 
@@ -234,35 +242,33 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
           # check that first and last name are filled
           try:
             if not customer_form[0].cleaned_data['first_name'] or not customer_form[0].cleaned_data['last_name']:
-              messages.error(self.request, "Please select existing customer or fill in new customer information!", extra_tags="alert alert-danger")
+              messages.error(self.request, err_missing_customer_info_msg, extra_tags=error_message_tag)
               BR_passed = False
             else:
               new_customer = True
           except KeyError: 
-            messages.error(self.request, "Please select existing customer or fill in new customer information!", extra_tags="alert alert-danger")
+            messages.error(self.request, err_missing_customer_info_msg, extra_tags=error_message_tag)
             BR_passed = False
         else:
-          messages.error(self.request, "Error saving customer information!", extra_tags="alert alert-danger")
+          messages.error(self.request, "Error saving customer information!", extra_tags=error_message_tag)
           BR_passed = False
 
     # validate issues
     if BR_passed and not issues_form.is_valid():
-      messages.error(self.request, "Error saving 'order issues' information!", extra_tags="alert alert-danger")
+      messages.error(self.request, "Error saving 'order issues' information!", extra_tags=error_message_tag)
       BR_passed = False
 
     # validate crypton protection plan
-    if BR_passed and \
-      not self.object.protection_plan and \
-      (crypton_protection_form.cleaned_data[0]['approval_no'] or crypton_protection_form.cleaned_data[0]['details']):
-      messages.error(self.request, crypton_orphan_info_error, extra_tags="alert alert-danger")
-      BR_passed = False
+    if BR_passed and not self.object.protection_plan:
+      if not _is_valid_protection_plan(crypton_protection_form):      
+        messages.error(self.request, crypton_orphan_info_error, extra_tags=error_message_tag)
+        BR_passed = False
 
     # validate order financing information
-    if BR_passed and not self.object.financing_option and \
-      (order_financing_form.cleaned_data[0]['approval_no'] or order_financing_form.cleaned_data[0]['details']):
-      messages.error(self.request, order_financing_orphan_info_error, extra_tags="alert alert-danger")
-      BR_passed = False
-  
+    if BR_passed and not self.object.financing_option:
+      if not _is_valid_financing_plan(order_financing_form):
+        messages.error(self.request, order_financing_orphan_info_error, extra_tags=error_message_tag)
+        BR_passed = False  
 
     # Final check
     if BR_passed: 
@@ -453,15 +459,13 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
     order_financing_form  = kwargs['financing_form']
 
     self.object = form.save(commit=False)
-    
-    error_tag = "alert alert-danger"
 
     # flags
     BR_passed = True
     new_customer=False
 
     if not form.data['status'] or form.data['status'] not in ('Q', 'N', 'X'):
-      messages.error(self.request, "Newly created order status must be either 'New', 'Pending', or 'Dummy'!", extra_tags=error_tag)
+      messages.error(self.request, err_invalid_new_order_status_msg, extra_tags=error_message_tag)
       BR_passed = False
 
     # validate customer
@@ -472,29 +476,28 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
           try:
             # check that first and last name are filled
             if not customer_form[0].cleaned_data['first_name'] or not customer_form[0].cleaned_data['last_name']:
-              messages.error(self.request, "Please select existing customer or fill in new customer information!", extra_tags=error_tag)
+              messages.error(self.request, err_missing_customer_info_msg, extra_tags=error_message_tag)
               BR_passed = False
             else:
               new_customer = True
           except KeyError: 
-            messages.error(self.request, "Please select existing customer or fill in new customer information!", extra_tags=error_tag)
+            messages.error(self.request, err_missing_customer_info_msg, extra_tags=error_message_tag)
             BR_passed = False
         else:
-          messages.error(self.request, "Error saving customer form information!", extra_tags=error_tag)
+          messages.error(self.request, "Error saving customer form information!", extra_tags=error_message_tag)
           BR_passed = False
 
     # validate crypton protection plan
-    if BR_passed and \
-      not self.object.protection_plan and \
-      (crypton_protection_form.cleaned_data[0]['approval_no'] or crypton_protection_form.cleaned_data[0]['details']):
-      messages.error(self.request, crypton_orphan_info_error, extra_tags="alert alert-danger")
-      BR_passed = False
+    if BR_passed and not self.object.protection_plan:
+      if not _is_valid_protection_plan(crypton_protection_form):      
+        messages.error(self.request, crypton_orphan_info_error, extra_tags=error_message_tag)
+        BR_passed = False
 
     # validate order financing information
-    if BR_passed and not self.object.financing_option and \
-      (order_financing_form.cleaned_data[0]['approval_no'] or order_financing_form.cleaned_data[0]['details']):
-      messages.error(self.request, order_financing_orphan_info_error, extra_tags="alert alert-danger")
-      BR_passed = False
+    if BR_passed and not self.object.financing_option:
+      if not _is_valid_financing_plan(order_financing_form):
+        messages.error(self.request, order_financing_orphan_info_error, extra_tags=error_message_tag)
+        BR_passed = False  
 
     if BR_passed: 
       
@@ -546,356 +549,40 @@ class OrderDeleteView(PermissionRequiredMixin, DeleteView):
     'orders.delete_order',
   )
 
-class FilteredTableMixin(object):
-  formhelper_class = FormHelper
-  context_filter_name = 'filter'
-  context_table_name = 'table'
-  model = None
-  table_class = OrderTable
-  context_object_name = "order_list"
-  table_paginate_by = None 
-  filter_class = OrderFilter
-  filter_form_id = 'order-filter'
 
-  def get_queryset(self, **kwargs):
-    qs = super(FilteredTableMixin, self).get_queryset(**kwargs)
-    self.setup_filter(queryset=qs)
-    return self.filter.qs
+############################ UTILITY FUNCTIONS ######################################
 
-  def setup_filter(self, **kwargs):
-    self.filter = self.filter_class(self.request.GET, queryset=kwargs['queryset'])
-    #self.filter.helper = self.formhelper_class()
-    self.filter.helper.form_id = self.filter_form_id
-    #self.filter.helper.form_class = "blueForms, well"
-    self.filter.helper.form_method = "get"
-    #self.filter.helper.add_input(Submit('submit', 'Submit'))
+def _is_valid_protection_plan(protection_plan_form):
+  """
+  function that checks if orphaned protection plan info exists while order's protection status flag is not set
+  """
+  for cleaned_data in protection_plan_form.cleaned_data:
+    if cleaned_data:
+      if 'DELETE' in cleaned_data and cleaned_data['DELETE']:
+        continue #form row has been marked for deletion, skip it
+      else:
+        #check if specified fields are populated in the form
+        if _any_form_fields_entered(cleaned_data, ('approval_no', 'details')):
+          return False
+  return True
 
-  def get_table(self, **kwargs):
-    try:
-      page = self.kwargs['page']
-    except KeyError:
-      page = 1 
-    options = {'paginate':{'page':page, 'per_page':self.table_paginate_by}}
-    table_class = self.table_class
-    table = table_class(**kwargs)
-    RequestConfig(self.request, **options).configure(table)
-    return table
+def _is_valid_financing_plan(financing_plan_form):
+  """
+  function that checks if orphaned financing plan info exists while order's financing plan status flag is not set.
+  this data has similar structure to 'protection plan' that is why it refers to protection plan validation function
+  """
+  return _is_valid_protection_plan(financing_plan_form)  
 
-  def get_context_data(self, **kwargs):
-    context = super(FilteredTableMixin, self).get_context_data(**kwargs)
-    table = self.get_table(data=context[self.context_object_name])
-    context[self.context_table_name] = table
-    context[self.context_filter_name] = self.filter
-    return context
-
-class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, MonthArchiveView):
-  model = Order
-  table_paginate_by = 50 
-
-  # archive view specific fields
-  date_field = "order_date"
-  make_object_list = True
-  allow_future = False
-  allow_empty = True
-  template_name = "orders/order_archive_month.html"
-  month_format = '%b'
-
-  required_permissions = (
-    'orders.view_orders',
-  )
-
-  def get_context_data(self, **kwargs):
-    unfiltered_orders = self.get_month_dated_queryset() 
-    context = super(OrderMonthArchiveTableView, self).get_context_data(**kwargs)
-
-    # get monthly sales totals
-    month_totals_table = _get_sales_totals(unfiltered_orders)
-    RequestConfig(self.request).configure(month_totals_table)
-    context['month_totals_table'] = month_totals_table
-
-    #calc YTD stats
-    year = self.get_year()
-    date_field = self.get_date_field()
-    date = datetime.strptime(str(year), self.get_year_format()).date()
-    since = self._make_date_lookup_arg(date)
-    until = self._make_date_lookup_arg(self._get_next_year(date))
-    lookup_kwargs = {
-        '%s__gte' % date_field: since,
-        '%s__lt' % date_field: until,
-    }
-    ytd_orders = self.model._default_manager.filter(**lookup_kwargs)
-    ytd_totals_table =  _get_sales_totals(ytd_orders)
-    RequestConfig(self.request).configure(ytd_totals_table)
-    context['ytd_totals_table'] = ytd_totals_table
-
-    #calc sales totals by associate
-    sales_by_assoc_data, tmp = order_utils._calc_sales_assoc_by_orders(unfiltered_orders)
-    sales_by_assoc = SalesByAssociateTable(sales_by_assoc_data)
-    RequestConfig(self.request).configure(sales_by_assoc)
-    context['sales_by_associate'] = sales_by_assoc 
-
-    #links to other months data
-    context['order_months_links'] = self._get_month_list_for_year()
-    context['previous_year_links'] = self._get_month_list_for_year(datetime.now().year-1)
-    context['prev_year'] = datetime.now().year-1
-
-    context['months_2013'] = self._get_month_list_for_year(datetime.now().year-2)
-
-    #unplaced orders
-    unplaced_orders = Order.objects.unplaced_orders()
-    unplaced_orders_table = OrderTable(unplaced_orders)
-    RequestConfig(self.request).configure(unplaced_orders_table)
-    context['unplaced_orders_table'] = unplaced_orders_table
-
-    return context
-
-  def _get_month_list_for_year(self, year=datetime.now().year):
-    cur_date = datetime(year, 1, 1)
-    months_data = []
-    while cur_date.year == year:
-      months_data.append((cur_date.strftime("%m"), cur_date.strftime("%b")))
-      cur_date = cur_date + timedelta(days=31)
-      cur_date = datetime(cur_date.year, cur_date.month, 1)
-      if cur_date > datetime.now():
+def _any_form_fields_entered(cleaned_data, field_list):
+  """
+  function that checks whether a form has any specified fields filled out (not blank)
+  """
+  res = False
+  for field in field_list:
+    if field in cleaned_data:
+      if len(cleaned_data[field]):
+        res = True
         break
-    return [(name, reverse('archive_month_numeric', kwargs={'year':year, 'month':m})) for m,name in sorted(months_data)]
-  
-  def get_month_dated_queryset(self):
-    year = self.get_year()
-    month = self.get_month()
-    date_field = self.get_date_field()
-    date = datetime.strptime("-".join((year, month)), "-".join((self.get_year_format(), self.get_month_format()))).date()
-    since = self._make_date_lookup_arg(date)
-    until = self._make_date_lookup_arg(self._get_next_month(date))
-    lookup_kwargs = {
-        '%s__gte' % date_field: since,
-        '%s__lt' % date_field: until,
-    }
-    qs = self.model._default_manager.all().filter(**lookup_kwargs)
-        
-    return qs
 
+  return res
 
-class ActiveOrdersTableView(PermissionRequiredMixin, FilteredTableMixin, ListView):
-  model = Order
-  table_paginate_by = 50 
-  context_object_name = 'order_list'
-  template_name = "orders/order_filtered_list.html"
-  required_permissions = (
-    'orders.view_orders',
-  )
-  queryset = Order.objects.open_orders()
-
-  def get_context_data(self, **kwargs):
-    context = super(ActiveOrdersTableView, self).get_context_data(**kwargs)
-    table = self.get_table(data=context[self.context_object_name])
-    context[self.context_table_name] = table
-    context[self.context_filter_name] = self.filter
-    context['list_label'] = 'All Active Orders'
-    return context
-
-class MyOrderListView(PermissionRequiredMixin, FilteredTableMixin, ListView):
-  model = Order
-  context_object_name = "order_list"
-  #template_name = "orders/order_filtered_table.html"
-  template_name = "orders/order_filtered_list.html"
-  table_paginate_by = 50 
- 
-  required_permissions = (
-    'orders.view_orders',
-  )
-
-  def get_queryset(self, **kwargs):
-    me = self.request.user
-    qs = Order.objects.select_related().filter(commission__associate=me).all()
-    self.setup_filter(queryset=qs)
-    return self.filter.qs
-
-  def get_context_data(self, **kwargs):
-    context = super(MyOrderListView, self).get_context_data(**kwargs)
-    context['list_label'] = 'Just my orders'
-    return context
-
-class OrderWeekArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, WeekArchiveView):
-  model = Order
-  table_paginate_by = 50 
-
-  # archive view specific fields
-  date_field = "order_date"
-  make_object_list = True
-  allow_future = True
-  allow_empty = True
-  template_name = "orders/order_archive_week.html"
-  week_format = '%W'
-
-  required_permissions = (
-    'orders.view_orders',
-  )
-
-  def get(self, request, *args, **kwargs):
-    self.date_list, self.object_list, extra_content = self.get_dated_items()
-    context = self.get_context_data(object_list=self.object_list, date_list=self.date_list)
-    context.update(extra_content)
-    
-    # extra fields for cur. week, prev, and next week
-    extra = {
-      'next_week_num': context['next_week'].isocalendar()[1] - 1,
-      'prev_week_num': context['previous_week'].isocalendar()[1] - 1,
-      'next_week_sun': context['next_week'] + timedelta(days=7),
-      'this_week_sun': context['week'] + timedelta(days=6),
-    }
-    context.update(extra)
-
-    return self.render_to_response(context)
-
-class DeliveriesTableView(LoginRequiredMixin, SingleTableView):
-  model = OrderDelivery
-  table_class = DeliveriesTable
-  context_table_name = 'table' 
-  template_name = "orders/delivery_list.html"
-  paginate_by = 20 
-  from_date = ""
-  to_date = ""
-
-  def get_queryset(self, **kwargs):
-    qs = OrderDelivery.objects.filter(~Q(delivery_type='SELF'))
-
-    date_range = ""
-    try:
-      date_range = self.request.GET['date_range']
-      self.from_date, self.to_date = order_utils.get_date_range(date_range, self.request)    
-    except KeyError, e:
-      self.from_date, self.to_date = order_utils.get_date_range('month', self.request);
-    
-    lookup_kwargs = {
-      '%s__gte' % 'scheduled_delivery_date': self.from_date,
-      '%s__lt'  % 'scheduled_delivery_date': self.to_date,
-    }
-    qs = qs.filter(**lookup_kwargs)
-
-    return qs
-
-  def get_context_data(self, **kwargs):
-    context = super(DeliveriesTableView, self).get_context_data(**kwargs)
-
-    context['date_range_filter'] = order_forms.DateRangeForm(self.request.GET)
-    
-    date_range = ""
-    if self.request.GET.has_key("date_range"):
-      date_range = self.request.GET['date_range']
-
-    if self.from_date and self.to_date:
-      context['dates_caption'] = "{0} - {1}".format(self.from_date.strftime("%Y-%m-%d"), self.to_date.strftime("%Y-%m-%d"))
-
-    return context
-    
-
-class DeliveryDetailView(LoginRequiredMixin, DetailView):
-  model = OrderDelivery
-  context_object_name = "delivery"
-  template_name = "orders/delivery_detail.html"
-
-class DeliveryDeleteView(LoginRequiredMixin, DeleteView):
-  model = OrderDelivery
-  success_url = reverse_lazy("delivery_list")
-
-class DeliveryUpdateView(LoginRequiredMixin, UpdateView):
-  model = OrderDelivery
-  context_object_name = "delivery"
-  template_name = "orders/delivery_update.html"
-  form_class = OrderDeliveryForm
-
-  def get_form_kwargs(self):
-    kwargs = super(DeliveryUpdateView, self).get_form_kwargs()
-    kwargs.update({'request':self.request})
-    return kwargs
-
-class SalesStandingsMonthTableView(PermissionRequiredMixin, ListView):
-  model = Order
-  context_object_name = "order_list"
-  template_name = "orders/commissions_monthly.html"
-  from_date = ""
-  to_date = ""
-
-  required_permissions = (
-    'orders.view_sales',
-  )
-  
-  def get_queryset(self, **kwargs):
-    #qs = super(FilteredTableMixin, self).get_queryset(**kwargs)
-    date_range = ""
-    try:
-      date_range = self.request.GET['date_range']
-    except KeyError, e:
-      pass
-    
-    self.from_date, self.to_date = order_utils.get_date_range(date_range, self.request);   
-    
-    qs = Order.objects.get_dated_qs(self.from_date, self.to_date)
-    
-    return qs
-
-  def get_context_data(self, **kwargs):
-    context = super(SalesStandingsMonthTableView, self).get_context_data(**kwargs)
-
-    context['date_range_filter'] = order_forms.DateRangeForm(self.request.GET)
-    
-    date_range = ""
-    if self.request.GET.has_key("date_range"):
-      date_range = self.request.GET['date_range']
-    context['dates_caption'] = "{0} - {1}".format(self.from_date.strftime("%Y-%m-%d"), self.to_date.strftime("%Y-%m-%d"))
-
-    orders = context[self.context_object_name]
-    sales_by_assoc_data, sales_by_assoc_expanded_data = order_utils._calc_sales_assoc_by_orders(orders)
-
-    #total sales table
-    sales_by_assoc_table = SalesByAssociateTable(sales_by_assoc_data)
-    RequestConfig(self.request).configure(sales_by_assoc_table)
-    context['sales_by_associate'] = sales_by_assoc_table 
-    
-    #prepare expanded tables per each associate
-    sales_by_assoc_expanded_tables= {}
-    count = 1
-    for assoc, sales in sales_by_assoc_expanded_data.items():
-      sales_by_assoc_expanded_tables[assoc] = SalesByAssocSalesTable(sales, prefix="tbl"+ str(count)) 
-      RequestConfig(self.request).configure(sales_by_assoc_expanded_tables[assoc])
-      count += 1
-    context['sales_by_assoc_expanded_tables'] = sales_by_assoc_expanded_tables
-
-    #sales by stores table 
-    store_totals_table =  _get_sales_totals(orders)
-    RequestConfig(self.request).configure(store_totals_table)
-    context['store_totals_table'] = store_totals_table
-
-    # sales_by_assoc_data_ytd = order_utils._calc_sales_assoc_by_orders(self.queryset)
-    # sales_by_assoc_ytd = SalesByAssociateTable(sales_by_assoc_data_ytd)
-    # RequestConfig(self.request).configure(sales_by_assoc_ytd)
-    # context['sales_by_associate_ytd'] = sales_by_assoc_ytd 
-    
-    #context['sales_data_ytd_raw'] = json.dumps([{'key':data['associate'], 'value':data['sales']} for data in sales_by_assoc_data])
-
-    return context
-
-class HomePageRedirectView(LoginRequiredMixin, RedirectView):
-  url = reverse_lazy('order_list')
-
-  def get_redirect_url(self, **kwargs):
-    # redirect directly to deliveries page if user belongs to group delivery_person
-    if utils.is_user_delivery_group(self.request):
-      self.url = reverse('delivery_list')
-
-    return super(HomePageRedirectView, self).get_redirect_url(**kwargs)
-
-def _get_sales_totals(qs):
-    totals_data = []
-    if qs.count():
-      subtotal_hq = sum([o.subtotal_after_discount for o in qs if o.store.name == "Sacramento"])
-      subtotal_fnt = sum([o.subtotal_after_discount for o in qs if o.store.name == "Roseville"])
-      total_hq = sum([o.grand_total for o in qs if o.store.name == "Sacramento"])
-      total_fnt = sum([o.grand_total for o in qs if o.store.name == "Roseville"])
-      totals_data = [
-        {'item':'Subtotal After Discount', 'hq':utils.dollars(subtotal_hq), 'fnt':utils.dollars(subtotal_fnt), 'total':utils.dollars(subtotal_hq + subtotal_fnt)},
-        {'item':'Grand Total', 'hq':utils.dollars(total_hq), 'fnt':utils.dollars(total_fnt), 'total':utils.dollars(total_hq + total_fnt)},
-        ]
-    totals_table = SalesTotalsTable(totals_data)
-    return totals_table    
