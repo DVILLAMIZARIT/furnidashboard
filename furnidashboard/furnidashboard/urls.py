@@ -27,7 +27,7 @@ urlpatterns = patterns('',
     #home page template
     url(
       regex=r'^$',
-      view=general_views.HomePageRedirectView.as_view(),
+      view=general_views.HomePageRedirectView.as_view(permanent=False),
       name="home",
     ),
     # url(r'^$', TemplateView.as_view(template_name='base.html')),  

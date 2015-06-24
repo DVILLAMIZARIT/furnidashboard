@@ -1,5 +1,5 @@
 """JQuery-Ajax Autocomplete fields for Django Forms"""
-__version__ = "1.3.3"
+__version__ = "1.3.6"
 __author__ = "crucialfelix"
 __contact__ = "crucialfelix@gmail.com"
 __homepage__ = "https://github.com/crucialfelix/django-ajax-selects/"
@@ -10,6 +10,7 @@ from django.db.models.fields.related import ForeignKey, ManyToManyField
 from django.contrib.contenttypes.models import ContentType
 from django.forms.models import ModelForm
 from django.utils.text import capfirst
+from django.utils.encoding import force_text
 from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
 
@@ -32,15 +33,15 @@ class LookupChannel(object):
 
     def get_result(self, obj):
         """ The text result of autocompleting the entered query """
-        return escape(unicode(obj))
+        return escape(force_text(obj))
 
     def format_match(self, obj):
         """ (HTML) formatted item for displaying item in the dropdown """
-        return escape(unicode(obj))
+        return escape(force_text(obj))
 
     def format_item_display(self, obj):
         """ (HTML) formatted item for displaying item in the selected deck area """
-        return escape(unicode(obj))
+        return escape(force_text(obj))
 
     def get_objects(self, ids):
         """ Get the currently selected objects when editing an existing model """
@@ -48,7 +49,8 @@ class LookupChannel(object):
         # this will be however the related objects Manager returns them
         # which is not guaranteed to be the same order they were in when you last edited
         # see OrdredManyToMany.md
-        ids = [int(id) for id in ids]
+        pk_type = self.model._meta.pk.to_python
+        ids = [pk_type(id) for id in ids]
         things = self.model.objects.in_bulk(ids)
         return [things[aid] for aid in ids if aid in things]
 
@@ -90,7 +92,8 @@ def make_ajax_form(model, fieldlist, superclass=ModelForm, show_help_text=False,
     class TheForm(superclass):
 
         class Meta:
-            pass
+            exclude = []
+
         setattr(Meta, 'model', model)
         if hasattr(superclass, 'Meta'):
             if hasattr(superclass.Meta, 'fields'):
@@ -100,12 +103,11 @@ def make_ajax_form(model, fieldlist, superclass=ModelForm, show_help_text=False,
             if hasattr(superclass.Meta, 'widgets'):
                 setattr(Meta, 'widgets', superclass.Meta.widgets)
 
-    for model_fieldname, channel in fieldlist.iteritems():
+    for model_fieldname, channel in fieldlist.items():
         f = make_ajax_field(model, model_fieldname, channel, show_help_text)
 
         TheForm.declared_fields[model_fieldname] = f
         TheForm.base_fields[model_fieldname] = f
-        setattr(TheForm, model_fieldname, f)
 
     return TheForm
 
@@ -132,12 +134,12 @@ def make_ajax_field(model, model_fieldname, channel, show_help_text=False, **kwa
                                    AutoCompleteSelectField
 
     field = model._meta.get_field(model_fieldname)
-    if not 'label' in kwargs:
-        kwargs['label'] = _(capfirst(unicode(field.verbose_name)))
+    if 'label' not in kwargs:
+        kwargs['label'] = _(capfirst(force_text(field.verbose_name)))
 
-    if not 'help_text' in kwargs and field.help_text:
+    if ('help_text' not in kwargs) and field.help_text:
         kwargs['help_text'] = field.help_text
-    if not 'required' in kwargs:
+    if 'required' not in kwargs:
         kwargs['required'] = not field.blank
 
     kwargs['show_help_text'] = show_help_text
@@ -159,7 +161,7 @@ def make_ajax_field(model, model_fieldname, channel, show_help_text=False, **kwa
     return f
 
 
-####################  private  ##################################################
+# -----------------------   private  --------------------------------------------- #
 
 def get_lookup(channel):
     """ find the lookup class for the named channel.  this is used internally """
@@ -184,15 +186,15 @@ def get_lookup(channel):
         if not hasattr(lookup_class, 'format_match'):
             setattr(lookup_class, 'format_match',
                 getattr(lookup_class, 'format_item',
-                    lambda self, obj: unicode(obj)))
+                    lambda self, obj: force_text(obj)))
         if not hasattr(lookup_class, 'format_item_display'):
             setattr(lookup_class, 'format_item_display',
                 getattr(lookup_class, 'format_item',
-                    lambda self, obj: unicode(obj)))
+                    lambda self, obj: force_text(obj)))
         if not hasattr(lookup_class, 'get_result'):
             setattr(lookup_class, 'get_result',
                 getattr(lookup_class, 'format_result',
-                    lambda self, obj: unicode(obj)))
+                    lambda self, obj: force_text(obj)))
 
         return lookup_class()
 

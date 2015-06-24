@@ -15,8 +15,9 @@
         }
         $this.val(ui.item.pk);
         $text.val('');
-        addKiller(ui.item.repr);
+        addKiller(ui.item.repr, ui.item.pk);
         $deck.trigger('added', [ui.item.pk, ui.item]);
+        $this.trigger('change');
 
         return false;
       }
@@ -70,6 +71,7 @@
           addKiller(ui.item.repr, pk);
           $text.val('');
           $deck.trigger('added', [ui.item.pk, ui.item]);
+          $this.trigger('change');
         }
         return false;
       }
@@ -152,7 +154,7 @@
       }
     },
     _renderItem: function(ul, item) {
-      var body = this.options.html ? item.repr : item.label;
+      var body = this.options.html ? item.match: item.label;
       return $('<li></li>')
         .data('item.autocomplete', item)
         .append($('<a></a>')[this.options.html ? 'html' : 'text' ](body))

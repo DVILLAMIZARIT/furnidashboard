@@ -4,7 +4,7 @@ from commissions.models import Commission
 from customers.models import Customer
 from django import forms
 from django.forms.models import inlineformset_factory, modelformset_factory
-from django.forms.util import ErrorList
+from django.forms.utils import ErrorList
 from django.forms.widgets import Select
 from django.contrib.auth import get_user_model
 from django.utils.functional import curry
@@ -74,6 +74,7 @@ class OrderItemForm(forms.ModelForm):
   class Meta:
     model = OrderItem
     #fields = ['description', 'in_stock', 'status', 'po_num', 'po_date', 'ack_num', 'ack_date', 'eta']
+    fields = "__all__" 
 
 class OrderItemFormHelper(FormHelper):
   def __init__(self, *args, **kwargs):
@@ -134,6 +135,7 @@ class OrderForm(forms.ModelForm):
     
   class Meta:
     model = Order
+    fields = "__all__" 
 
 class CommissionForm(forms.ModelForm):
 
@@ -153,6 +155,7 @@ class CommissionForm(forms.ModelForm):
 
   class Meta:
      model = Commission
+     fields = "__all__" 
 
 class OrderDeliveryForm(forms.ModelForm):
 
@@ -219,6 +222,7 @@ class OrderDeliveryForm(forms.ModelForm):
     
   class Meta:
     model = OrderDelivery
+    fields = "__all__" 
 
 class CustomerForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
@@ -226,6 +230,7 @@ class CustomerForm(forms.ModelForm):
 
   class Meta:
     model = Customer
+    fields = "__all__" 
 
 class CustomerDetailReadOnlyForm(DisabledFieldsMixin, CustomerForm):
   def __init__(self, *args, **kwargs):
@@ -254,26 +259,26 @@ class DateRangeForm(forms.Form):
 
     
 def get_ordered_items_formset(extra=1, max_num=1000):
-  return inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=extra, max_num=max_num)
+  return inlineformset_factory(Order, OrderItem, form=OrderItemForm, fields='__all__', extra=extra, max_num=max_num)
 
 def get_deliveries_formset(extra=1, max_num=1000, request=None):
-  formset = inlineformset_factory(Order, OrderDelivery, extra=extra, max_num=max_num, can_delete=False)
+  formset = inlineformset_factory(Order, OrderDelivery, fields='__all__', extra=extra, max_num=max_num, can_delete=False)
   formset.form = staticmethod(curry(OrderDeliveryForm, request=request))
   return formset
 
 def get_commissions_formset(extra=1, max_num=1000, request=None):
-  formset = inlineformset_factory(Order, Commission, extra=extra, max_num=max_num, can_delete=True)
+  formset = inlineformset_factory(Order, Commission, fields='__all__', extra=extra, max_num=max_num, can_delete=True)
   formset.form = staticmethod(curry(CommissionForm, request=request))
   return formset
 
 def get_order_issues_formset(extra=1, max_num=1000, request=None):
-  return inlineformset_factory(Order, OrderIssue, form=OrderIssueForm, extra=extra, max_num=max_num, can_delete=True)
+  return inlineformset_factory(Order, OrderIssue, form=OrderIssueForm, fields='__all__', extra=extra, max_num=max_num, can_delete=True)
 
 #inline formsets
-ItemFormSet = inlineformset_factory(Order, OrderItem, form=OrderItemForm, extra=1, max_num=100)
-DeliveryFormSet = inlineformset_factory(Order, OrderDelivery, form=OrderDeliveryForm, extra=1, max_num=100)
-CommissionFormSet = inlineformset_factory(Order, Commission, form=CommissionForm, extra=1, max_num=100, can_delete=False)
-CustomerFormSet = modelformset_factory(Customer, form=CustomerForm, extra=1, max_num=1)
-OrderAttachmentFormSet = inlineformset_factory(Order, OrderAttachment, extra=1, max_num=5)
-CryptonProtectionFormSet = inlineformset_factory(Order, OrderItemProtectionPlan, extra=1, max_num=1)
-OrderFinancingFormSet = inlineformset_factory(Order, OrderFinancing, extra=1, max_num=1)
+ItemFormSet = inlineformset_factory(Order, OrderItem, form=OrderItemForm, fields='__all__', extra=1, max_num=100)
+DeliveryFormSet = inlineformset_factory(Order, OrderDelivery, form=OrderDeliveryForm, fields='__all__', extra=1, max_num=100)
+CommissionFormSet = inlineformset_factory(Order, Commission, form=CommissionForm, fields='__all__', extra=1, max_num=100, can_delete=False)
+CustomerFormSet = modelformset_factory(Customer, form=CustomerForm, fields='__all__', extra=1, max_num=1)
+OrderAttachmentFormSet = inlineformset_factory(Order, OrderAttachment, fields='__all__', extra=1, max_num=5)
+CryptonProtectionFormSet = inlineformset_factory(Order, OrderItemProtectionPlan, fields='__all__', extra=1, max_num=1)
+OrderFinancingFormSet = inlineformset_factory(Order, OrderFinancing, fields='__all__', extra=1, max_num=1)

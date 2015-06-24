@@ -10,7 +10,7 @@ class OrderManager(models.Manager):
     launch_dt = timezone.make_aware(launch_dt, timezone.get_current_timezone())
 
   def get_qs(self):
-    qs = super(OrderManager, self).get_query_set().filter(~Q(status='I'))
+    qs = super(OrderManager, self).get_queryset().filter(~Q(status='I'))
     return qs
    
   def get_dated_qs(self, start, end):
@@ -18,7 +18,7 @@ class OrderManager(models.Manager):
         '%s__gte' % 'order_date': start -  timedelta(minutes=1),
         '%s__lt' % 'order_date': end,
     }
-    return super(OrderManager, self).get_query_set().filter(**lookup_kwargs)
+    return super(OrderManager, self).get_queryset().filter(**lookup_kwargs)
   
   def unplaced_orders(self):
     """ queryset that find unplaced special orders, for which there is no PO number specified """
