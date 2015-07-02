@@ -5,6 +5,7 @@ from customers.models import Customer
 from django import forms
 from django.forms.models import inlineformset_factory, modelformset_factory
 from django.forms.utils import ErrorList
+from bootstrap3_datetime.widgets import DateTimePicker
 from django.forms.widgets import Select
 from django.contrib.auth import get_user_model
 from django.utils.functional import curry
@@ -18,6 +19,8 @@ import orders.utils as order_utils
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, Submit, Div, Field, HTML
 from crispy_forms.bootstrap import AppendedText, InlineField
+
+DATEPICKER_OPTIONS = {"format":"YYYY-MM-DD", "pickTime": False}
 
 class OrderItemForm(forms.ModelForm):
 
@@ -33,16 +36,16 @@ class OrderItemForm(forms.ModelForm):
     
     self.fields['po_num'].widget.attrs['class'] = "order-item-po"
     self.fields['po_num'].label = "PO #"
-    self.fields['po_date'].widget = BootstrapDateInput()
+    self.fields['po_date'].widget = DateTimePicker(options=DATEPICKER_OPTIONS)
     self.fields['po_date'].label = "PO placed date"
     self.fields['po_date'].widget.attrs['class'] = "order-item-po-date"
     self.fields['ack_num'].widget.attrs['class'] = "order-item-ack-num"
     self.fields['ack_num'].label = "Acknowledgement #"
-    self.fields['ack_date'].widget=BootstrapDateInput()
+    self.fields['ack_date'].widget = DateTimePicker(options=DATEPICKER_OPTIONS)
     self.fields['ack_date'].label = "Acknowl. date"
     self.fields['ack_date'].widget.attrs['class'] = "order-item-ack-date"
     
-    self.fields['eta'].widget=BootstrapDateInput()    
+    self.fields['eta'].widget = DateTimePicker(options=DATEPICKER_OPTIONS)
     self.fields['eta'].widget.attrs['class'] = "order-item-eta clear"
     self.fields['eta'].label = "ETA"
     self.fields['description'].widget.attrs['size']=80
@@ -115,9 +118,10 @@ class OrderForm(forms.ModelForm):
     self.fields['status'].initial='N'
     self.fields['status'].required = True
     
-    self.fields['order_date'].widget = BootstrapDateInput()
+    #self.fields['order_date'].widget = BootstrapDateInput()
+    self.fields['order_date'].widget = DateTimePicker(options=DATEPICKER_OPTIONS)
     self.fields['order_date'].label = "Ordered Date"
-    self.fields['order_date'].widget.attrs['class'] = "order-date"
+    self.fields['order_date'].widget.attrs['class'] += " order-date"
     
     self.fields['subtotal_after_discount'].required = True
 
@@ -142,7 +146,8 @@ class CommissionForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
     self.request = kwargs.pop('request', None)
     super(CommissionForm, self).__init__(*args, **kwargs)
-    self.fields['paid_date'].widget = BootstrapDateInput()
+    #self.fields['paid_date'].widget = BootstrapDateInput()
+    self.fields['paid_date'].widget = DateTimePicker(options=DATEPICKER_OPTIONS)
     self.fields['paid_date'].widget.attrs['layout'] = 'inline';
     self.fields['associate'].required = True
     user_model = get_user_model() 
@@ -162,16 +167,17 @@ class OrderDeliveryForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
     self.request = kwargs.pop('request', None)
     super(OrderDeliveryForm, self).__init__(*args, **kwargs)
-    self.fields['scheduled_delivery_date'].widget = BootstrapDateInput()
-    self.fields['delivered_date'].widget = BootstrapDateInput()
+
+    self.fields['scheduled_delivery_date'].widget = DateTimePicker(options=DATEPICKER_OPTIONS)
+    self.fields['delivered_date'].widget = DateTimePicker(options=DATEPICKER_OPTIONS)
     self.fields['pickup_from'].required = False
-    self.fields['delivery_cost'].widget = BootstrapTextInput(prepend='$')
+    #self.fields['delivery_cost'].widget = BootstrapTextInput(prepend='$')
     self.fields['delivery_cost'].initial = 0.0
     self.fields['paid'].widget = Select(choices = ((0,"No"), (1, "Yes")));
     self.fields['paid'].initial = False
     #self.fields['delivery_cost'].initial = 0.00
     
-    disabled_fields = []
+    disabled_fields = ['order']
     self.fields_to_disable = []
     self.fields_to_remove = []
     
@@ -256,6 +262,24 @@ class DateRangeForm(forms.Form):
   def __init__(self, *args, **kwargs):
     super(DateRangeForm, self).__init__(*args, **kwargs)
     self.fields['date_range'].initial = 'week'  #default selection
+
+    self.helper = FormHelper()
+    self.form_tag = False
+    self.disable_csrf = True
+    self.helper.form_class = 'form-inline'
+    self.helper.field_template = 'bootstrap3/layout/inline_field.html'
+    self.helper.layout = Layout(
+        Div(
+          HTML (
+            '<h3>Select date range</h3>'
+          ),
+          'date_range',
+          'range_from',
+          'range_to',
+          Submit('submit', 'Filter', css_class='btn-default'),
+          css_class = 'well'
+        )
+    )
 
     
 def get_ordered_items_formset(extra=1, max_num=1000):

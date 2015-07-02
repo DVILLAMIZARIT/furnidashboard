@@ -111,17 +111,22 @@
 
   // routine that runs once new formset is added to the form
   var initFormset = function($form, prefix, caption) {
-    var accordions = $form.parent().find('div.accordion-group');
+    var accordions = $form.parent().find('div.form-row');
     var form_ind = accordions.length - 1;
-    $form.find("div.accordion-heading a.accordion-toggle").attr("href", "#collapse" + prefix + "-" + form_ind).text(caption + " " + (form_ind + 1));
-    $form.find("div.accordion-body").attr("id", "collapse" + prefix + "-" + form_ind);
-    $form.parents('fieldset.accordion').find("div.accordion-body").removeClass("in");
-    $form.find("div.accordion-heading a").click();
+    $form.find("div.panel-heading .panel-title a").attr("href", "#collapse" + prefix + "-" + form_ind).text(caption + " " + (form_ind + 1));
+    $form.find("div.panel-collapse").attr("id", "collapse" + prefix + "-" + form_ind);
+    $form.parents('fieldset.accordion').find("div.panel-collapse").removeClass("in");
+    $form.find("div.panel-heading a").click();
   }
 
   FormHelper.applyItemFormRules = init;
   FormHelper.recalcOrderTotals = recalcOrderTotals;
   FormHelper.initFormset = initFormset;
+  FormHelper.dateTimePickerOptions = {
+    pickTime: false,
+    format:  "MM-DD-YYYY"
+  };
+
   G.FurnFormHelper = FormHelper;
 
 }(this, undefined))

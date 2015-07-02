@@ -1,51 +1,93 @@
-{% extends "base.html" %}
+{% extends "base_bootstrap3.html" %}
 
+{% comment %}
 {% load bootstrap_toolkit %}
+{% endcomment %}
 
-{% block title %}Modify Order{% endblock %}
+{% load bootstrap3 %}
 
-{% block page_title %}Modify Order {{order}}{% endblock page_title %}
+{% block title %}Update Delivery Info | Order #{{ delivery.order.number }}{% endblock %}
+
+{% block page_title %}Update Delivery Info | Order #{{ delivery.order.number }}{% endblock page_title %}
 
 {% block extra_js %}
-<script type="text/javascript">
-    $(function() {
-      $(document).ready(function() {
-        
-      });
-    })
-</script>
+  <script type="text/javascript">
+      $(function() {
+        $(document).ready(function() {
+          
+        });
+      })
+  </script>
 
   {{ form.media }}
   
 {% endblock %}
 
-{% block extra_css %}
-<style type="text/css">
-</style>
+{% block extra_css %}  
 {% endblock %}
 
 {% block content %}
 
-<form action="" method="POST" enctype="multipart/form-data">
+<form action="" method="POST" enctype="multipart/form-data" role="form" class="form">
   {% csrf_token %}
   
   {{ form.management_form }}
   {{ form.non_form_errors }}
-  <div class="form-row inline">
-    {% for field in form %}
-      {% ifequal field.name "paid" %}
-        <div class="field-bg">
-      {% endifequal %}
-      
-      {{ field | as_bootstrap}}
-      
-      {% ifequal field.name "paid" %}
-        </div>
-      {% endifequal %}
-    {% endfor %}
-  </div>
 
-  <input type="submit" value="Save"/>
+    <div class="row">      
+      <div class="col-md-3">
+         {% bootstrap_field form.order %}
+      </div>
+
+      <div class="col-md-3">
+        {% bootstrap_field form.delivery_type %}
+      </div>
+
+      <div class="col-md-3">
+        {% bootstrap_field form.scheduled_delivery_date %}
+      </div>
+
+      <div class="col-md-3">
+        {% bootstrap_field form.pickup_from %}
+      </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">
+          {% bootstrap_field form.delivered_date %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+          {% bootstrap_field form.delivery_slip %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+          {% bootstrap_field form.comments %}
+        </div>
+    </div>
+
+     <div class="row">
+        <div class="col-md-8">
+          {% bootstrap_field form.delivery_person_notes %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+          {% bootstrap_field form.delivery_cost %}
+        </div>
+        <div class="col-md-3">
+          {% bootstrap_field form.paid %}
+        </div>
+    </div>
+
+
+  {% buttons submit='Save' %}{% endbuttons %}
 
 </form>
 

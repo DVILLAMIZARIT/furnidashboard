@@ -1,14 +1,31 @@
 <!-- date filter form -->
 
-{% load bootstrap_toolkit %}
+{% load bootstrap3 %}
+{% load crispy_forms_tags %}
 
 <div>
-    <form action="" method="GET" id="dateRangeFilter" class="well form-inline">
+    <form action="" method="GET" id="dateRangeFilter" class="form-inline">
         {{ date_range_filter.non_field_errors }} 
+        {{ date_range_filter.management_form }}
+
+        {% comment %}
         <div class="controls-row">
-            {{ date_range_filter | as_bootstrap }}
-            <input type="submit" class="btn btn-submit btn-default" value="Apply"/>
+            {% bootstrap_form date_range_filter success_css_class="" %}            
         </div>
+       
+
+     	<div class="form-group">
+        	{% bootstrap_field date_range_filter.month layout="inline" show_label="true" %}
+      	</div>
+      	<div class="form-group">
+        	{% bootstrap_field date_range_filter.year layout="inline" show_label="true" %}
+      	</div>
+      	{% buttons submit='Apply' %}{% endbuttons %}
+
+      	{% endcomment %}
+
+      	{% crispy date_range_filter date_range_filter.helper %}
+
     </form>
 </div>
 <!-- \date filter form -->

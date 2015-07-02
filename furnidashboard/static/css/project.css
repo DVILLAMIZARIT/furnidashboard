@@ -89,10 +89,24 @@ input.order-item-desc {
 #bonus_scale {
   float:right;
 }
-#order-filter .control-group {
-  display:inline-block;
-  margin-right:1.5em;
+
+/* ORDER FILTER */
+#order-filter .form-group {
+    margin-right: 20px;
 }
+#order-filter .sr-only {
+    position: initial;
+    width: auto;
+    height: auto;
+}
+#order-filter .form-control {
+    display: block;
+}
+#order-filter .btn {
+    margin-top: 18px;
+}
+/* \ORDER FILTER */
+
 #totals {
   padding:2em 0;
 }
@@ -151,4 +165,8 @@ a.delete-row {
   background: pink;
   border-radius: 5px;
   padding: .2em .5em;
+}
+
+.checkbox-middle {
+  margin-top:30px;
 }

@@ -2,7 +2,7 @@ import django_filters as filters
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, Submit, Div
+from crispy_forms.layout import Layout, Fieldset, Submit, Div, Field
 from .models import Order
 
 CHOICES_FOR_STATUS_FILTER = [('', '--Any--')]
@@ -14,23 +14,24 @@ class OrderFilter(filters.FilterSet):
 
   def __init__(self, *args, **kwargs):
     super(OrderFilter, self).__init__(*args, **kwargs)
-    self.helper = FormHelper()
-    
+        
     user_model = get_user_model() 
     self.filters['commission__associate'].field.queryset = user_model.objects.filter(Q(groups__name__icontains="associates") | Q(groups__name__icontains="managers" ))
 
+    self.helper = FormHelper()
+    self.helper.form_class = 'form-inline'
+    self.helper.field_template = 'bootstrap3/layout/inline_field.html'
     self.helper.layout = Layout(
-      Fieldset(
-        'Filter orders',
         Div(
           'store',
           'status',
           'commission__associate',
-          Submit('submit', 'Filter'),
-          css_class='well',
-        ),
-      ),
+          Submit('submit', 'Filter', css_class='btn-default'),
+          css_class = 'well'
+        )
     )
+
+    self.form.fields['store'].widget.attrs['placeholder'] = 'Store'
 
   class Meta:
     model = Order

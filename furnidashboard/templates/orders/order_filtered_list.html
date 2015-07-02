@@ -15,7 +15,9 @@
 
   <div id="order-list" class="monthly-orders">
 
+    <!-- Filter Form -->
     {% crispy filter.form filter.helper %}
+    
     {% render_table table %}
 
   </div>

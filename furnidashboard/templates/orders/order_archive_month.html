@@ -1,8 +1,9 @@
-{% extends "base.html" %}
+{% extends "base_bootstrap3.html" %}
 
 {% load staticfiles %}
 {% load render_table from django_tables2 %}
 {% load crispy_forms_tags %}
+{% load bootstrap3 %}
 
 {% block title %}Orders for {{ month|date:'F, Y'}} {% endblock title %}
 {% block extra_css %}
@@ -42,7 +43,23 @@
       </ul>
     {% endif %}
 
+    {% comment %}
+    <fieldset class="well">
+      <legend>Filter orders</legend>
+      <form id="order-filter" method="get" class="form form-inline">
+        {{ filter.form.management_form}}
+        {{ filter.form.non_field_errors}}
+        {% bootstrap_form_errors filter.form layout='inline' %}
+        {% bootstrap_form filter.form layout="inline" %}
+        {% buttons submit='Filter' layout="inline" %}{% endbuttons %}
+      </form>
+    </fieldset>
+    {% endcomment %}
+
+    <!-- Filter Form -->
     {% crispy filter.form filter.helper %}
+    
+
     {% render_table table %}
 
   </div>

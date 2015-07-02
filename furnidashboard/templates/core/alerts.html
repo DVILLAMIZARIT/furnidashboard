@@ -1,5 +1,5 @@
 
-{% extends "base.html" %}
+{% extends "base_bootstrap3.html" %}
 
 {% load staticfiles %}
 {% load crispy_forms_tags %}
@@ -12,22 +12,19 @@
 {% block page_title %}Alerts Dashboard{% endblock page_title %}
 
 {% block content %}
-  <div class="navbar">
+  <ul class="nav nav-pills">
     {% url 'alerts_main' as alerts  %}
     {% url 'alerts_unpaid_deliveries' as unpaid_deliveries  %}
     {% url 'alerts_unacknowledged_orders' as unacknowledged_orders  %}
     {% url 'alerts_unpaid_commissions' as unpaid_commissions  %}
     {% url 'alerts_protection_plan' as protection_plan_alert  %}
     {% url 'alerts_order_financing' as order_financing_alert  %}
-    <div class="navbar-inner">
-      <ul class="nav">
-        <li class="{% ifequal request.path alerts %}active{% endifequal %} -btn"><a href="{{ alerts }}">Unplaced Orders</a></li>
-        <li class="{% ifequal request.path protection_plan_alert %}active{% endifequal %} -btn"><a href="{{ protection_plan_alert }}">Crypton Protection Plan</a></li>
-        <li class="{% ifequal request.path order_financing_alert %}active{% endifequal %} -btn"><a href="{{ order_financing_alert }}">Order Financing</a></li>
-        <li class="{% ifequal request.path unpaid_deliveries %}active{% endifequal %} -btn"><a href="{{ unpaid_deliveries }}">Unpaid Deliveries</a></li>
-        <li class="{% ifequal request.path unacknowledged_orders %}active{% endifequal %} -btn"><a href="{{ unacknowledged_orders }}">Unconfirmed Orders</a></li>
-        <li class="{% ifequal request.path unpaid_commissions %}active{% endifequal %} -btn"><a href="{{ unpaid_commissions }}">Commissions Due</a></li>
-      </ul>
-    </div>
-  </div>
+
+    <li role="presentation" class="{% ifequal request.path alerts %}active{% endifequal %} -btn"><a href="{{ alerts }}">Unplaced Orders</a></li>
+    <li role="presentation" class="{% ifequal request.path protection_plan_alert %}active{% endifequal %} -btn"><a href="{{ protection_plan_alert }}">Crypton Protection Plan</a></li>
+    <li role="presentation" class="{% ifequal request.path order_financing_alert %}active{% endifequal %} -btn"><a href="{{ order_financing_alert }}">Order Financing</a></li>
+    <li role="presentation" class="{% ifequal request.path unpaid_deliveries %}active{% endifequal %} -btn"><a href="{{ unpaid_deliveries }}">Unpaid Deliveries</a></li>
+    <li role="presentation" class="{% ifequal request.path unacknowledged_orders %}active{% endifequal %} -btn"><a href="{{ unacknowledged_orders }}">Unconfirmed Orders</a></li>
+    <li role="presentation" class="{% ifequal request.path unpaid_commissions %}active{% endifequal %} -btn"><a href="{{ unpaid_commissions }}">Commissions Due</a></li>
+  </ul>
 {% endblock %}

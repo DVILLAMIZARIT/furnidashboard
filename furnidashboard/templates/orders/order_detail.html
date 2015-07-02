@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_bootstrap3.html" %}
 
 {% load extras %}
 
@@ -27,32 +27,28 @@
 
   <br/>
 
-  <div class="row-fluid">
-    <div class="span12">
-      <div class="row-fluid">
-    <div class="span2">
+  <div class="container-fluid">
+    <div class="col-md-2">
       <h5>Order Date:</h5>
       {{order.order_date|date:'j F, Y'}}
     </div> 
-    <div class="span2">
+    <div class="col-md-2">
       <h5>Status:</h5>
       {{order.get_status_display|upper}}
     </div>
-    <div class="span2">
+    <div class="col-md-2">
       <h5>Store:</h5>
       {{order.store}}
     </div>
-    <div class="span2">
+    <div class="col-md-2">
       <h5>Associate:</h5>
       {% for commission in order.commission_set.all %}
         {{ commission.associate.first_name }},  
       {% endfor %}
     </div>
-    <div class="span1">
+    <div class="col-md-2">
       <h5>Referral</h5>
       <p>{{order.get_referral_display|upper}}</p>
-    </div>
-      </div>
     </div>
   </div>
 
@@ -60,16 +56,16 @@
 
   <h3>Customer</h3>
   <div class="row customer-info">
-    <div class="span2">
+    <div class="col-md-2">
       {{order.customer}}<br/>
       Phone: {{order.customer.phone}}<br/>
       Email: {{order.customer.email}}
     </div>
-    <div class="span3">
+    <div class="col-md-3">
       <h4>Billing Address:</h4>
       {{order.customer.billing_address}}
     </div>
-    <div class="span3">
+    <div class="col-md-3">
       <h4>Shipping Address:</h4>
       {{order.customer.shipping_address}}
     </div>
@@ -115,7 +111,7 @@
   <hr/>
 
   <div class="row">
-    <div class="span4">
+    <div class="col-md-4">
       <h3>Payment</h3>
       <table id="order-payments-table" cell-spacing="0" cell-padding="0">
         <tr>
@@ -139,7 +135,7 @@
       </table>
     </div>
 
-    <div class="span8">
+    <div class="col-md-8">
       <h3>Ordered Items</h3>
       <table id="order-items-table" cell-spacing="0" cell-padding="0">
         <thead>
@@ -180,12 +176,12 @@
   <hr/>
 
   <div class="row">
-    <div class="span6">
+    <div class="col-md-6">
       <h3>Special Financing Option</h3>
       {% if order.orderfinancing_set.count %}
         {% for financing_plan in order.orderfinancing_set.all %}
         <div class="row customer-info">
-          <div class="span2">
+          <div class="col-md-2">
             {{ financing_plan.approval_no }}<br/>
             Details: {{ financing_plan.details }}<br/>
           </div>
@@ -196,12 +192,12 @@
       {% endif %}
     </div>
 
-    <div class="span6">
+    <div class="col-md-6">
       <h3>Crypton Protection Plan</h3>
       {% if order.orderitemprotectionplan_set.count %}
         {% for crypton_plan in order.orderitemprotectionplan_set.all %}
         <div class="row customer-info">
-          <div class="span2">
+          <div class="col-md-2">
             {{ crypton_plan.approval_no }}<br/>
             Details: {{ crypton_plan.details }}<br/>
           </div>
@@ -249,11 +245,11 @@
 
 
   <div class="row">
-    <div class="span4">
+    <div class="col-md-4">
       <h3>Comments</h3>
       <p>{{order.comments}}</p>
     </div>
-    <div class="span5">
+    <div class="col-md-5">
       <h3>Attachments</h3>
       <ul>
       {% for attachment in order.orderattachment_set.all %}

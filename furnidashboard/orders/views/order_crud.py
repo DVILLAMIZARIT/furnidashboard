@@ -337,6 +337,7 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     Called if any of the forms on order page is invalid. Returns a response with an invalid form in the context
     """
     context = self.get_context_data()
+    #kwargs.update({'messages':messages.get_messages(self.request)})
     context.update(kwargs)
 
     return self.render_to_response(context)
@@ -442,7 +443,7 @@ class OrderCreateView(PermissionRequiredMixin, CreateView):
     """
     Called if any of the forms on order page is invalid. Returns a response with an invalid form in the context
     """    
-    context = self.get_context_data(messages=messages)
+    context = self.get_context_data()
     context.update(kwargs)
     return self.render_to_response(context)
 

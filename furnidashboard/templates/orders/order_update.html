@@ -1,10 +1,20 @@
-{% extends "base.html" %}
+{% extends "base_bootstrap3.html" %}
 
+{% comment %}
 {% load bootstrap_toolkit %}
+{% endcomment %}
+
+{% load bootstrap3 %}
 {% load crispy_forms_tags %}
 {% load staticfiles %}
 
-{% block title %}Modify Order{% endblock %}
+{% block title %}
+  {% if page_title %} 
+    {{ page_title }}
+  {% else %}
+    Update Order
+  {% endif %}
+{% endblock %}
 
 {% block page_title %}Modify Order {{order}}{% endblock page_title %}
 
@@ -14,7 +24,6 @@
 
 <script type="text/javascript">
   $(function() {
-
     $(document).ready(function() {
 
       var warnBeforeExit = true;
@@ -24,10 +33,10 @@
         $(this).tab('show');
       })
 
-      FurnFormHelper.applyItemFormRules($("#order-items-fieldset"));
+      FurnFormHelper.applyItemFormRules($("#order-items-fieldset"));  
 
       // items formset
-      $("#order-items-fieldset").find("div.accordion-body").eq(0).addClass("in"); //expand first item
+      $("#order-items-fieldset").find("div.panel-collapse").eq(0).addClass("in"); //expand first item
       $('#order-items-fieldset div.items-form').formset({
           prefix: '{{items_form.prefix}}',
           deleteText: 'Delete',
@@ -39,29 +48,53 @@
             $form.find("select").off('change');
 
             FurnFormHelper.applyItemFormRules($("#order-items-fieldset"));
+            
+            $('.input-group-addon', $form).off('change');
+            $('.input-group-addon', $form).off('click');            
+           
+            $('.date', $form).each(function() {
+              $(this).removeData('DateTimePicker')
+              $(this).datetimepicker(FurnFormHelper.dateTimePickerOptions);
+            });
           }
       });
       
       // order delivery formset
-      $("#deliveries").find("div.accordion-body:first").addClass("in"); //expand first item
+      $("#deliveries").find("div.panel-collapse").eq(0).addClass("in");               //expand first item
       $('#deliveries div.delivery-form').formset({
           prefix: '{{delivery_form.prefix}}',
           added: function($form) {
             FurnFormHelper.initFormset($form, 'deliveries', 'Delivery');
+            
+            $('.input-group-addon', $form).off('change');
+            $('.input-group-addon', $form).off('click');
+
+            $('.date', $form).each(function() {
+              $(this).removeData('DateTimePicker')
+              $(this).datetimepicker(FurnFormHelper.dateTimePickerOptions);
+            });
           }
       });
 
       // commissions formset
-      $("#order-commissions-fieldset").find("div.accordion-body:first").addClass("in"); //expand first item
+      $("#order-commissions-fieldset").find("div.panel-collapse:first").addClass("in"); //expand first item
       $('#order-commissions-fieldset div.commissions-form').formset({
           prefix: '{{commissions_form.prefix}}',
           added: function($form) {
             FurnFormHelper.initFormset($form, 'commissions', 'Commissions');
+
+            $('.input-group-addon', $form).off('change');
+            $('.input-group-addon', $form).off('click');
+
+            $('.date', $form).each(function() {
+              $(this).removeData('DateTimePicker')
+              $(this).datetimepicker(FurnFormHelper.dateTimePickerOptions);
+            });
           }
       });
 
       // attachments formset
-      $("#attachment-fieldset").find("div.accordion-body:first").addClass("in"); //expand first item
+      $("#attachment-fieldset").find("div.panel-collapse:first").addClass("in"); //expand first item
       $('#attachment-fieldset div.attachment-form').formset({
           prefix: '{{attachment_form.prefix}}',
           added: function($form) {
@@ -70,7 +103,7 @@
       });
 
       // issues formset
-      $("#issues-fieldset").find("div.accordion-body:first").addClass("in"); //expand first item
+      $("#issues-fieldset").find("div.panel-collapse:first").addClass("in"); //expand first item
       $('#issues-fieldset div.issues-form').formset({
           prefix: '{{issues_form.prefix}}',
           added: function($form) {
@@ -114,14 +147,18 @@
             required: 'Order number is required'
           }
         },
-        errorClass: "error help-block",
+
+        errorClass: "has-error help-block",
+        errorPlacement: function(error, element) {
+          error.appendTo( element.parents(".form-group") );
+        },
         highlight: function(element) {
-          $(element).closest('.control-group').removeClass('success').addClass('error');
+          $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
         },
         success: function(element) {
           element
-          .text('OK!').addClass('valid')
-          .closest('.control-group').removeClass('error').addClass('success');
+          .addClass('has-success control-label')
+          .closest('.form-group').removeClass('has-error').addClass('has-success');
         } 
       });
 
@@ -159,50 +196,59 @@
 
 {% block content %}
 
-<form action="" method="POST" enctype="multipart/form-data" id="orderForm">
+<form action="" method="POST" enctype="multipart/form-data" id="orderForm" role="form" class="form">
   {% csrf_token %}
   {{ form.non_field_errors }} 
   
   <div class="tabbable tabs-left">
   
     <!-- Nav tabs -->
-    <ul class="nav nav-tabs" id="tabs">
-      <li class="active"><a href="#order-info" data-toggle="tab">Order info</a></li>
-      <li><a href="#customer-info" data-toggle="tab">Customer</a></li>
-      <li><a href="#payment-info" data-toggle="tab">Payment</a></li>
-      <li><a href="#order-items-fieldset" data-toggle="tab">Items</a></li>
-      <li><a href="#deliveries" data-toggle="tab">Deliveries</a></li>
-      <li><a href="#order-commissions-fieldset" data-toggle="tab">Commissions</a></li>
-      <li><a href="#attachment-fieldset" data-toggle="tab">Attachments</a></li>
-      <li><a href="#issues-fieldset" data-toggle="tab">Order Issues</a></li>
+    <ul class="nav nav-tabs" id="tabs" role="tablist">
+      <li role="presentation" class="active"><a href="#order-info" data-toggle="tab">Order info</a></li>
+      <li role="presentation"><a href="#customer-info" data-toggle="tab">Customer</a></li>
+      <li role="presentation"><a href="#payment-info" data-toggle="tab">Payment</a></li>
+      <li role="presentation"><a href="#order-items-fieldset" data-toggle="tab">Items</a></li>
+      <li role="presentation"><a href="#deliveries" data-toggle="tab">Deliveries</a></li>
+      <li role="presentation"><a href="#order-commissions-fieldset" data-toggle="tab">Commissions</a></li>
+      <li role="presentation"><a href="#attachment-fieldset" data-toggle="tab">Attachments</a></li>
+      <li role="presentation"><a href="#issues-fieldset" data-toggle="tab">Order Issues</a></li>
     </ul>
 
     <!-- Tab panes -->
     <div class="tab-content">  
-      <div class="tab-pane active" id="order-info">
+      <div role="tabpanel" class="tab-pane active" id="order-info">
         <fieldset>
           <legend>Order info</legend>
       
-            <div class="field-wrapper inline">
-              {{ form.number|as_bootstrap }}
+            <div class="row">
+              <div class="col-md-3">
+                {% bootstrap_field form.number %}
+              </div>
+              
+              <div class="col-md-3">
+                {% bootstrap_field form.order_date  %}
+              </div>
+              
+              <div class="col-md-3">
+                {% bootstrap_field form.store %}
+                
+              </div>
             </div>
-            
-            <div class="field-wrapper inline">
-              {{ form.order_date|as_bootstrap }}
+
+            <div class="row">
+              <div class="col-md-3">
+                {% bootstrap_field form.status %}
+              </div>
+
+              <div id="referral-info" class="col-md-3">
+                {% bootstrap_field form.referral %}
+              </div>
             </div>
-            
-            <div class="field-wrapper inline">
-              {{ form.status|as_bootstrap }}
-            </div>
-      
-           <div class="field-wrapper clear">
-             {{ form.store|as_bootstrap }}
-           </div>
       
         </fieldset>
       </div>
     
-      <div class="tab-pane" id="customer-info">
+      <div role="tabpanel" class="tab-pane" id="customer-info">
         <fieldset>
           <legend>Customer Info</legend>
           
@@ -211,20 +257,21 @@
                 <li class="active"><a href="#tab1" data-toggle="tab">Select Customer</a></li>
                 <li><a href="#tab2" data-toggle="tab">New Customer...</a></li>
               </ul>
+
               <div class="tab-content">
                 <div class="tab-pane active" id="tab1">
-                  <div class="field-wrapper">
-                    {{ form.customer|as_bootstrap }}
+
+                  <div class="col-md-6">
+                    {% bootstrap_field form.customer %}
                   </div>
 
                 </div>
                 <div class="tab-pane" id="tab2">
-                  <div id="new-customer-form-wrapper" >
+                  <div id="new-customer-form-wrapper" class="col-md-6">
                     {{ customer_form.management_form }}
-                    {% for subform in customer_form %}
-                      {{ subform.non_field_errors }}
-                      {{ subform }}
-                    {% endfor %}
+                    {{ customer_form.non_form_errors }}
+                    {% bootstrap_formset_errors customer_form layout='inline' %}
+                    {% bootstrap_formset customer_form %}
                   </div>
                 </div>
               </div>
@@ -235,198 +282,388 @@
         </fieldset>
       </div>
     
-      <div class="tab-pane" id="payment-info">
+      <div role="tabpanel" class="tab-pane" id="payment-info">
         <fieldset>
           <div class="row">
             <div class="span4">
-              <legend>Payment Information</legend>
-              
-              {% include "partial/bootstrap_field.html" with field=form.subtotal_after_discount addon="$" %}
-             
-              {% include "partial/bootstrap_field.html" with field=form.deposit_balance addon="$" %}
+              <legend>Payment Information</legend>                 
 
-              {% include "partial/bootstrap_field.html" with field=form.tax addon="$" %}
-              
-              {% include "partial/bootstrap_field.html" with field=form.shipping addon="$" %} 
+                <div class="row">
+                  <div class="col-md-3">
+                    {% bootstrap_field form.subtotal_after_discount addon_before='$' %}
+                  </div>
+
+                  <div class="col-md-3">
+                    {% bootstrap_field form.deposit_balance addon_before='$' %}
+                  </div>
+
+                </div>
+
+                <div class="row">
+                  <div class="col-md-3">
+                    {% bootstrap_field form.tax addon_before='$' %}
+                  </div>
+
+                   <div class="col-md-3">
+                    {% bootstrap_field form.shipping addon_before='$' %}              
+                  </div>                  
+
+                </div>
 
               <hr/>
             </div>            
 
-            <div class="span4">
-              {% include "partial/bootstrap_field.html" with field=form.protection_plan label_tag="Protection plan purchased" %}
-              <div class="accordion-group items-form form-row" id="crypton-form-row">
-                <div class="accordion-heading">
-                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#payment-info" href="#collapse-crypton">Crypton Protection Plan (expand)</a>
-                </div>
-                <div id="collapse-crypton" class="accordion-body collapse">
-                  <div class="accordion-inner">
-                       <legend>Crypton Protection Plan</legend>
+            <div class="row">
 
-                      {% if crypton_form %}
-                        {{ crypton_form.management_form }}
-                        {{ crypton_form.non_form_errors }}
-                        {% for form in crypton_form %}
-                         {{ form | as_bootstrap }}
-                        {% endfor %}
-                      {% endif %}
+              <div class="col-md-4">
+                {% bootstrap_label "Protection plan purchased"  %}
+                {% bootstrap_field form.protection_plan show_label=False %}
 
+                {% comment %}
+                  {% include "partial/bootstrap_field.html" with field=form.protection_plan label_tag="Protection plan purchased" %}
+                {% endcomment %}
+
+                <div class="accordion-group items-form form-row" id="crypton-form-row">
+                  <div class="accordion-heading">
+                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#payment-info" href="#collapse-crypton">Crypton Protection Plan (expand)</a>
                   </div>
-                </div>       
-              </div>   
+                  <div id="collapse-crypton" class="accordion-body collapse">
+                    <div class="accordion-inner">
+                         <legend>Crypton Protection Plan</legend>
 
-              <hr/>
-              {% include "partial/bootstrap_field.html" with field=form.financing_option label_tag="Order financing" %}
-              <div class="accordion-group items-form form-row" id="financing-form-row">
-                <div class="accordion-heading">
-                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#payment-info" href="#collapse-financing">Order Financing (expand)</a>
-                </div>
-                <div id="collapse-financing" class="accordion-body collapse">
-                  <div class="accordion-inner">
-                       <legend>Order Financing</legend>                  
-                      
+                        {% if crypton_form %}
+                          {{ crypton_form.management_form }}
+                          {{ crypton_form.non_form_errors }}
+                          {% for form in crypton_form %}
+                            {% bootstrap_form form %}
+                          {% endfor %}
+                        {% endif %}
+
+                    </div>
+                  </div>       
+                </div>  
+              </div>
+
+              <div class="col-md-4">
+
+                {% bootstrap_label "Order financing"  %}
+                {% bootstrap_field form.financing_option show_label=False %}
+
+                {% comment %}
+                  {% include "partial/bootstrap_field.html" with field=form.financing_option label_tag="Order financing" %}
+                {% endcomment %}
+
+                <div class="accordion-group items-form form-row" id="financing-form-row">
+                  <div class="accordion-heading">
+                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#payment-info" href="#collapse-financing">Order Financing (expand)</a>
+                  </div>
+                  <div id="collapse-financing" class="accordion-body collapse">
+                    <div class="accordion-inner">
+                      <legend>Order Financing</legend>                  
+                        
                       {% if financing_form %}
                         {{ financing_form.management_form }}
                         {{ financing_form.non_form_errors }}
                         {% for form in financing_form %}
-                         {{ form | as_bootstrap }}
+                         {% bootstrap_form form %}
                         {% endfor %}
                       {% endif %}
 
-                  </div>
-                </div>       
-              </div>   
+                    </div>
+                  </div>       
+                </div> 
+
+              </div>
+
             </div>
+
+            <hr/>
 
           </div>  
 
         </fieldset>
       </div>
       
-      <div class="tab-pane" id="order-items-fieldset">
+      <div role="tabpanel" class="tab-pane" id="order-items-fieldset">
         <fieldset class="accordion">
           <legend>Sold Items</legend>
-          {{ items_form.management_form|crispy }}
-          {{ items_form.non_field_errors }}    
-          {% for item_form in items_form %}
-            <div class="accordion-group items-form form-row" id="{{ item_form.prefix }}-row">
-              <div class="accordion-heading">
-                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#order-items-fieldset" href="#collapse{{ item_form.prefix }}">Item {{ forloop.counter }}</a>
-              </div>
-              <div id="collapse{{ item_form.prefix }}" class="accordion-body collapse">
-                <div class="accordion-inner">
-                  {% crispy item_form item_form_helper %} 
-                  {% comment %} {{ item_form | as_bootstrap }} {% endcomment %}
-                  {{ item_form.id }}
+
+          <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            {{ items_form.management_form|crispy }}
+            {{ items_form.non_field_errors }} 
+            {% bootstrap_formset_errors items_form layout='inline' %}
+
+            {% for item_form in items_form %}
+
+
+              <div class="panel panel-default items-form form-row" id="{{ item_form.prefix }}-row">
+                <div class="panel-heading" role="tab" id="heading{{ item_form.prefix }}">
+                  <h4 class="panel-title">
+                    <a role="button" data-toggle="collapse" data-parent="#order-items-fieldset" href="#collapse{{ item_form.prefix }}" aria-expanded="false" aria-controls="collapse{{ item_form.prefix }}">
+                      Item {{ forloop.counter }}
+                    </a>
+                  </h4>
                 </div>
-              </div>       
-            </div>
-          {% endfor %}
+                <div id="collapse{{ item_form.prefix }}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading{{ item_form.prefix }}">
+                  <div class="panel-body">
+
+                    <div class="item-general-fields">
+                      <div class="row">
+                        <div class="col-md-3">
+                          {% bootstrap_field item_form.status %}
+                        </div>
+                        <div class="col-md-3">
+                          {% bootstrap_field item_form.in_stock %}
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          {% bootstrap_field item_form.description %}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="item-special-fields">
+                      <div class="row">
+                        <div class="col-md-3">
+                          {% bootstrap_field item_form.po_num %}
+                        </div>
+                        <div class="col-md-3">
+                          {% bootstrap_field item_form.po_date %}
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-3">
+                          {% bootstrap_field item_form.ack_num %}
+                        </div>
+                        <div class="col-md-3">
+                          {% bootstrap_field item_form.ack_date %}
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-3">
+                          {% bootstrap_field item_form.eta %}
+                        </div>
+                      </div>
+                    </div>
+
+                    {{ item_form.id }}
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
         </fieldset>
       </div>
     
-      <div class="tab-pane" id="deliveries">
-        <fieldset class="formset">
+      <div role="tabpanel" class="tab-pane" id="deliveries">
+        <fieldset class="formset accordion">
           <legend>Deliveries</legend>
+
+          <div class="panel-group" class="accordion" role="tablist" aria-multiselectable="true">
           {{ delivery_form.management_form }}
           {% if delivery_form %}
             {{ delivery_form.non_form_errors }}
-            {% for form in delivery_form %}
-              <div class="accordion-group delivery-form form-row" id="{{ delivery_form.prefix }}-{{forloop.counter}}-row">
-                <div class="accordion-heading">
-                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#deliveries" href="#collapse-{{ form.prefix }}">Delivery {{ forloop.counter }}</a>
+            {% bootstrap_formset_errors delivery_form %}
+
+            {% for form in delivery_form %}   
+
+              <div class="panel panel-default delivery-form form-row" id="{{ delivery_form.prefix }}-{{forloop.counter}}-row">
+                <div class="panel-heading" role="tab" id="heading{{ form.prefix }}">
+                  <h4 class="panel-title">
+                    <a role="button" data-toggle="collapse" data-parent="#deliveries" href="#collapse{{ delivery_form.prefix }}" aria-expanded="false" aria-controls="collapse{{ form.prefix }}">
+                      Delivery {{ forloop.counter }}
+                    </a>
+                  </h4>
                 </div>
-                <div id="collapse-{{ form.prefix }}" class="accordion-body collapse">
-                  <div class="accordion-inner">
-                    {{ form | as_bootstrap }}
-                  </div>
-                </div>       
+                <div id="collapse{{ delivery_form.prefix }}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading{{ form.prefix }}">
+                  <div class="panel-body">
+                    
+                    <div class="row">
+                      <div class="col-md-3">
+                        {% bootstrap_field form.delivery_type %}
+                      </div>
+                      <div class="col-md-3">
+                        {% bootstrap_field form.scheduled_delivery_date %}
+                      </div>
+                      <div class="col-md-3">
+                        {% bootstrap_field form.pickup_from %}
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-3">
+                        {% bootstrap_field form.delivered_date %}
+                      </div>
+                       <div class="col-md-4">
+                        {% bootstrap_field form.delivery_slip %}
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6">
+                        {% bootstrap_field form.comments %}
+                      </div>
+                    </div>
+                  
+                    <div class="row">
+                      <div class="col-md-6">
+                        {% bootstrap_field form.delivery_person_notes %}
+                      </div>
+                    </div>
+                     <div class="row">
+                      <div class="col-md-3">
+                        {% bootstrap_field form.delivery_cost %}
+                      </div>
+                    </div>
+
+                     
+                    <div class="row">
+                      <div class="col-md-3">
+                        {% bootstrap_field form.paid %}
+                      </div>
+                    </div>
+
+                  </div>       
               </div>
+
             {% endfor %}
           {% else %}
             <div class="alert warning">Deliveries can be added only after saving the order.</div>
           {% endif %}
+          </div>
         </fieldset>
       </div>
     
-      <div class="tab-pane" id="order-commissions-fieldset">
+      <div role="tabpanel" class="tab-pane" id="order-commissions-fieldset">
         <fieldset class="formset accordion">
           <legend>Commissions</legend>
-          {{ commissions_form.management_form }}
-          {% if commissions_form %}
-            {{ commissions_form.non_field_errors }}    
-            {% for comm_form in commissions_form %}
-              <div class="accordion-group commissions-form form-row" id="{{ commissions_form.prefix }}-{{forloop.counter}}-row">
-                <div class="accordion-heading">
-                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#order-commissions-fieldset" href="#collapse-{{ comm_form.prefix }}">Commissions {{ forloop.counter }}</a>
-                </div>
-                <div id="collapse-{{ comm_form.prefix }}" class="accordion-body collapse">
-                  <div class="accordion-inner">
-                    {{ comm_form | as_bootstrap }}
+
+          <div class="panel-group" class="accordion" role="tablist" aria-multiselectable="true">
+            {{ commissions_form.management_form }}
+            {% if commissions_form %}
+              {{ commissions_form.non_field_errors }}   
+              {% bootstrap_formset_errors commissions_form %}
+   
+              {% for comm_form in commissions_form %}          
+
+                <div class="panel panel-default commissions-form form-row" id="{{ commissions_form.prefix }}-{{forloop.counter}}-row">
+                  <div class="panel-heading" role="tab" id="heading{{ comm_form.prefix }}">
+                    <h4 class="panel-title">
+                      <a role="button" data-toggle="collapse" data-parent="#order-commissions-fieldset" href="#collapse{{ comm_form.prefix }}" aria-expanded="false" aria-controls="collapse{{ comm_form.prefix }}">
+                        Commissions {{ forloop.counter }}
+                      </a>
+                    </h4>
                   </div>
-                </div>       
-              </div>
-            {% endfor %}
-          {% else %}
-              No commissions info available.
-          {% endif %}
+                  <div id="collapse{{ comm_form.prefix }}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading{{ comm_form.prefix }}">
+                    <div class="panel-body">
+
+                      <div class="row">
+                        <div class="col-md-3">
+                          {% bootstrap_field comm_form.associate %}
+                        </div>
+                        <div class="col-md-offset-1 col-md-1">
+                          {% bootstrap_field comm_form.paid form_group_class="form-group checkbox-middle" %}
+                        </div>
+                        <div class="col-md-2">
+                          {% bootstrap_field comm_form.paid_date %}
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>       
+                </div>
+
+                {{ comm_form.id }}
+
+              {% endfor %}
+            {% else %}
+                No commissions info available.
+            {% endif %}
+
+          </div>
 
         </fieldset>
       </div>
     
-      <div class="tab-pane" id="attachment-fieldset">
+      <div role="tabpanel" class="tab-pane" id="attachment-fieldset">
         <fieldset class="formset accordion">
           <legend>Attachments</legend>
-          {{ attachment_form.management_form }}
-          {% if attachment_form %}
-            {{ attachment_form.non_field_errors }}    
-            {% for form in attachment_form %}
-              <div class="accordion-group attachment-form form-row" id="{{ attachment_form.prefix }}-{{forloop.counter}}-row">
-                <div class="accordion-heading">
-                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#attachment-fieldset" href="#collapse-{{ form.prefix }}">Attachment {{ forloop.counter }}</a>
-                </div>
-                <div id="collapse-{{ form.prefix }}" class="accordion-body collapse">
-                  <div class="accordion-inner">
-                    {{ form | as_bootstrap }}
+
+          <div class="panel-group" class="accordion" role="tablist" aria-multiselectable="true">
+            {{ attachment_form.management_form }}
+            {% if attachment_form %}
+              {{ attachment_form.non_field_errors }}   
+              {% bootstrap_formset_errors attachment_form %}
+
+              {% for form in attachment_form %}
+
+                <div class="panel panel-default attachment-form form-row" id="{{ attachment_form.prefix }}-{{forloop.counter}}-row">
+                  <div class="panel-heading" role="tab" id="heading{{ form.prefix }}">
+                    <h4 class="panel-title">
+                      <a role="button" data-toggle="collapse" data-parent="#attachment-fieldset" href="#collapse{{ form.prefix }}" aria-expanded="false" aria-controls="collapse{{ form.prefix }}">
+                        Attachment {{ forloop.counter }}
+                      </a>
+                    </h4>
                   </div>
-                </div>       
-              </div>
-            {% endfor %}
-          {% else %}
-            {% ifequal object.pk None %}
-              <div class="alert warning">Save the order before uploading attachments.</div>
+                  <div id="collapse{{ form.prefix }}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading{{ form.prefix }}">
+                    <div class="panel-body">
+
+                      {% bootstrap_form form %}
+
+
+                    </div>
+                  </div>       
+                </div>
+              {% endfor %}
             {% else %}
-              <div class="alert warning">Nothing uploaded yet</div>
-            {% endifequal %}
-          {% endif %}
+              {% ifequal object.pk None %}
+                <div class="alert warning">Save the order before uploading attachments.</div>
+              {% else %}
+                <div class="alert warning">Nothing uploaded yet</div>
+              {% endifequal %}
+            {% endif %}
+
+          </div>
 
         </fieldset>
       </div>
     
-      <div class="tab-pane" id="issues-fieldset">
+      <div role="tabpanel" class="tab-pane" id="issues-fieldset">
         <fieldset class="formset accordion">
           <legend>Order Issues</legend>
-          {{ issues_form.management_form }}
-          {% if issues_form %}
-            {{ issues_form.non_field_errors }}    
-            {% for form in issues_form %}
-              <div class="accordion-group attachment-form form-row" id="{{ issues_form.prefix }}-{{forloop.counter}}-row">
-                <div class="accordion-heading">
-                  <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#issues-fieldset" href="#collapse-{{ form.prefix }}">Issue {{ forloop.counter }}</a>
-                </div>
-                <div id="collapse-{{ form.prefix }}" class="accordion-body collapse">
-                  <div class="accordion-inner">
-                    {{ form | as_bootstrap }}
+
+          <div class="panel-group" class="accordion" role="tablist" aria-multiselectable="true">
+            {{ issues_form.management_form }}
+            {% if issues_form %}
+              {{ issues_form.non_field_errors }}  
+              {% bootstrap_formset_errors issues_form %}  
+
+              {% for form in issues_form %}
+
+                <div class="panel panel-default issues_form form-row" id="{{ issues_form.prefix }}-{{forloop.counter}}-row">
+                  <div class="panel-heading" role="tab" id="heading{{ form.prefix }}">
+                    <h4 class="panel-title">
+                      <a role="button" data-toggle="collapse" data-parent="#issues-fieldset" href="#collapse{{ form.prefix }}" aria-expanded="false" aria-controls="collapse{{ form.prefix }}">
+                        Issue {{ forloop.counter }}
+                      </a>
+                    </h4>
                   </div>
-                </div>       
-              </div>
-            {% endfor %}
-          {% else %}
-            {% ifequal object.pk None %}
-              <div class="alert warning">Save the order before entering order issues.</div>
+                  <div id="collapse{{ form.prefix }}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading{{ form.prefix }}">
+                    <div class="panel-body">
+
+                      {% bootstrap_form form %}
+
+                    </div>
+                  </div>       
+                </div>
+              {% endfor %}
             {% else %}
-              <div class="alert warning">No issues yet.</div>
-            {% endifequal %}
-          {% endif %}
+              {% ifequal object.pk None %}
+                <div class="alert warning">Save the order before entering order issues.</div>
+              {% else %}
+                <div class="alert warning">No issues yet.</div>
+              {% endifequal %}
+            {% endif %}
+
+          </div>
 
         </fieldset>
       </div>
@@ -439,15 +676,7 @@
 
     <div class="field-wrapper order-comments-wrapper">
       {{ form.comments.errors }}
-      <label for="id_comments">Comments</label>
-      {{ form.comments }}
-    </div>
-
-    <br/>
-    
-    <div id="referral-info">
-      <label for="id_referral">Referral source</label>
-      {{ form.referral }} 
+      {% bootstrap_field form.comments %}
     </div>
     
     <br/>

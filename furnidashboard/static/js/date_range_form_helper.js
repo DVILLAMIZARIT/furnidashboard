@@ -4,8 +4,8 @@
 
   	var init = function() {
 
-		var $rangeFrom = $("#id_range_from").parents('.control-group'); 
-		var $rangeTo = $("#id_range_to").parents('.control-group');
+		var $rangeFrom = $("#id_range_from").parents('.form-group'); 
+		var $rangeTo = $("#id_range_to").parents('.form-group');
 
 		function refreshDateRangeControls() {
 			if($("#id_date_range").val() === 'custom') {
