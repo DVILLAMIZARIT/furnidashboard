@@ -165,6 +165,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'audit_log.middleware.UserLoggingMiddleware',
+    'orders.middleware.SquashInvalidHostMiddleware',
 )
 ########## END MIDDLEWARE CONFIGURATION
 
