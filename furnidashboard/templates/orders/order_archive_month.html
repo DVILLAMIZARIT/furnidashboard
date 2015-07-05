@@ -19,7 +19,7 @@
     <ul class="breadcrumb">
       <li> {{ month|date:'Y' }}:</li>
       {% for month, link in order_months_links %} 
-        <li><a href="{{ link }}" class="-btn">{{ month}}</a>  <span class="divider">/</span></li>
+	  <li><a href="{{ link }}" class="-btn">{{ month}}</a>  <!--<span class="divider">/</span>--></li>
       {% endfor %}      
       {% url 'active_orders' as active_orders %}
       <li class="pull-right"><a href={{ active_orders}}>View all active orders</a></li>
@@ -29,7 +29,7 @@
       <ul class="breadcrumb">
         <li> {{ prev_year }}:</li>
         {% for month, link in previous_year_links %} 
-          <li><a href="{{ link }}" class="-btn">{{ month}}</a>   <span class="divider">/</span></li>
+		<li><a href="{{ link }}" class="-btn">{{ month}}</a>   <!--<span class="divider">/</span>--></li>
         {% endfor %}
       </ul>
     {% endif %}
@@ -38,7 +38,7 @@
       <ul class="breadcrumb">
         <li> 2013: </li>
         {% for month, link in months_2013 %} 
-          <li><a href="{{ link }}" class="-btn">{{ month}}</a>   <span class="divider">/</span></li>
+		<li><a href="{{ link }}" class="-btn">{{ month}}</a>   <!--<span class="divider">/</span>--></li>
         {% endfor %}
       </ul>
     {% endif %}
