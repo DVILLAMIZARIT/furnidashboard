@@ -84,9 +84,9 @@
         
 
           {% if request.user.is_authenticated %} 
-            <form action="/search/" class="navbar-form navbar-left form-inline" role="search">
+            <form action="/search/" method="get" class="navbar-form navbar-left form-inline" role="search">
               <div class="form-group">
-                <input type="text" class="form-control input-medium" placeholder="Order# / customer name...">
+                <input type="text" name="q" class="form-control input-medium" placeholder="Order# / customer name...">
               </div>
               <button type="submit" value="Submit" class="btn btn-default">Submit</button>
             </form>
