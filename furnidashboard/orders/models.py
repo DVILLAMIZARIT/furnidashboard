@@ -139,8 +139,11 @@ class OrderDelivery(TimeStampedModel, AuthStampedModel):
 
   @property
   def delivery_slip_filename(self):
-    import os
-    return os.path.basename(self.delivery_slip.name)
+    if self.delivery_slip:
+      import os
+      return os.path.basename(self.delivery_slip.name)
+    else :
+      return ""
 
   class Meta:
     db_table = "deliveries"

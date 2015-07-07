@@ -124,7 +124,7 @@
   FormHelper.initFormset = initFormset;
   FormHelper.dateTimePickerOptions = {
     pickTime: false,
-    format:  "MM-DD-YYYY"
+    format:  "YYYY-MM-DD"
   };
 
   G.FurnFormHelper = FormHelper;

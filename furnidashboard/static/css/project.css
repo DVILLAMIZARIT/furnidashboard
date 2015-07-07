@@ -123,7 +123,7 @@ input.order-item-desc {
 /* \ORDER LIST */
 
 /* ORDER DETAIL */
-table.dashed-table,  #order-items-table, #order-detail-table, #order-payments-table, #order-deliveries-table {
+/*table.dashed-table,  #order-items-table, #order-detail-table, #order-payments-table, #order-deliveries-table {
   border: 1px solid #D3D3D3;
 }
 table.dashed-table td,
@@ -138,7 +138,7 @@ table.dashed-table th,
 }
 #order-deliveries-table th{
   padding: .7em 1em;
-}
+}*/
 /* \ORDER DETAIL */
 
 /* ORDER REPORTS */

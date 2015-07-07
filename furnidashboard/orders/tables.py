@@ -6,8 +6,9 @@ from core.tables import CustomTextLinkColumn
 import core.utils as utils
 
 class OrderAssociatesColumn(tables.Column):
-  def render(self, value):
-    commissions = value.all()
+  empty_values = ()
+  def render(self, value, record):
+    commissions = record.commission_set.all()  
     associates = ", ".join([comm.associate.first_name for comm in commissions])
     return mark_safe(associates)
 
@@ -24,7 +25,7 @@ class OrderTable(tables.Table):
   modified = tables.TemplateColumn('{{ record.modified|date:\'m/d/Y\'}}', verbose_name="Last Modified") 
   # detail = tables.TemplateColumn('<a href="{% url \'order_detail\' record.pk %}">Detail</a>', verbose_name="Actions", orderable=False)
   pk = CustomTextLinkColumn('order_detail', args=[A('pk')], custom_text="Detail", orderable=False, verbose_name="Actions")
-  associate = OrderAssociatesColumn(accessor="commission_set", verbose_name="Associate")
+  associate = OrderAssociatesColumn(accessor="pk", verbose_name="Associate")
   subtotal_after_discount = DollarAmountColumn(verbose_name="Subtotal")
   grand_total = DollarAmountColumn(orderable=False)
 
@@ -37,7 +38,7 @@ class UnplacedOrdersTable(tables.Table):
 
   order_date = tables.TemplateColumn('{{ record.order_date|date:\'m/d/Y\'}}') 
   detail = tables.TemplateColumn('<a href="{% url \'order_detail\' record.pk %}">Detail</a>', verbose_name="Actions", orderable=False)
-  associate = OrderAssociatesColumn(accessor="commission_set", verbose_name="Associate")
+  associate = OrderAssociatesColumn(accessor="record.pk", verbose_name="Associate")
   grand_total = tables.Column(orderable=False)
 
   class Meta:

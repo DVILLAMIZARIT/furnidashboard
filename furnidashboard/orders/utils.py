@@ -196,6 +196,7 @@ def get_date_range(range_str, request):
     try:
       from_date = datetime.strptime(request.GET['range_from'], "%Y-%m-%d")
       to_date = datetime.strptime(request.GET['range_to'], "%Y-%m-%d")
+      to_date = to_date.replace(hour=23, minute=59, second=59)
     except (KeyError, ValueError) as e:
       #raise ValueError("Incorrect date format, should be YYYY-MM-DD")
       messages.add_message(request, messages.ERROR, "Incorrect date format, should be YYYY-MM-DD", extra_tags="alert alert-danger")

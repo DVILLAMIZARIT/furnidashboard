@@ -1,9 +1,5 @@
 {% extends "base_bootstrap3.html" %}
 
-{% comment %}
-{% load bootstrap_toolkit %}
-{% endcomment %}
-
 {% load bootstrap3 %}
 {% load crispy_forms_tags %}
 {% load staticfiles %}
@@ -319,10 +315,6 @@
                 {% bootstrap_label "Protection plan purchased"  %}
                 {% bootstrap_field form.protection_plan show_label=False %}
 
-                {% comment %}
-                  {% include "partial/bootstrap_field.html" with field=form.protection_plan label_tag="Protection plan purchased" %}
-                {% endcomment %}
-
                 <div class="accordion-group items-form form-row" id="crypton-form-row">
                   <div class="accordion-heading">
                     <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#payment-info" href="#collapse-crypton">Crypton Protection Plan (expand)</a>
@@ -348,10 +340,6 @@
 
                 {% bootstrap_label "Order financing"  %}
                 {% bootstrap_field form.financing_option show_label=False %}
-
-                {% comment %}
-                  {% include "partial/bootstrap_field.html" with field=form.financing_option label_tag="Order financing" %}
-                {% endcomment %}
 
                 <div class="accordion-group items-form form-row" id="financing-form-row">
                   <div class="accordion-heading">
@@ -460,22 +448,22 @@
           <legend>Deliveries</legend>
 
           <div class="panel-group" class="accordion" role="tablist" aria-multiselectable="true">
-          {{ delivery_form.management_form }}
-          {% if delivery_form %}
-            {{ delivery_form.non_form_errors }}
-            {% bootstrap_formset_errors delivery_form %}
+            {{ delivery_form.management_form }}
+            {% if delivery_form %}
+              {{ delivery_form.non_form_errors }}
+              {% bootstrap_formset_errors delivery_form %}
 
             {% for form in delivery_form %}   
 
-              <div class="panel panel-default delivery-form form-row" id="{{ delivery_form.prefix }}-{{forloop.counter}}-row">
+              <div class="panel panel-default delivery-form form-row" id="{{ form.prefix }}-row"> <!-- -{{forloop.counter}} -->
                 <div class="panel-heading" role="tab" id="heading{{ form.prefix }}">
                   <h4 class="panel-title">
-                    <a role="button" data-toggle="collapse" data-parent="#deliveries" href="#collapse{{ delivery_form.prefix }}" aria-expanded="false" aria-controls="collapse{{ form.prefix }}">
+                    <a role="button" data-toggle="collapse" data-parent="#deliveries" href="#collapse{{ form.prefix }}" aria-expanded="false" aria-controls="collapse{{ form.prefix }}">
                       Delivery {{ forloop.counter }}
                     </a>
                   </h4>
                 </div>
-                <div id="collapse{{ delivery_form.prefix }}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading{{ form.prefix }}">
+                <div id="collapse{{ form.prefix }}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading{{ form.prefix }}">
                   <div class="panel-body">
                     
                     <div class="row">
@@ -521,7 +509,10 @@
                       </div>
                     </div>
 
-                  </div>       
+                    {{ form.id }}
+
+                  </div>  
+                </div>     
               </div>
 
             {% endfor %}

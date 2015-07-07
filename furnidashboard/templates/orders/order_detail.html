@@ -24,275 +24,283 @@
 
   <h3>Order #{{order.number}}</h3>
 
-
   <br/>
 
-  <div class="container-fluid">
-    <div class="col-md-2">
-      <h5>Order Date:</h5>
-      {{order.order_date|date:'j F, Y'}}
-    </div> 
-    <div class="col-md-2">
-      <h5>Status:</h5>
-      {{order.get_status_display|upper}}
-    </div>
-    <div class="col-md-2">
-      <h5>Store:</h5>
-      {{order.store}}
-    </div>
-    <div class="col-md-2">
-      <h5>Associate:</h5>
-      {% for commission in order.commission_set.all %}
-        {{ commission.associate.first_name }},  
-      {% endfor %}
-    </div>
-    <div class="col-md-2">
-      <h5>Referral</h5>
-      <p>{{order.get_referral_display|upper}}</p>
+  <div class="panel panel-default">
+    <div class="panel-body">
+
+      <div class="col-md-2">
+        <h5>Order Date:</h5>
+        {{order.order_date|date:'j F, Y'}}
+      </div> 
+      <div class="col-md-2">
+        <h5>Status:</h5>
+        {{order.get_status_display|upper}}
+      </div>
+      <div class="col-md-2">
+        <h5>Store:</h5>
+        {{order.store}}
+      </div>
+      <div class="col-md-2">
+        <h5>Associate:</h5>
+        {% if order.commission_set.count %}
+          <ul class="list-group">
+            {% for commission in order.commission_set.all %}
+              <li class="list-group-item">{{ commission.associate.first_name }} {{ commission.associate.last_name }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+      <div class="col-md-2">
+        <h5>Referral</h5>
+        <p>{{order.get_referral_display|upper}}</p>
+      </div>
     </div>
   </div>
 
-  <hr/>
 
-  <h3>Customer</h3>
-  <div class="row customer-info">
-    <div class="col-md-2">
-      {{order.customer}}<br/>
-      Phone: {{order.customer.phone}}<br/>
-      Email: {{order.customer.email}}
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Customer</h3>
     </div>
-    <div class="col-md-3">
-      <h4>Billing Address:</h4>
-      {{order.customer.billing_address}}
-    </div>
-    <div class="col-md-3">
-      <h4>Shipping Address:</h4>
-      {{order.customer.shipping_address}}
+    <div class="panel-body">
+      <div class="row customer-info">
+        <div class="col-md-2">
+          {{order.customer}}<br/>
+          Phone: {{order.customer.phone}}<br/>
+          Email: {{order.customer.email}}
+        </div>
+        <div class="col-md-3">
+          <h4>Billing Address:</h4>
+          {{order.customer.billing_address}}
+        </div>
+        <div class="col-md-3">
+          <h4>Shipping Address:</h4>
+          {{order.customer.shipping_address}}
+        </div>
+      </div>
     </div>
   </div>
-
-  <table id="order-detail-table" cell-spacing="0" cell-padding="0">
-    <!--<tr>
-      <td>Placed Date:</td><td>{{order.order_date|date:'j F, Y'}}</td>
-    </tr>
-    <tr>
-      <td>Status:</td><td>{{order.get_status_display|upper}}</td>
-    </tr>
-    <tr>
-      <td>Store:</td><td>{{order.store}}</td>
-    </tr>
-    <tr>
-      <td>Associate:</td>
-      <td>
-        {% for commission in order.commission_set.all %}
-          {{ commission.associate.first_name }} <br/> 
-        {% endfor %}
-      </td>
-    <tr>
-      <td>Customer:</td><td>{{order.customer}}</td>
-    </tr>
-    <tr>
-      <td>Customer Contact Details:</td>
-      <td>
-        Phone: {{order.customer.phone}}<br/>
-        Email: {{order.customer.email}}
-      </td>
-    </tr>
-    <tr>
-      <td>Billing Address:</td>
-      <td>{{order.customer.billing_address}}</td>
-    </tr>
-    <tr>
-      <td>Shipping Address:</td>
-      <td>{{order.customer.shipping_address}}</td>
-    </tr>-->
-  </table>
-
-  <hr/>
 
   <div class="row">
     <div class="col-md-4">
-      <h3>Payment</h3>
-      <table id="order-payments-table" cell-spacing="0" cell-padding="0">
-        <tr>
-          <td>Subtotal After Discount</td><td>{{order.subtotal_after_discount|dollars}}</td>
-        </tr>
-        <tr>
-          <td>Tax</td><td>{{order.tax|dollars}}</td>
-        </tr>
-        <tr>
-          <td>Shipping</td><td>{{order.shipping|dollars}}</td>
-        </tr>
-        <tr>
-          <td>Grand Total</td><td>{{order.grand_total|dollars}}</td>
-        </tr>
-        <tr>
-          <td>Deposit Balance</td><td>{{order.deposit_balance|dollars}}</td>
-        </tr>
-        <tr>
-          <td>Balance Due</td><td>{{order.balance_due|dollars}}</td>
-        </tr>
-      </table>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Payment</h3>
+        </div>
+      
+        <div class="panel-body">      
+          <table id="order-payments-table" cell-spacing="0" cell-padding="0" class="table">
+            <tr>
+              <td>Subtotal After Discount</td><td>{{order.subtotal_after_discount|dollars}}</td>
+            </tr>
+            <tr>
+              <td>Tax</td><td>{{order.tax|dollars}}</td>
+            </tr>
+            <tr>
+              <td>Shipping</td><td>{{order.shipping|dollars}}</td>
+            </tr>
+            <tr>
+              <td>Grand Total</td><td>{{order.grand_total|dollars}}</td>
+            </tr>
+            <tr>
+              <td>Deposit Balance</td><td>{{order.deposit_balance|dollars}}</td>
+            </tr>
+            <tr>
+              <td>Balance Due</td><td>{{order.balance_due|dollars}}</td>
+            </tr>
+          </table>
+        </div>
+      </div> 
     </div>
 
     <div class="col-md-8">
-      <h3>Ordered Items</h3>
-      <table id="order-items-table" cell-spacing="0" cell-padding="0">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Ordered Items</h3>
+        </div>
+      
+        <div class="panel-body">      
+      
+          <table id="order-items-table" cell-spacing="0" cell-padding="0" class="table">
+            <thead>
+              <th>&nbsp;</th>
+              <th>Status</th>
+              <th>PO #</th>
+              <th>PO Date</th>
+              <th>Acknowledgement #</th>
+              <th>Acknowledgement Date</th>
+              <th>ETA</th>
+            </thead>
+            <tbody>
+            {% for item in order.orderitem_set.all %}
+              <tr>
+                <td>{{ item.description }} <br/> </td>
+                {% if item.in_stock %}
+                  <td>IN STOCK</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                {% else %}
+                  <td>{{ item.get_status_display|upper}}</td>
+                  <td>{{ item.po_num}}</td>
+                  <td>{{ item.po_date|date:'j F, Y'}}</td>
+                  <td>{{ item.ack_num}}</td>
+                  <td>{{ item.ack_date|date:'j F, Y'}}</td>
+                  <td>{{ item.eta|date:'j F, Y' }} </td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <hr/>
+
+   <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Additional</h3>
+    </div>
+    <div class="panel-body">
+      <div class="row">
+        <div class="col-md-6">
+          <h3>Special Financing Option</h3>
+          {% if order.orderfinancing_set.count %}
+            {% for financing_plan in order.orderfinancing_set.all %}
+            <div class="row customer-info">
+              <div class="col-md-2">
+                {{ financing_plan.approval_no }}<br/>
+                Details: {{ financing_plan.details }}<br/>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            N/A
+          {% endif %}
+        </div>
+
+        <div class="col-md-6">
+          <h3>Crypton Protection Plan</h3>
+          {% if order.orderitemprotectionplan_set.count %}
+            {% for crypton_plan in order.orderitemprotectionplan_set.all %}
+            <div class="row customer-info">
+              <div class="col-md-2">
+                {{ crypton_plan.approval_no }}<br/>
+                Details: {{ crypton_plan.details }}<br/>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            NOT PURCHASED
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  
+   <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Deliveries</h3>
+    </div>
+    <div class="panel-body">
+      {% if order.orderdelivery_set.count %}
+        <table id="order-deliveries-table" cell-spacing="0" cell-padding="0" class="table">
+          <thead>
+            <th>Delivery by</th>
+            <th>Pickup From</th>
+            <th>Delivery Slip</th>
+            <th>Delivery scheduled Date</th>
+            <th>Delivered Date</th>
+            <th>Delivery Fee</th>
+            <th>Fee Paid?</th>
+            <th>Associate Comments</th>
+            <th>Delivery Person Notes</th>
+          </thead>
+          <tbody>
+          {% for delivery in order.orderdelivery_set.all %}
+            <tr>
+              <td>{{ delivery.get_delivery_type_display|upper}}</td>
+              <td>{{ delivery.pickup_from}}</td>
+              <td><a href="{{ MEDIA_URL }}{{delivery.delivery_slip}}">{{ delivery.delivery_slip_filename }}</a></td>
+              <td>{{ delivery.scheduled_delivery_date|date:'j F, Y'}}</td>
+              <td>{{ delivery.delivered_date|date:'j F, Y'}}</td>
+              <td>{{ delivery.delivery_cost}}</td>
+              <td>{{ delivery.paid|yesno:"Yes,No"}}</td>
+              <td>{{ delivery.comments }} </td>
+              <td>{{ delivery.delivery_person_notes }} </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+          <p>No Deliveries for the order.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <div class="row">
+        <div class="col-md-4">
+          <h3>Comments</h3>
+          <p>{{order.comments}}</p>
+        </div>
+        <div class="col-md-5">
+          <h3>Attachments</h3>
+          <ul>
+          {% for attachment in order.orderattachment_set.all %}
+            <li>
+              <a href="{{ MEDIA_URL }}{{attachment.file}}" target="_blank">{{ attachment.filename }}</a>
+              {% if attachment.description %}
+                [{{attachment.description}}]
+              {% endif %}
+            </li>
+          {% empty %}
+          <p>No attachments.</p>
+          {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+   <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Order issues</h3>
+    </div>
+    <div class="panel-body">
+      {% if order.orderissue_set.count %}  
+      <table id="order-issues-table" class="dashed-table">
         <thead>
-          <th>&nbsp;</th>
+          <th>Date</th>
           <th>Status</th>
-          <th>PO #</th>
-          <th>PO Date</th>
-          <th>Acknowledgement #</th>
-          <th>Acknowledgement Date</th>
-          <th>ETA</th>
+          <th>Description</th>
         </thead>
         <tbody>
-        {% for item in order.orderitem_set.all %}
-          <tr>
-            <td>{{ item.description }} <br/> </td>
-            {% if item.in_stock %}
-              <td>IN STOCK</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-            {% else %}
-              <td>{{ item.get_status_display|upper}}</td>
-              <td>{{ item.po_num}}</td>
-              <td>{{ item.po_date|date:'j F, Y'}}</td>
-              <td>{{ item.ack_num}}</td>
-              <td>{{ item.ack_date|date:'j F, Y'}}</td>
-              <td>{{ item.eta|date:'j F, Y' }} </td>
-            {% endif %}
-          </tr>
-        {% endfor %}
+          {% for issue in order.orderissue_set.all %}
+            <tr>
+              <td>{{ issue.created|date:'j F, Y' }}</td>
+              <td>{{ issue.get_status_display|upper }}</td>
+              <td> {{ issue.comments }}</td>
+            </tr>
+          {% endfor %}
         </tbody>
       </table>
-    </div>
-  </div>
-  
-  <hr/>
-
-  <div class="row">
-    <div class="col-md-6">
-      <h3>Special Financing Option</h3>
-      {% if order.orderfinancing_set.count %}
-        {% for financing_plan in order.orderfinancing_set.all %}
-        <div class="row customer-info">
-          <div class="col-md-2">
-            {{ financing_plan.approval_no }}<br/>
-            Details: {{ financing_plan.details }}<br/>
-          </div>
-        </div>
-        {% endfor %}
       {% else %}
-        N/A
-      {% endif %}
-    </div>
-
-    <div class="col-md-6">
-      <h3>Crypton Protection Plan</h3>
-      {% if order.orderitemprotectionplan_set.count %}
-        {% for crypton_plan in order.orderitemprotectionplan_set.all %}
-        <div class="row customer-info">
-          <div class="col-md-2">
-            {{ crypton_plan.approval_no }}<br/>
-            Details: {{ crypton_plan.details }}<br/>
-          </div>
-        </div>
-        {% endfor %}
-      {% else %}
-        NOT PURCHASED
+        <p>No order issues.</p>
       {% endif %}
     </div>
   </div>
-  
-  <h3>Deliveries</h3>
-  {% if order.orderdelivery_set.count %}
-    <table id="order-deliveries-table" cell-spacing="0" cell-padding="0">
-      <thead>
-        <th>Delivery by</th>
-        <th>Pickup From</th>
-        <th>Delivery Slip</th>
-        <th>Delivery scheduled Date</th>
-        <th>Delivered Date</th>
-        <th>Delivery Fee</th>
-        <th>Fee Paid?</th>
-        <th>Associate Comments</th>
-        <th>Delivery Person Notes</th>
-      </thead>
-      <tbody>
-      {% for delivery in order.orderdelivery_set.all %}
-        <tr>
-          <td>{{ delivery.get_delivery_type_display|upper}}</td>
-          <td>{{ delivery.pickup_from}}</td>
-          <td><a href="{{ MEDIA_URL }}{{delivery.delivery_slip}}">{{ delivery.delivery_slip_filename }}</a></td>
-          <td>{{ delivery.scheduled_delivery_date|date:'j F, Y'}}</td>
-          <td>{{ delivery.delivered_date|date:'j F, Y'}}</td>
-          <td>{{ delivery.delivery_cost}}</td>
-          <td>{{ delivery.paid|yesno:"Yes,No"}}</td>
-          <td>{{ delivery.comments }} </td>
-          <td>{{ delivery.delivery_person_notes }} </td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-      <p>No Deliveries for the order.</p>
-  {% endif %}
 
-
-  <div class="row">
-    <div class="col-md-4">
-      <h3>Comments</h3>
-      <p>{{order.comments}}</p>
-    </div>
-    <div class="col-md-5">
-      <h3>Attachments</h3>
-      <ul>
-      {% for attachment in order.orderattachment_set.all %}
-        <li>
-          <a href="{{ MEDIA_URL }}{{attachment.file}}" target="_blank">{{ attachment.filename }}</a>
-          {% if attachment.description %}
-            [{{attachment.description}}]
-          {% endif %}
-        </li>
-      {% empty %}
-      <p>No attachments.</p>
-      {% endfor %}
-      </ul>
-    </div>
-  </div>
-
-  <hr/>
-
-  <h3>Order issues</h3>
-  {% if order.orderissue_set.count %}  
-  <table id="order-issues-table" class="dashed-table">
-    <thead>
-      <th>Date</th>
-      <th>Status</th>
-      <th>Description</th>
-    </thead>
-    <tbody>
-      {% for issue in order.orderissue_set.all %}
-        <tr>
-          <td>{{ issue.created|date:'j F, Y' }}</td>
-          <td>{{ issue.get_status_display|upper }}</td>
-          <td> {{ issue.comments }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-    <p>No order issues.</p>
-  {% endif %}
-  <hr/>
   <div class="row pull-right">
     <h4>Audit Trail:</h4>
-    <table id="order-audit-trail" class="dashed-table">
+    <table id="order-audit-trail" class="table">
       <tr>
         <td>Created:</td><td> {{ order.created|date:'j F, Y H:i' }}</td>
         <td>by:</td> <td>{{ order.created_by }}</td>
