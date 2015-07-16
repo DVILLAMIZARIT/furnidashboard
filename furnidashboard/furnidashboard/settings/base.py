@@ -116,7 +116,7 @@ SECRET_KEY = r"@)jv)^k=1f055u(0b@t$efrdmu(z0#+_z&dp&wkmsu*4*w2xkb"
 ########## SITE CONFIGURATION
 # Hosts/domain names that are valid for this site
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.furnitalia.com']
 ########## END SITE CONFIGURATION
 
 
