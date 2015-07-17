@@ -115,7 +115,7 @@ class OrderCronJob(CronJobBase):
   def send_emails(self):
 
     report_date = datetime.now().strftime('%m-%d-%Y')
-    to = ['akhmirem@gmail.com', 'lana@furnitalia.com', 'd.aks@furnitalia.com', 'pearl@furnitalia.com']
+    to = ['akhmirem@gmail.com', 'lana@furnitalia.com', 'd.aks@furnitalia.com', 'pearl@furnitalia.com', 'ruth@furnitalia.com', 'jenn@furnitalia.com', 'jamie@furnitalia.com']
     self.msg[:0] = ['Report created on ' + report_date, ""]
     email_msg = EmailMessage("FurniCloud Report (" + report_date + ")", "<br/>".join(self.msg), "admin@furnitalia.com", to) 
     email_msg.content_subtype = "html"
