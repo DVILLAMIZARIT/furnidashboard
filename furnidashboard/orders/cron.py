@@ -3,6 +3,7 @@ from django.conf import settings
 from django_cron import CronJobBase, Schedule
 from .models import Order
 from stores.models import Store
+import order.utils as order_utils
 from datetime import datetime
 from django.core.mail.message import EmailMessage
 
@@ -14,18 +15,22 @@ class OrderCronJob(CronJobBase):
   code = 'orders.cron.OrderCronJob'
   msg = []
 
+  report_is_blank = True
+
   def do(self):
 
     self.msg = []
 
-    self.trace("Checking for MISSING orders:", important=True)
-    orders_missing = self.determine_potentially_missed_orders()
-    self.trace("{0} potentially missed order(s)".format(len(orders_missing)), important=True)
+    orders_missing = self.determine_potentially_missed_orders()    
     if orders_missing:
+      self.report_is_blank = False
+      self.trace("There are {0} potentially missed orders.".format(len(orders_missing)), important=True)
       for o in orders_missing:
         self.trace(str(o))
-    self.trace("-" * 40)
-    self.trace("")
+      self.trace("")
+      self.trace("*NOTE: please verify that your orders have been entered. If the POS order is a quote, select a status of 'Dummy' for order in FurniCloud.", important=True)
+      self.trace("-" * 40)
+      self.trace("")
 
     # TEMPORARILY COMMENT OUT
     # self.trace("Checking for UNPLACED orders: ", important=True)
@@ -39,9 +44,14 @@ class OrderCronJob(CronJobBase):
     self.trace("10 most recent orders:", important=True)
     recent_orders = Order.objects.filter(status__exact='N').order_by('-order_date')[:10]
     for o in recent_orders:
-       self.trace("Order {0}, created {1}, status {2}".format(o.number, o.order_date.strftime("%m-%d-%Y"), o.get_status_display()))
+       self.trace("Order {0}, created {1}, status: {2}, associate(s): {3}".format(o.number, 
+          o.order_date.strftime("%m-%d-%Y"), o.get_status_display(), order_utils.get_order_associates(o)))
     self.trace("-" * 40)
     self.trace("")
+
+    self.trace("*" * 40)
+    self.trace("Please visits the 'Alerts' page on FurniCloud for full report".upper(), important=True)
+    self.trace("*" * 40)
        
     # TEMPORARILY COMMENT OUT
     # self.trace("Special Orders, acknowledgement not received from vendor:", important=True)
@@ -52,7 +62,8 @@ class OrderCronJob(CronJobBase):
     # self.trace("-" * 40)
 
     # SEND EMAIL
-    self.send_emails()
+    if not self.report_is_blank:
+      self.send_emails()
 
   def determine_potentially_missed_orders(self):
     res = []

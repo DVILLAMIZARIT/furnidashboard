@@ -207,3 +207,11 @@ def get_date_range(range_str, request):
     from_date = from_date.replace(hour=0, minute=0, second=0)
   
   return (from_date, to_date)
+
+def get_order_associates(order): 
+  assoc_list = []
+  comm_queryset = order.commission_set.select_related().all() 
+  for com in comm_queryset:
+    assoc_list.append(com.associate.first_name)
+
+  return ", ".join(assoc_list)
