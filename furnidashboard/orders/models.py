@@ -26,6 +26,7 @@ class Order(TimeStampedModel, AuthStampedModel):
   REFERRAL_SOURCES = (
     ('NO', 'Not Referred'),
     ('RVL', 'Roseville Store'),
+    ('CST', 'Referred by existing Furnitalia customer'), 
     ('REF', 'Referred by friends/relatives/acquintance'),
     ('WEB', 'Website'),
     ('EBL', 'E-mail (or Eblast)'),

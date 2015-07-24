@@ -278,6 +278,16 @@ CRON_CLASSES = [
     'django_cron.cron.FailedRunsNotificationCronJob',
 ]
 FAILED_RUNS_CRONJOB_EMAIL_PREFIX = "[Furnitalia Dashboard]: "
+DJANGO_CRON_DELETE_LOGS_OLDER_THAN =  30
+CRON_EMAIL_NOTIFICATION_LIST = [
+    'emil@furnitalia.com',
+    'lana@furnitalia.com',
+    'd.aks@furnitalia.com',
+    'pearl@furnitalia.com',
+    'ruth@furnitalia.com',
+    'jenn@furnitalia.com',
+    'jamie@furnitalia.com',
+]
 
 # Default settings
 BOOTSTRAP3 = {
