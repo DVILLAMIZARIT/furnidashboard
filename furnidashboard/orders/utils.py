@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib import messages
 from django.utils import timezone
-from orders.models import Order
+from orders.models import Order, OrderItem
 import re
 
 def calc_commissions_for_order(order):
@@ -215,3 +215,30 @@ def get_order_associates(order):
     assoc_list.append(com.associate.first_name)
 
   return ", ".join(assoc_list)
+
+def get_all_unacknowledged_orders(associate=None):
+  
+  #items that have PO# but don't have Acknowledgement #
+  unconfirmed_items = OrderItem.objects.exclude(po_num="").filter(ack_num="").select_related('order') 
+
+  if associate is not None:
+    #filter by specific associate
+    unconfirmed_items.filter(order__commission__associate=associate)
+
+  orders = set([i.order for i in unconfirmed_items if i.order.status != 'I'])
+
+  return orders
+
+def get_all_unplaced_orders(associate=None):
+  
+  #items that are not 'In Stock' and don't have PO#
+  unplaced_items = OrderItem.objects.filter(in_stock=False, po_num="").select_related('order') 
+
+  if associate is not None:
+    #filter by specific associate
+    unplaced_items.filter(order__commission__associate=associate)
+
+  orders = set([i.order for i in unplaced_items if i.order.status != 'I'])
+
+  return orders  
+
