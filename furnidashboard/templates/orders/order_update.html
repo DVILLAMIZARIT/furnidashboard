@@ -17,10 +17,12 @@
 {% block extra_js %}
   <script src="{% static 'js/formhelper.js' %}"></script>
   <script src="{% static 'js/jquery.validate.extra.js' %}"></script>
+  <script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+
 
 <script type="text/javascript">
   $(function() {
-    $(document).ready(function() {
+    $(document).ready(function() {    
 
       var warnBeforeExit = true;
         
@@ -100,11 +102,22 @@
 
       // issues formset
       $("#issues-fieldset").find("div.panel-collapse:first").addClass("in"); //expand first item
-      $('#issues-fieldset div.issues-form').formset({
+      //$('#issues-fieldset .issues-form').formset({
+      $('#orderIssuesTable tr').formset({
           prefix: '{{issues_form.prefix}}',
+          addCssClass: 'btn btn-default add-row',
+          addText: 'Add <span class="glyphicon glyphicon-plus-sign"></span>',
+          deleteCssClass: 'delete-row-tr',
           added: function($form) {
-            FurnFormHelper.initFormset($form, 'issues', 'Issue');
+            //FurnFormHelper.initFormset($form, 'issues', 'Issue');
+            console.log('formset initialized');
           }
+      });
+      var t = $('#orderIssuesTable').DataTable ({
+        "paging":   false,
+        "ordering": false,
+        "info":     false,
+        "bSort":    false
       });
 
       // ORDER TOTALS calculation
@@ -183,11 +196,14 @@
 {% endblock %}
 
 {% block extra_css %}
-<style type="text/css">
-    .delete-row {
-        margin-left:5px;
-    }   
-</style>
+  <style type="text/css">
+      .delete-row {
+          margin-left:5px;
+      }   
+  </style>
+
+  <link href="//cdn.datatables.net/1.10.7/css/jquery.dataTables.css" rel="stylesheet">
+
 {% endblock %}
 
 {% block content %}
@@ -434,6 +450,10 @@
                       </div>
                     </div>
 
+                    {% if items_form.can_delete %}
+                      {{ item_form.DELETE }}
+                    {% endif %}
+
                     {{ item_form.id }}
                   </div>
                 </div>
@@ -621,14 +641,41 @@
         <fieldset class="formset accordion">
           <legend>Order Issues</legend>
 
-          <div class="panel-group" class="accordion" role="tablist" aria-multiselectable="true">
+          <div> <!--class="panel-group" class="accordion" role="tablist" aria-multiselectable="true"-->
             {{ issues_form.management_form }}
             {% if issues_form %}
               {{ issues_form.non_field_errors }}  
               {% bootstrap_formset_errors issues_form %}  
 
-              {% for form in issues_form %}
+              <table id="orderIssuesTable" class="display" cellspacing="0" width="100%">
+                <thead>
+                  <tr class="">
+                    <th>Status</th>
+                    <th>Comments</th>
+                  </tr>
+                </thead>
+         
+                <tbody>
 
+                  {% for form in issues_form %}
+                    <tr class="issues_form form-row" id="{{ issues_form.prefix }}-{{forloop.counter}}-row">
+                      <td class="col-md-3">
+                        {% bootstrap_field form.status  %}
+                      </td>
+                      <td>
+                        {% bootstrap_field form.comments form_group_class="order-issues-comment" %}                         
+                        {{ form.id }} 
+                        {% if issues_form.can_delete %}
+                          {{ form.DELETE }}
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}                 
+
+                </tbody>
+              </table>
+
+                {% comment %}
                 <div class="panel panel-default issues_form form-row" id="{{ issues_form.prefix }}-{{forloop.counter}}-row">
                   <div class="panel-heading" role="tab" id="heading{{ form.prefix }}">
                     <h4 class="panel-title">
@@ -645,7 +692,9 @@
                     </div>
                   </div>       
                 </div>
-              {% endfor %}
+                 {% endcomment %}
+
+              
             {% else %}
               {% ifequal object.pk None %}
                 <div class="alert warning">Save the order before entering order issues.</div>

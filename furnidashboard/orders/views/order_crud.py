@@ -101,7 +101,8 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
     attachment_form = OrderAttachmentFormSet(instance=self.object, prefix="attachments")
 
     # issues form
-    OrderIssuesFormSet = get_order_issues_formset()
+    extra = 1 if self.object.orderissue_set.count() == 0 else 0
+    OrderIssuesFormSet = get_order_issues_formset(extra=extra, max_num=100)
     issues_form = OrderIssuesFormSet(instance=self.object, prefix='issues')
 
     # crypton protection plan form

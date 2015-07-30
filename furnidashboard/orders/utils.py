@@ -216,29 +216,30 @@ def get_order_associates(order):
 
   return ", ".join(assoc_list)
 
-def get_all_unacknowledged_orders(associate=None):
+def list_unconfirmed_orders(by_associate=None):
   
   #items that have PO# but don't have Acknowledgement #
-  unconfirmed_items = OrderItem.objects.exclude(po_num="").filter(ack_num="").select_related('order') 
+  unconfirmed_items = OrderItem.objects.exclude(po_num="").filter(ack_num="").select_related('order').exclude(order__status='I')
 
-  if associate is not None:
+  import pdb; pdb.set_trace()
+  if by_associate:
     #filter by specific associate
-    unconfirmed_items.filter(order__commission__associate=associate)
+    unconfirmed_items.filter(order__commission__associate=by_associate)
 
-  orders = set([i.order for i in unconfirmed_items if i.order.status != 'I'])
+  orders = (i.order for i in unconfirmed_items)
 
   return orders
 
-def get_all_unplaced_orders(associate=None):
+def list_unplaced_orders(by_associate=None):
   
   #items that are not 'In Stock' and don't have PO#
-  unplaced_items = OrderItem.objects.filter(in_stock=False, po_num="").select_related('order') 
+  unplaced_items = OrderItem.objects.filter(in_stock=False, po_num="")#.select_related('order') 
 
-  if associate is not None:
+  if associate:
     #filter by specific associate
     unplaced_items.filter(order__commission__associate=associate)
 
   orders = set([i.order for i in unplaced_items if i.order.status != 'I'])
 
-  return orders  
+  return tuple(orders)
 
