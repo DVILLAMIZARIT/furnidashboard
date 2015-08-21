@@ -163,10 +163,23 @@
             if ($$.is('TR')) {
                 // If forms are laid out as table rows, insert the
                 // "add" button in a new table row:
-                var numCols = $$.eq(0).children().length,   // This is a bit of an assumption :|
-                    buttonRow = $('<tr><td colspan="' + numCols + '"><a class="' + options.addCssClass + '" href="javascript:void(0)">' + options.addText + '</a></tr>')
-                                .addClass(options.formCssClass + '-add');
-                $$.parent().append(buttonRow);
+                var numCols = $$.eq(0).children().length;   // This is a bit of an assumption :|
+                    //buttonRow = $('<tr><td colspan="' + numCols + '"><a class="' + options.addCssClass + '" href="javascript:void(0)">' + options.addText + '</a></tr>')
+                    //            .addClass(options.formCssClass + '-add');
+                
+                //PATCH: commented 2 lines above to prevent colspan b/c DataTables library does not support cells with colspans
+                //instead, adding empty cells
+                var buttonRowStr = '<tr>';
+                for (var i = 0; i < numCols-1; ++i) {
+                    buttonRowStr += '<td></td>';
+                }
+                buttonRowStr += '<td><a class="' + options.addCssClass + '" href="javascript:void(0)">' + options.addText + '</a></td></tr>';
+                var buttonRow = $(buttonRowStr).addClass(options.formCssClass + '-add');
+
+                // PATCH preveny addButton being appended to thead
+                //$$.parent().append(buttonRow);
+                $$.parent('tbody').append(buttonRow);
+
                 if (hideAddButton) buttonRow.hide();
                 addButton = buttonRow.find('a');
             } else {

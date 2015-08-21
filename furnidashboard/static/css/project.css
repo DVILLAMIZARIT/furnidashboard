@@ -63,6 +63,9 @@ input.order-item-desc {
   margin-left: 0.3em;
   padding: 5px 10px;
 }
+.order-issues-comment textarea {
+  height:100px;
+}
 /* /ORDER FORM */
 
 /* ORDER LIST */
@@ -159,12 +162,24 @@ table.dashed-table th,
 a.delete-row {
   float: right;
   position: relative;
-  bottom: 2.2em;
-  right: 1em;
   color: red;
   background: pink;
   border-radius: 5px;
   padding: .2em .5em;
+  bottom:2.2em;
+}
+a.delete-row-tr {
+  float: right;
+  position: relative;
+  color:red;
+  top:10px;
+  margin-bottom:5px;
+  padding: .2em .5em;
+}
+#orderIssuesTable a.add-row {
+  float: right;
+  font-size: 20px;
+  margin:10px 0;
 }
 
 .checkbox-middle {

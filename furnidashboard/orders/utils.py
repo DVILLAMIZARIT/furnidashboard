@@ -216,7 +216,7 @@ def get_order_associates(order):
 
   return ", ".join(assoc_list)
 
-def get_all_unacknowledged_orders(associate=None):
+def list_unconfirmed_orders(by_associate=None):
   
   launch_dt = datetime(2014, 5, 1)
   if settings.USE_TZ:
@@ -230,11 +230,11 @@ def get_all_unacknowledged_orders(associate=None):
     unconfirmed_items = unconfirmed_items.filter(order__commission__associate__exact=associate)
 
   res = set([i.order for i in unconfirmed_items if i.order.status != 'I'])
-  unconfirmed_items = None
+
 
   return res
 
-def get_all_unplaced_orders(associate=None):
+def list_unplaced_orders(by_associate=None):
   
   launch_dt = datetime(2014, 5, 1)
   if settings.USE_TZ:
@@ -249,5 +249,5 @@ def get_all_unplaced_orders(associate=None):
 
   res = set([i.order for i in unplaced_items if i.order.status != 'I'])
 
-  return res  
+  return res
 
