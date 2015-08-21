@@ -218,27 +218,36 @@ def get_order_associates(order):
 
 def get_all_unacknowledged_orders(associate=None):
   
+  launch_dt = datetime(2014, 5, 1)
+  if settings.USE_TZ:
+    launch_dt = timezone.make_aware(launch_dt, timezone.get_current_timezone())
+
   #items that have PO# but don't have Acknowledgement #
-  unconfirmed_items = OrderItem.objects.exclude(po_num="").filter(ack_num="").select_related('order') 
+  unconfirmed_items = OrderItem.objects.exclude(po_num="").filter(ack_num="").select_related('order').filter(order__order_date__gte=launch_dt)  
 
-  if associate is not None:
+  if associate:
     #filter by specific associate
-    unconfirmed_items.filter(order__commission__associate=associate)
+    unconfirmed_items = unconfirmed_items.filter(order__commission__associate__exact=associate)
 
-  orders = set([i.order for i in unconfirmed_items if i.order.status != 'I'])
+  res = set([i.order for i in unconfirmed_items if i.order.status != 'I'])
+  unconfirmed_items = None
 
-  return orders
+  return res
 
 def get_all_unplaced_orders(associate=None):
   
+  launch_dt = datetime(2014, 5, 1)
+  if settings.USE_TZ:
+    launch_dt = timezone.make_aware(launch_dt, timezone.get_current_timezone())
+
   #items that are not 'In Stock' and don't have PO#
-  unplaced_items = OrderItem.objects.filter(in_stock=False, po_num="").select_related('order') 
+  unplaced_items = OrderItem.objects.filter(in_stock=False, po_num="").select_related('order').filter(order__order_date__gte=launch_dt) 
 
-  if associate is not None:
+  if associate:
     #filter by specific associate
-    unplaced_items.filter(order__commission__associate=associate)
+    unplaced_items = unplaced_items.filter(order__commission__associate__exact=associate)
 
-  orders = set([i.order for i in unplaced_items if i.order.status != 'I'])
+  res = set([i.order for i in unplaced_items if i.order.status != 'I'])
 
-  return orders  
+  return res  
 

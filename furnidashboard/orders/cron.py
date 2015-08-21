@@ -64,30 +64,30 @@ class UnplacedOrderCronJob(FurnCronJob):
   def do(self):
 
     self.trace("This is auto-generated notification on unplaced orders at FurniCloud", important=True)
-    self.trace("-" * 40)
+    self.trace("-" * 60)
     self.trace("UNPLACED special orders (missing PO numbers): ", important=True)
-    unplaced = Order.objects.unplaced_orders()
-    self.trace("There are {0} unplaced orders".format(unplaced.count()), important=True)
+    unplaced = order_utils.get_all_unplaced_orders() #Order.objects.unplaced_orders()
+    self.trace("There are {0} unplaced orders".format(len(unplaced)), important=True)
     
-    if unplaced.count() > 0 :
+    if len(unplaced) > 0 :
       self.report_is_blank = False
 
     for counter, o in enumerate(unplaced):
       self.trace("{0}) {1} unplaced. View order: http://cloud.furnitalia.com{2}".format(counter+1, o.number, o.get_absolute_url()))
-    self.trace("-" * 40)
+    self.trace("-" * 60)
     self.trace("")
 
     self.trace("List of UNCONFIRMED special orders (missing acknowledgement# from vendor):", important=True)
-    orders_no_ack_no = Order.objects.ordered_not_acknowledged()
-    self.trace("There are {0} unconfirmed orders".format(orders_no_ack_no.count(), important = True))
+    orders_no_ack_no = order_utils.get_all_unacknowledged_orders() #Order.objects.ordered_not_acknowledged()
+    self.trace("There are {0} unconfirmed orders".format(len(orders_no_ack_no), important = True))
 
-    if orders_no_ack_no.count() > 0 :
+    if len(orders_no_ack_no) > 0 :
       self.report_is_blank = False
 
     for counter, o in enumerate(orders_no_ack_no):
       self.trace("{0}) {1} View order: http://cloud.furnitalia.com{2}".format(counter+1, o.number, o.get_absolute_url()))
-    self.trace("-" * 40)
-    self.trace("-" * 40)
+    self.trace("-" * 60)
+    self.trace("-" * 60)
 
     self.report_is_blank = True
     # send email notifications
@@ -115,39 +115,42 @@ class UnplacedOrderByAssocCronJob(UnplacedOrderCronJob):
       self.report_is_blank = True
       self.msg = []
       if len(associate.email):
-        unplaced = Order.objects.unplaced_orders().filter(commission__associate=associate)
-        if unplaced.count():
-          self.report_is_blank = False
-          
-          self.trace("This is auto-generated notification on unplaced orders by associate: <i>{0}</i>".format(associate.first_name + " " + associate.last_name), important=True)
-          self.trace("-" * 40)
+        #unplaced = Order.objects.unplaced_orders().filter(commission__associate=associate)
+		unplaced = order_utils.get_all_unplaced_orders(associate=associate) 
+		if len(unplaced):
+			self.report_is_blank = False
+		  
+			self.trace("This is auto-generated notification on unplaced orders for associate: <i>{0}</i>".format(associate.first_name + " " + associate.last_name), important=True)
+			self.trace("-" * 60)
 
-          self.trace("There are {0} UNPLACED special orders (missing PO numbers): ".format(unplaced.count()), important=True)
-          for counter, o in enumerate(unplaced):
-            self.trace("{0}) {1} unplaced. View order: http://cloud.furnitalia.com{2}".format(counter+1, o.number, o.get_absolute_url()))
-          
-          self.trace("-" * 40)
-          self.trace("Please bring to Lana's or Dmitriy's attention that your orders need to be placed with the vendor!")
-          self.trace("")
+			self.trace("There are {0} UNPLACED special orders (missing PO numbers): ".format(len(unplaced)), important=True)
+			for counter, o in enumerate(unplaced):
+				self.trace("{0}) {1} unplaced. View order: http://cloud.furnitalia.com{2}".format(counter+1, o.number, o.get_absolute_url()))
+		  
+			self.trace("-" * 60)
+			self.trace("Please bring to Lana's or Dmitriy's attention that your orders need to be placed with the vendor!")
+			self.trace("")
 
-        orders_no_ack_no = Order.objects.ordered_not_acknowledged().filter(commission__associate=associate)
-        if orders_no_ack_no.count():
-          self.report_is_blank = False
-          self.trace("There are {0} UNCONFIRMED orders  (missing acknowledgement# from vendor)".format(orders_no_ack_no.count(), important = True))
-          for counter, o in enumerate(orders_no_ack_no):
-            self.trace("{0}) {1} View order: http://cloud.furnitalia.com{2}".format(counter+1, o.number, o.get_absolute_url()))
-          self.trace("-" * 40)
-          self.trace("Please check with Lana regarding the status of this order.")
+		#orders_no_ack_no = Order.objects.ordered_not_acknowledged().filter(commission__associate=associate)
+		orders_no_ack_no = order_utils.get_all_unacknowledged_orders(associate=associate) 
+		if len(orders_no_ack_no):
+		  self.report_is_blank = False
+		  self.trace("There are {0} UNCONFIRMED orders  (missing acknowledgement# from vendor)".format(len(orders_no_ack_no), important = True))
+		  for counter, o in enumerate(orders_no_ack_no):
+			self.trace("{0}) {1} View order: http://cloud.furnitalia.com{2}".format(counter+1, o.number, o.get_absolute_url()))
+		  self.trace("-" * 60)
+		  self.trace("Please check with Lana regarding the status of your unconfirmed orders.")
+		  self.trace("-" * 60)
 
-        self.report_is_blank = True
-        # send email notifications
-        if not self.report_is_blank:
-          assoc_email = associate.email
-          self.send_emails (
-            to=(assoc_email, 'admin@furnitalia.com'),
-            subject ="Notification about your Order status in FurniCloud",
-            message="<br/>".join(self.msg)
-          )
+		self.report_is_blank = True
+		# send email notifications
+		if not self.report_is_blank:
+		  assoc_email = associate.email
+		  self.send_emails (
+			to=(assoc_email, 'admin@furnitalia.com'),
+			subject ="Notification about your Order status in FurniCloud",
+			message="<br/>".join(self.msg)
+		  )
 
   
 
@@ -158,13 +161,13 @@ class OrderCronJob(FurnCronJob):
 
   # cron job will run at 6:30am
   RUN_AT_TIMES = ['6:30']
-  RUN_EVERY_MINS = 1 # every minute
+  RUN_EVERY_MINS = 10 # every minute
   schedule = Schedule(run_at_times=RUN_AT_TIMES, run_every_mins=RUN_EVERY_MINS)  
 
   def do(self):
 
     self.trace("This is auto-generated notification on missing orders at FurniCloud", important=True)
-    self.trace("-" * 40)
+    self.trace("-" * 60)
     orders_missing = self.determine_potentially_missed_orders()    
     if orders_missing:
       self.report_is_blank = False
@@ -173,7 +176,7 @@ class OrderCronJob(FurnCronJob):
         self.trace(str(o))
       self.trace("")
       self.trace("*NOTE: please verify that your orders have been entered. If the POS order is a quote, select a status of 'Dummy' for order in FurniCloud.", important=True)
-      self.trace("-" * 40)
+      self.trace("-" * 60)
       self.trace("")
 
     self.trace("List of 10 most recent orders:", important=True)
@@ -181,12 +184,12 @@ class OrderCronJob(FurnCronJob):
     for o in recent_orders:
        self.trace("Order {0}, created {1}, status: {2}, associate(s): {3}".format(o.number, 
           o.order_date.strftime("%m-%d-%Y"), o.get_status_display(), order_utils.get_order_associates(o)))
-    self.trace("-" * 40)
+    self.trace("-" * 60)
     self.trace("")
 
-    self.trace("*" * 40)
+    self.trace("*" * 60)
     self.trace("Please visits the 'Alerts' page on FurniCloud for full report".upper(), important=True)
-    self.trace("*" * 40)
+    self.trace("*" * 60)
     
     self.report_is_blank = True
     # send email notifications
