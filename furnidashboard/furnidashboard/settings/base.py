@@ -116,7 +116,10 @@ SECRET_KEY = r"@)jv)^k=1f055u(0b@t$efrdmu(z0#+_z&dp&wkmsu*4*w2xkb"
 ########## SITE CONFIGURATION
 # Hosts/domain names that are valid for this site
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ['.furnitalia.com']
+ALLOWED_HOSTS = [
+    '.furnitalia.com',
+    '.furnitalia.com.'
+]
 ########## END SITE CONFIGURATION
 
 
@@ -244,13 +247,22 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+         },
+        'null': {
+            'level': 'ERROR',
+            'class': 'logging.NullHandler',
+         },
     },
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
+        },
+        'django.security.DisallowedHost': {
+            'handlers': ['null'],
+            'level': 'ERROR',
+            'propagate': False,
         },
     }
 }
@@ -289,7 +301,7 @@ CRON_EMAIL_NOTIFICATION_LIST = [
     'ruth@furnitalia.com',
     'jenn@furnitalia.com',
     'jamie@furnitalia.com',
-]
+
 
 # Default settings
 BOOTSTRAP3 = {
