@@ -225,14 +225,14 @@ def list_unconfirmed_orders(by_associate=None):
   #items that have PO# but don't have Acknowledgement #
   unconfirmed_items = OrderItem.objects.exclude(po_num="").filter(ack_num="").select_related('order').filter(order__order_date__gte=launch_dt)  
 
-  if associate:
+  if by_associate:
     #filter by specific associate
-    unconfirmed_items = unconfirmed_items.filter(order__commission__associate__exact=associate)
+    unconfirmed_items = unconfirmed_items.filter(order__commission__associate__exact=by_associate)
 
   res = set([i.order for i in unconfirmed_items if i.order.status != 'I'])
 
 
-  return res
+  return tuple(res)
 
 def list_unplaced_orders(by_associate=None):
   
@@ -243,11 +243,11 @@ def list_unplaced_orders(by_associate=None):
   #items that are not 'In Stock' and don't have PO#
   unplaced_items = OrderItem.objects.filter(in_stock=False, po_num="").select_related('order').filter(order__order_date__gte=launch_dt) 
 
-  if associate:
+  if by_associate:
     #filter by specific associate
-    unplaced_items = unplaced_items.filter(order__commission__associate__exact=associate)
+    unplaced_items = unplaced_items.filter(order__commission__associate__exact=by_associate)
 
   res = set([i.order for i in unplaced_items if i.order.status != 'I'])
 
-  return res
+  return tuple(res)
 
