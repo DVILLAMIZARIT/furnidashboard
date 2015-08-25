@@ -24,7 +24,7 @@ class FurnCronJob(CronJobBase):
     self.msg.append(txt)
 
   def send_emails(self, to=None, subject="", message="", from_addr="admin@furnitalia.com"):
-    if len(trim(message)) == 0 :
+    if len(message.strip()) == 0 :
       return
 
     if to == None :
@@ -57,9 +57,8 @@ class UnplacedOrderCronJob(FurnCronJob):
   report_is_blank = True
 
   #this job will run only at 6am
-  RUN_AT_TIMES = ['6:00']   
-  RUN_EVERY_MINS = 1 #every minute
-  schedule = Schedule(run_at_times=RUN_AT_TIMES, run_every_mins=RUN_EVERY_MINS)  
+  RUN_AT_TIMES = ['06:00']   
+  schedule = Schedule(run_at_times=RUN_AT_TIMES) #, run_every_mins=RUN_EVERY_MINS)  
 
   def do(self):
 
@@ -89,7 +88,7 @@ class UnplacedOrderCronJob(FurnCronJob):
       self.trace("-" * 60)
       self.trace("-" * 60)
 
-    self.report_is_blank = True
+    #self.report_is_blank = True
     # send email notifications
     if not self.report_is_blank:
       self.send_emails (
@@ -102,9 +101,9 @@ class UnplacedOrderByAssocCronJob(UnplacedOrderCronJob):
   code = 'orders.cron.UnplacedOrderByAssocCronJob'  
 
   # cron job will run at 6:30am
-  RUN_AT_TIMES = ['6:30']
-  RUN_EVERY_MINS = 1 # every minute
-  schedule = Schedule(run_at_times=RUN_AT_TIMES, run_every_mins=RUN_EVERY_MINS)  
+  RUN_AT_TIMES = ['06:30']
+  #RUN_EVERY_MINS = 1 # every minute
+  schedule = Schedule(run_at_times=RUN_AT_TIMES) #, run_every_mins=RUN_EVERY_MINS)  
 
   def do(self):    
 
@@ -141,7 +140,7 @@ class UnplacedOrderByAssocCronJob(UnplacedOrderCronJob):
     		  self.trace("*** Please check status of the orders above. ***")
     		  self.trace("-" * 60)
 
-    		self.report_is_blank = True
+    		#self.report_is_blank = True
     		# send email notifications
     		if not self.report_is_blank:
     		  assoc_email = associate.email
@@ -158,10 +157,10 @@ class OrderCronJob(FurnCronJob):
   msg = []
   report_is_blank = True
 
-  # cron job will run at 6:30am
-  RUN_AT_TIMES = ['6:30']
-  RUN_EVERY_MINS = 100 # every minute
-  schedule = Schedule(run_at_times=RUN_AT_TIMES, run_every_mins=RUN_EVERY_MINS)  
+  # cron job will run at 7:00am
+  RUN_AT_TIMES = ['07:00']
+  #RUN_EVERY_MINS = 100 # every minute
+  schedule = Schedule(run_at_times=RUN_AT_TIMES) #, run_every_mins=RUN_EVERY_MINS)  
 
   def do(self):
 
@@ -190,7 +189,7 @@ class OrderCronJob(FurnCronJob):
     self.trace("Please visits the 'Alerts' page on FurniCloud for full report".upper(), important=True)
     self.trace("*" * 60)
     
-    self.report_is_blank = True
+    #self.report_is_blank = True
     # send email notifications
     if not self.report_is_blank:
       self.send_emails(message="<br/>".join(self.msg))

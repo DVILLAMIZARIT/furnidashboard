@@ -301,7 +301,7 @@ CRON_EMAIL_NOTIFICATION_LIST = [
     'ruth@furnitalia.com',
     'jenn@furnitalia.com',
     'jamie@furnitalia.com',
-
+]
 
 # Default settings
 BOOTSTRAP3 = {
