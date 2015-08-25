@@ -205,7 +205,6 @@ THIRD_PARTY_APPS = (
     'bootstrap3',
     'bootstrap3_datetime',
     'crispy_forms',
-    'django_cron',
     'django_extensions',
     'kronos',
 )
@@ -286,14 +285,6 @@ AJAX_LOOKUP_CHANNELS = {
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3' # django crispy forms
 
-CRON_CLASSES = [
-    #'orders.cron.OrderCronJob',
-    #'orders.cron.UnplacedOrderCronJob',
-    #'orders.cron.UnplacedOrderByAssocCronJob',
-    'django_cron.cron.FailedRunsNotificationCronJob',
-]
-FAILED_RUNS_CRONJOB_EMAIL_PREFIX = "[Furnicloud Notification]: "
-DJANGO_CRON_DELETE_LOGS_OLDER_THAN =  30
 CRON_EMAIL_NOTIFICATION_LIST = [
     'emil@furnitalia.com',
     'lana@furnitalia.com',

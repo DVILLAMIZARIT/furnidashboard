@@ -299,13 +299,17 @@ class OrderUpdateView(PermissionRequiredMixin, UpdateView):
         commissions_form.save()
 
       # save deliveries
+      delivery_warning = False
       for del_form in delivery_form:
         if del_form.has_changed():
           if del_form.instance.pk or not utils.delivery_form_empty(del_form.cleaned_data):
             del_form.order = self.object
             del_form.save()
             if any(self.object.orderitem_set.filter(~Q(status__in=['S', 'R']))):
-              messages.add_message(self.request, messages.ERROR, "Warning: a delivery has been scheduled for this order BUT item(s) are not in stock/not delivered. Please check the order status for any issues.", extra_tags="alert alert-warning")
+              delivery_warning = True  
+
+      if delivery_warning:
+        messages.add_message(self.request, messages.ERROR, "Warning: a delivery has been scheduled for this order BUT item(s) are not in stock/not delivered. Please check the order status for any issues.", extra_tags="alert alert-warning")            
 
       # save attachments
       if attachment_form.has_changed():

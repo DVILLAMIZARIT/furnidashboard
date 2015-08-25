@@ -7,41 +7,32 @@ def run_missed_orders_cron():
     msg = []
     report_is_blank = True
 
-    def trace(txt, important=False):
-        print txt
-
-        if txt.strip() == "":
-            txt = "<br/>"
-
-        if important:
-            txt = "<strong>" + txt + "</strong>"
-
-        msg.append(txt)
-
-    trace("Notification about missing orders at FurniCloud", important=True)
-    trace("-" * 60)
+    msg.append("<strong>Notification about missing orders at FurniCloud</strong>")
+    msg.append("<br/>")
     orders_missing = __determine_potentially_missed_orders()    
     if orders_missing:
       report_is_blank = False
-      trace("There are {0} potentially MISSING orders.".format(len(orders_missing)), important=True)
+      msg.append("<strong>There are {0} potentially MISSING orders.</strong>".format(len(orders_missing)))
+      msg.append("<ul>")
+      items=[]
       for o in orders_missing:
-        trace(str(o))
-      trace("")
-      trace("*NOTE: please verify that your orders have been entered. If the POS order is a quote, select a status of 'Dummy' for order in FurniCloud.", important=True)
-      trace("-" * 60)
-      trace("")
+        items.append("<li>{0}</li>".format(str(o)))
+      msg.append("".join(items))
+      msg.append("</ul>")
+      msg.append("<strong>***NOTE: please verify that your orders have been entered. If the POS order is a quote, select a status of 'Dummy' for order in FurniCloud.</strong>")
+      msg.append("<br/>")
 
-    trace("List of 10 most recent orders:", important=True)
+    msg.append("<strong>List of 10 most recent orders:</strong>")
     recent_orders = Order.objects.filter(status__exact='N').order_by('-order_date')[:10]
+    msg.append("<ul>")
+    items=[]
     for o in recent_orders:
-       trace("Order {0}, created {1}, status: {2}, associate(s): {3}".format(o.number, 
+       items.append("<li>Order {0}, created {1}, status: {2}, associate(s): {3}</li>".format(o.number, 
           o.order_date.strftime("%m-%d-%Y"), o.get_status_display(), order_utils.get_order_associates(o)))
-    trace("-" * 60)
-    trace("")
+    msg.append("".join(items))
+    msg.append("</ul><br/>")
 
-    trace("*" * 60)
-    trace("Please visits the 'Alerts' page on FurniCloud for full report".upper(), important=True)
-    trace("*" * 60)
+    msg.append("<strong>Please visits the 'Alerts' page on FurniCloud for full report</strong>".upper())
     
     # send email notifications
     if not report_is_blank:
