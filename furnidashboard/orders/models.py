@@ -14,6 +14,7 @@ class Order(TimeStampedModel, AuthStampedModel):
     ('N', 'New'),
     ('Q', 'Pending'),
     ('H', 'On Hold'),
+    ('E', 'Cancelled'),
     ('P', 'In Production'),
     ('T', 'In Transit'),
     ('S', 'Scheduled for Delivery'),
