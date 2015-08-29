@@ -104,7 +104,8 @@ def get_query(query_string, search_fields):
 @login_required 
 def search(request):
   query_string = ''
-  found_entries = None
+  found_orders = None
+  found_customers = None
   if request.GET:
     query_string = request.GET.get('q', '').strip()
 
@@ -116,9 +117,9 @@ def search(request):
       entry_query = get_query(query_string, ['first_name', 'last_name', 'email'])
       found_customers = Customer.objects.filter(entry_query).order_by('-last_name')
 
-      return render(request, 'search/search_results.html', 
-        {'query_string': query_string, 
-         'found_orders': found_orders,
-         'found_customers':found_customers,
-        },
-      )
+  return render(request, 'search/search_results.html', 
+	{'query_string': query_string, 
+	   'found_orders': found_orders,
+	   'found_customers':found_customers,
+	  },
+     )
