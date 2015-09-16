@@ -20,7 +20,7 @@ from django.conf import settings
 from django.contrib import admin
 admin.autodiscover()
 
-this_month_args = {'year':str(date.today().year), 'month':str(date.today().month)}
+#this_month_args = {'year':str(date.today().year), 'month':str(date.today().month)}
 
 urlpatterns = patterns('',
     
@@ -35,7 +35,7 @@ urlpatterns = patterns('',
     
     url(
       regex= r'^orders/$',
-      view=general_views.OrderMonthArchiveTableView.as_view(month_format='%m', **this_month_args),
+      view=general_views.OrderMonthArchiveTableView.as_view(month_format='%m', year=str(date.today().year), month=str(date.today().month)),
       name="order_list",
     ),
     url(

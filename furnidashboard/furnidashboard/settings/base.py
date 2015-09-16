@@ -292,7 +292,6 @@ CRON_EMAIL_NOTIFICATION_LIST = [
     'pearl@furnitalia.com',
     'ruth@furnitalia.com',
     'jenn@furnitalia.com',
-    'jamie@furnitalia.com',
 ]
 
 KRONOS_POSTFIX = '> /dev/null 2>&1'

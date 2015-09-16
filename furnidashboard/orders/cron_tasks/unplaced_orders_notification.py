@@ -93,7 +93,7 @@ def run_unplaced_orders_by_assoc_cron():
             if not report_is_blank:
                 assoc_email = associate.email
                 cron_utils.send_emails (
-                    to=(assoc_email, 'admin@furnitalia.com'),
+                    to=(assoc_email),
                     subject ="Notification about your Order status in FurniCloud",
                     message="<br/>".join(msg)
                 )
