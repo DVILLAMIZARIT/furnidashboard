@@ -42,7 +42,7 @@ def run_unplaced_orders_cron():
     # send email notifications
     if not report_is_blank:
       cron_utils.send_emails (
-        to=['lana@furnitalia.com', 'd.aks@furnitalia.com', 'admin@furnitalia.com'],
+        to=['lana@furnitalia.com', 'ruth@furnitalia.com', 'd.aks@furnitalia.com', 'admin@furnitalia.com'],
         subject ="Notification about Unplaced Orders at FurniCloud",
         message="<br/>".join(msg)        
       )
