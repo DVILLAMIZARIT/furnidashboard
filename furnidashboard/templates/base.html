@@ -57,7 +57,8 @@
           <ul class="nav navbar-nav">
             {% url 'order_list' as order_list %}
             {% url 'alerts_main' as alerts  %}
-            {% url 'order_add' as add_order  %}
+           <!--  {% url 'order_add' as add_order  %} -->
+           	{% url 'claim_list' as claim_list  %}
             {% url 'customer_list' as customers %}
             {% url 'delivery_list' as delivery_list %}
             {% url 'sales_standings_cur' as sales_standings %}
@@ -70,8 +71,8 @@
             {% if perms.orders.view_orders %}
               <li class="{% ifequal request.path alerts %}active{% endifequal %}"><a href="{{ alerts }}">Alerts</a></li>
             {% endif %}
-            {% if perms.orders.add_order %}
-              <li class="{% ifequal request.path add_order %}active{% endifequal %}"><a href="{{add_order}}">Add Order</a></li>
+            {% if perms.claims.view_claims %}
+              <li class="{% ifequal request.path claim_list %}active{% endifequal %}"><a href="{{claim_list}}">Claims</a></li>
             {% endif %}
             {% if perms.customers.view_customers %}
               <li class="{% ifequal request.path customers %}active{% endifequal %}"><a href="{{customers}}" >Customers</a></li>

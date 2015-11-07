@@ -216,6 +216,7 @@ LOCAL_APPS = (
      'stores',
      'orders',
      'commissions',
+     'claims',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -363,3 +364,7 @@ COMMISSION_PERCENT = 0.025
 
 ORDER_FORMAT_REGEX = '(SO|SR|DR)-([0-9]{5})'
 ORDER_FORMAT_DESC = '<"SO" or "SR" or "DR">-<5 digits>. Examples: SO-10009 or SR-31000 or DR-10005'
+
+
+#Date FOrmat
+DATE_FORMAT_SHORT = 'j F, Y'

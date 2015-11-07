@@ -9,6 +9,7 @@ import orders.views.general as general_views
 import orders.views.order_crud as order_crud_views
 import orders.views.deliveries as deliveries_views
 from commissions.views import BonusMonthlyReportView
+import claims.views as claims_views
 #from core.views import UnpaidDeliveriesTableView, UnplacedOrderTableView, OrderedUnacknowledgedOrdersTableView, UnpaidCommissionsTableView   
 import core.views as core_views
 from django.views.generic.edit import FormView
@@ -196,6 +197,34 @@ urlpatterns = patterns('',
       view=deliveries_views.DeliveryDeleteView.as_view(),
       name="delivery_delete",
     ),
+                       
+    #claims
+    url(
+        regex = r'^claims/$',
+        view = claims_views.ClaimsTableView.as_view() ,
+        name = "claim_list",
+    ),
+    url(
+      regex = r'^claims/(?P<pk>\d+)/$', 
+      view=claims_views.ClaimDetailView.as_view(),
+      name="claim_detail",
+    ),
+    url(
+      regex = r'^claims/(?P<pk>\d+)/edit/$', 
+      view=claims_views.ClaimUpdateView.as_view(),
+      name="claim_edit",
+    ),
+    url(
+      regex = r'^claims(?P<pk>\d+)/delete/$', 
+      view=claims_views.ClaimDeleteView.as_view(),
+      name="claim_delete",
+    ),
+    url(
+        regex = r'claims/add/$', 
+        view = claims_views.ClaimCreateView.as_view(), 
+        name="claim_add"
+    ),
+       
 
     url(r'^ajax_select/', include('ajax_select.urls')),
 

@@ -23,6 +23,11 @@ div.search form {
 }
 
 /* ORDER FORM */
+#createOrderAside {
+	position: relative;
+	float: right;
+	bottom: 3em;
+}
 div.order-comments-wrapper {
   clear:both;
 }
@@ -176,7 +181,7 @@ a.delete-row-tr {
   margin-bottom:5px;
   padding: .2em .5em;
 }
-#orderIssuesTable a.add-row {
+#orderIssuesTable a.add-row, #claimStatusTable a.add-row {
   float: right;
   font-size: 20px;
   margin:10px 0;
@@ -185,3 +190,12 @@ a.delete-row-tr {
 .checkbox-middle {
   margin-top:30px;
 }
+
+/* CLAIMS BEGIN */
+.claim-desc-comment textarea {
+	height:10em;
+}
+#photos-fieldset a.delete-row {
+	bottom:0;
+}
+/* CLAIMS END */

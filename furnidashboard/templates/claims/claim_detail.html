@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% load extras %}
+{% block title %}Claim #{{claim.pk}} Detail{% endblock %}
+
+{% block page_title %}Claim #{{claim.pk}} Detail{% endblock page_title %}
+
+{% block content %}
+  
+  <div class="well hidden-print">
+    {% if perms.claims.edit_claims %}
+      <a href="{% url 'claim_edit' claim.pk %}" title="Edit Claim">Update Claim</a>  
+      |  <a href="{% url 'claim_delete' claim.pk %}" title="Delete Claim">Delete this Claim</a>
+    {% endif %}
+  </div>
+  <hr/>
+
+  <h3>Claim Info</h3>
+  
+  <div class="panel panel-default">
+    <div class="panel-body">
+
+      <div class="col-md-2">
+        <h5>Claim Date:</h5>
+        {{claim.claim_date|date:'j F, Y'}}
+      </div> 
+      <div class="col-md-4">
+        <h5>Claim Description:</h5>
+        {{claim.claim_desc}}
+      </div> 
+      <div class="col-md-2">
+        <h5>Delivery Date:</h5>
+        {{claim.delivery_date|date:'j F, Y'}}
+      </div> 
+      <div class="col-md-2">
+        <h5>Item Origin:</h5>
+        {{claim.get_item_origin_display}}
+      </div>
+      <div class="col-md-2">
+        <h5>Amount:</h5>
+        ${{claim.amount}}
+      </div> 
+      
+      
+     <!--  vendor_claim_no
+      customer
+      order_ref
+      order_invoice_num
+      paid_by
+      repair_tech -->
+      
+      <div class="col-md-6">
+        <h5>Claim Status:</h5>
+        {% if claim.claimstatus_set.count %}
+        	<table id="order-issues-table" class="dashed-table">
+		        <thead>
+		          <th>Date</th>
+		          <th>Status</th>
+		          <th>Description</th>
+		        </thead>
+		        <tbody>
+           			{% for status in claim.claimstatus_set.all %}
+			            <tr>
+			              <td>{{ status.date|date:'j F, Y' }}</td>
+			              <td>{{ status.get_status_display|upper }}</td>
+			              <td> {{ status.status_desc }}</td>
+			            </tr>
+		          	{% endfor %}
+		        </tbody>
+		      </table>
+	      {% else %}
+		        <p>No status entered.</p>
+	      {% endif %}
+	                  
+      </div>
+      
+    </div>
+  </div>
+  
+  
+  
+ <div class="row pull-right">
+    <h4>Audit Trail:</h4>
+    <table id="order-audit-trail" class="table">
+      <tr>
+        <td>Created:</td><td> {{ claim.created|date:'j F, Y H:i' }}</td>
+        <td>by:</td> <td>{{ claim.created_by }}</td>
+      </tr>
+      <tr>
+        <td>Modified: </td><td>{{ claim.modified|date:'j F, Y H:i' }}</td>
+        <td>by:</td><td> {{ claim.modified_by }}</td>
+      </tr>
+    </table>
+  </div>
+
+{% endblock content %}

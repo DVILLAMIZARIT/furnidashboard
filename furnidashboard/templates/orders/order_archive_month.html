@@ -14,8 +14,15 @@
 
 {% block content %}
 
+	
+  {% if perms.orders.add_order %}
+	<aside id="createOrderAside">
+      <a href="{% url 'order_add' %}" class="btn btn-primary btn-default">Create Order</a>
+    </aside>
+  {% endif %}
+  
   <div id="order-list" class="monthly-orders">
-
+    
     <ul class="breadcrumb">
       <li> {{ month|date:'Y' }}:</li>
       {% for month, link in order_months_links %} 
@@ -58,7 +65,6 @@
 
     <!-- Filter Form -->
     {% crispy filter.form filter.helper %}
-    
 
     {% render_table table %}
 

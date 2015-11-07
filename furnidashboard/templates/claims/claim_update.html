@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% load bootstrap3 %}
+{% load crispy_forms_tags %}
+{% load staticfiles %}
+
+{% block title %}
+  {% if page_title %} 
+    {{ page_title }}
+  {% else %}
+    Update Claim
+  {% endif %}
+{% endblock %}
+
+{% block page_title %}
+	{% if claim.pk %}
+		Modify Claim #{{claim.pk}}
+	{% else %}
+		Create Claim
+	{% endif %}
+{% endblock page_title %}
+
+{% block extra_js %}
+  {{ form.media }}
+  {{ status_formset.media }}
+  {{ photo_formset.media }}
+  
+	<script src="{% static 'js/formhelper.js' %}"></script>
+	<script src="{% static 'js/jquery.validate.extra.js' %}"></script>
+
+
+	<script type="text/javascript">
+ 		$(function() {
+    		$(document).ready(function() {  
+	  			$('#claimStatusTable tr').formset({
+			      	prefix: '{{status_formset.prefix}}',
+			      	addCssClass: 'btn btn-default add-row',
+			      	addText: 'Add <span class="glyphicon glyphicon-plus-sign"></span>',
+			      	deleteCssClass: 'delete-row-tr',
+			      	added: function($form) {
+			        	
+			        	console.log('New Claim Status is created');
+			        	
+			        	$('.input-group-addon', $form).off('change');
+			            $('.input-group-addon', $form).off('click');
+
+		                $('.date', $form).each(function() {
+		                  $(this).removeData('DateTimePicker')
+		                  $(this).datetimepicker(FurnFormHelper.dateTimePickerOptions);
+		                });
+			      	}
+	  			});
+	  			
+	  			$('#photos-fieldset div.photos-form').formset({
+	  	          prefix: '{{photos_formset.prefix}}',
+	  	          added: function($form) {
+
+	  	            $('.input-group-addon', $form).off('change');
+	  	            $('.input-group-addon', $form).off('click');
+
+	  	            $('.date', $form).each(function() {
+	  	              $(this).removeData('DateTimePicker')
+	  	              $(this).datetimepicker(FurnFormHelper.dateTimePickerOptions);
+	  	            });
+	  	          }
+	  	      });
+	  			
+    		});
+ 		});
+  </script>
+{% endblock extra_js %}
+
+{% block extra_css %}
+  <style type="text/css">
+      .delete-row {
+          margin-left:5px;
+      }   
+  </style>
+{% endblock %}
+
+{% block content %}
+
+<form action="" method="POST" enctype="multipart/form-data" id="orderForm" role="form" class="form">
+	{% csrf_token %}
+	{{ form.non_field_errors }}
+	{{ form.management_form }}
+	
+	<fieldset>
+      <legend>Claim info</legend>
+  
+        <div class="row">
+          <div class="col-md-3">
+            {% bootstrap_field form.claim_date %}
+          </div>
+          
+          <div class="col-md-5">
+            {% bootstrap_field form.claim_desc form_group_class="claim-desc-comment"  %}            
+          </div>
+        </div>
+    </fieldset>
+    
+    
+    <fieldset>
+    	<legend>Claim Status</legend>
+	    <div class="panel panel-default">
+	    	<div class="panel-body">
+	
+	            {{ status_formset.management_form }}
+	            {% if status_formset %}
+	              {{ status_formset.non_field_errors }}  
+	              {% bootstrap_formset_errors status_formset %}  
+	
+	              <table id="claimStatusTable" class="display table" cellspacing="0" width="100%">
+	                <thead>
+	                  <tr class="">
+	                    <th>Status Date</th>
+	                    <th>Status</th>
+	                    <th>Status Description</th>
+	                  </tr>
+	                </thead>
+	         
+	                <tbody>
+	
+	                  {% for form in status_formset %}
+	                    <tr class="status_form form-row" id="{{ status_formset.prefix }}-{{forloop.counter}}-row">
+	                      <td class="col-md-3">
+	                        {% bootstrap_field form.date show_label=False %}
+	                      </td>
+	                      <td>
+	                        {% bootstrap_field form.status form_group_class="claim-status" show_label=False %}        
+	                      </td>
+	                      <td>           
+	                      	{% bootstrap_field form.status_desc form_group_class="claim-status-desc" show_label=False %}              
+	                        {{ form.id }} 
+	                        {% if status_formset.can_delete %}
+	                          {{ form.DELETE }}
+	                        {% endif %}
+	                      </td>
+	                    </tr>
+	                  {% endfor %}                 
+	
+	                </tbody>
+	              </table>
+	            {% else %}
+	                <div class="alert warning">No claim status entered yet.</div>
+	            {% endif %}
+	
+	    	</div>
+	    </div>
+	</fieldset>
+    
+    <fieldset>
+    	<legend>Claim Details</legend>
+
+        <div class="row">
+          <div class="col-md-3">
+            {% bootstrap_field form.delivery_date %}
+          </div>
+
+          <div class="col-md-3">
+            {% bootstrap_field form.item_origin %}
+          </div>
+          
+          <div class="col-md-3">
+            {% bootstrap_field form.vendor_claim_no %}
+          </div>
+          
+        </div>
+        
+        <div class="row">
+          <div class="col-md-3">
+            {% bootstrap_field form.order_invoice_num %}
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-3">
+            {% bootstrap_field form.amount %}
+          </div>
+          <div class="col-md-3">
+            {% bootstrap_field form.paid_by %}
+          </div>
+        </div>
+  
+    </fieldset>
+ 
+ 	<fieldset id="photos-fieldset">
+    	<legend>Claim Photos</legend>
+		{{ photos_formset.management_form }}
+        {% if photos_formset %}
+        	{{ photos_formset.non_field_errors }}  
+            {% bootstrap_formset_errors photos_formset %} 
+        	
+        	{% for photos_form in photos_formset %}
+        		
+        		<div class="row">
+	        		<div class="col-md-6">
+		        		<div class=" photos-form form-row" id="{{ photos_form.prefix }}-row"> <!-- panel panel-default -->
+		        			<div>
+		        				{% bootstrap_form photos_form layout='inline'%}
+		        				{{ photos_form.id }}
+		        			</div>
+		        			
+		        			
+		        			{% comment %}
+		        			{% bootstrap_field photos_form.file %}
+		        			{% bootstrap_field photos_form.description %}
+		        			
+			        		{% if photos_formset.can_delete %}
+			                  {{ photos_form.DELETE }}
+			                {% endif %}
+			
+			                {{ photos_form.id }}
+			                {% endcomment %}
+			             
+			             </div>   
+		             </div>  
+                </div>
+                
+        	{% endfor %}
+        	
+        {% endif %} 
+    </fieldset>
+ 
+ <br/><br/>
+ 
+  <input type="submit" id="submitButton" class="btn btn-primary btn-large" value="Save"/>
+
+</form>
+
+{% endblock content %}
