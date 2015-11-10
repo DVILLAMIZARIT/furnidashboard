@@ -58,7 +58,7 @@
             <div class="col-md-6">
                 <h4>Claim Status:</h4>
                 {% if claim.claimstatus_set.count %}
-                    <table id="order-issues-table" class="table">
+                    <table id="order-issues-table" class="table table-striped table-bordered">
                         <thead>
                             <th>Date</th>
                             <th>Status</th>
@@ -66,7 +66,13 @@
                         </thead>
                         <tbody>
                             {% for status in claim.claimstatus_set.all %}
-                                <tr>
+                                <tr
+                                        {% ifequal forloop.counter 1  %}
+                                            class="success"
+                                        {% else %}
+                                            style="background-color:lightgray;color:grey;"
+                                        {% endifequal %}
+                                >
                                     <td>{{ status.date|date:'j F, Y' }}</td>
                                     <td>{{ status.get_status_display|upper }}</td>
                                     <td> {{ status.status_desc }}</td>
@@ -96,12 +102,12 @@
             </div>
 
             <div class="col-md-2">
-                <h5>Order/Invoice #:</h5>
+                <h4>Order/Invoice #:</h4>
                 {{claim.order_invoice_num}}
             </div>
 
             <div class="col-md-2">
-                <h4>Furnitalia Order #:</h4>
+                <h4>FurniCloud Order:</h4>
                 {{claim.order_ref}}
             </div>
 
@@ -118,7 +124,7 @@
             <div class="col-md-6">
                 <h4>Claim Photos:</h4>
                 {% if claim.claimphoto_set.count %}
-                    <table id="order-photo-table" class="table">
+                    <table id="order-photo-table" class="table table-striped">
                         <thead>
                             <th>Photo</th>
                             <th>Description</th>

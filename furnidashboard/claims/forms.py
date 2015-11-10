@@ -22,6 +22,7 @@ DATEPICKER_OPTIONS = {"format":"YYYY-MM-DD", "pickTime": False}
 class ClaimForm(forms.ModelForm):
 
   customer = AutoCompleteSelectField('customer', required=False)
+  order_ref = AutoCompleteSelectField('order', required=False)
 
   def __init__(self, *args, **kwargs):
     super(ClaimForm, self).__init__(*args, **kwargs)
