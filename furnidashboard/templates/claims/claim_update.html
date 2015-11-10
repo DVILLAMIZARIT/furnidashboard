@@ -181,7 +181,16 @@
             {% bootstrap_field form.paid_by %}
           </div>
         </div>
-  
+
+        <hr/>
+
+        <div class="row">
+            <div class="col-md-3">
+                {% bootstrap_label "Select Customer"  %}
+                {% bootstrap_field form.customer show_label=False %}
+            </div>
+        </div>
+
     </fieldset>
  
  	<fieldset id="photos-fieldset">

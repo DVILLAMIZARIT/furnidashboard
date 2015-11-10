@@ -7,77 +7,143 @@
 
 {% block content %}
   
-  <div class="well hidden-print">
-    {% if perms.claims.edit_claims %}
-      <a href="{% url 'claim_edit' claim.pk %}" title="Edit Claim">Update Claim</a>  
-      |  <a href="{% url 'claim_delete' claim.pk %}" title="Delete Claim">Delete this Claim</a>
-    {% endif %}
-  </div>
-  <hr/>
-
-  <h3>Claim Info</h3>
-  
-  <div class="panel panel-default">
-    <div class="panel-body">
-
-      <div class="col-md-2">
-        <h5>Claim Date:</h5>
-        {{claim.claim_date|date:'j F, Y'}}
-      </div> 
-      <div class="col-md-4">
-        <h5>Claim Description:</h5>
-        {{claim.claim_desc}}
-      </div> 
-      <div class="col-md-2">
-        <h5>Delivery Date:</h5>
-        {{claim.delivery_date|date:'j F, Y'}}
-      </div> 
-      <div class="col-md-2">
-        <h5>Item Origin:</h5>
-        {{claim.get_item_origin_display}}
-      </div>
-      <div class="col-md-2">
-        <h5>Amount:</h5>
-        ${{claim.amount}}
-      </div> 
-      
-      
-     <!--  vendor_claim_no
-      customer
-      order_ref
-      order_invoice_num
-      paid_by
-      repair_tech -->
-      
-      <div class="col-md-6">
-        <h5>Claim Status:</h5>
-        {% if claim.claimstatus_set.count %}
-        	<table id="order-issues-table" class="dashed-table">
-		        <thead>
-		          <th>Date</th>
-		          <th>Status</th>
-		          <th>Description</th>
-		        </thead>
-		        <tbody>
-           			{% for status in claim.claimstatus_set.all %}
-			            <tr>
-			              <td>{{ status.date|date:'j F, Y' }}</td>
-			              <td>{{ status.get_status_display|upper }}</td>
-			              <td> {{ status.status_desc }}</td>
-			            </tr>
-		          	{% endfor %}
-		        </tbody>
-		      </table>
-	      {% else %}
-		        <p>No status entered.</p>
-	      {% endif %}
-	                  
-      </div>
-      
+    <div class="well hidden-print">
+        {% if perms.claims.edit_claims %}
+            <a href="{% url 'claim_edit' claim.pk %}" title="Edit Claim">Update Claim</a>
+            |  <a href="{% url 'claim_delete' claim.pk %}" title="Delete Claim">Delete this Claim</a>
+        {% endif %}
     </div>
-  </div>
+
+    <hr/>
+
+    <h3>Claim Info</h3>
   
-  
+    <div class="panel panel-default">
+        <div class="panel-body">
+
+            <div class="col-md-2">
+                <h4>Claim Date:</h4>
+                {{claim.claim_date|date:'j F, Y'}}
+            </div>
+            <div class="col-md-4">
+                <h4>Claim Description:</h4>
+                {{claim.claim_desc}}
+            </div>
+            <div class="col-md-2">
+                <h4>Delivery Date:</h4>
+                {{claim.delivery_date|date:'j F, Y'}}
+            </div>
+
+             <div class="col-md-2">
+                <h4>Customer:</h4>
+                {{claim.customer}}
+             </div>
+
+      
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="col-md-2">
+                <h4>Amount:</h4>
+                ${{claim.amount}}
+            </div>
+
+            <div class="col-md-2">
+                <h4>Paid by:</h4>
+                {{claim.paid_by}}
+            </div>
+
+            <div class="col-md-6">
+                <h4>Claim Status:</h4>
+                {% if claim.claimstatus_set.count %}
+                    <table id="order-issues-table" class="table">
+                        <thead>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Description</th>
+                        </thead>
+                        <tbody>
+                            {% for status in claim.claimstatus_set.all %}
+                                <tr>
+                                    <td>{{ status.date|date:'j F, Y' }}</td>
+                                    <td>{{ status.get_status_display|upper }}</td>
+                                    <td> {{ status.status_desc }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No status entered.</p>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+
+            <div class="col-md-2">
+                <h4>Item Origin:</h4>
+                {{claim.get_item_origin_display}}
+            </div>
+
+            <div class="col-md-2">
+                <h4>Vendor Claim #:</h4>
+                {{claim.vendor_claim_no}}
+            </div>
+
+            <div class="col-md-2">
+                <h5>Order/Invoice #:</h5>
+                {{claim.order_invoice_num}}
+            </div>
+
+            <div class="col-md-2">
+                <h4>Furnitalia Order #:</h4>
+                {{claim.order_ref}}
+            </div>
+
+            <div class="col-md-2">
+                <h4>Repair technician:</h4>
+                {{claim.repair_tech}}
+            </div>
+
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="col-md-6">
+                <h4>Claim Photos:</h4>
+                {% if claim.claimphoto_set.count %}
+                    <table id="order-photo-table" class="table">
+                        <thead>
+                            <th>Photo</th>
+                            <th>Description</th>
+                        </thead>
+                        <tbody>
+                            {% for photo in claim.claimphoto_set.all %}
+                                <tr>
+                                    <td><a href="{{ MEDIA_URL }}{{photo.file}}"  target="_blank">
+                                        <img src="{{ MEDIA_URL }}{{photo.file}}" width="100" alt="{{ photo.filename }}"/> {{ photo.filename }}</a></td>
+                                    <td> {{ photo.description}}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No status entered.</p>
+                {% endif %}
+
+            </div>
+
+
+        </div>
+    </div>
+
+    <hr/>
   
  <div class="row pull-right">
     <h4>Audit Trail:</h4>

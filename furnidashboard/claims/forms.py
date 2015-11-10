@@ -20,7 +20,9 @@ from crispy_forms.bootstrap import AppendedText, InlineField
 DATEPICKER_OPTIONS = {"format":"YYYY-MM-DD", "pickTime": False}
 
 class ClaimForm(forms.ModelForm):
-  
+
+  customer = AutoCompleteSelectField('customer', required=False)
+
   def __init__(self, *args, **kwargs):
     super(ClaimForm, self).__init__(*args, **kwargs)
     

@@ -8,12 +8,17 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
 {% endblock %}
 
-{% block page_title %}Claims{% endblock page_title %}
+{% block page_title %}Recent Claims{% endblock page_title %}
 
 {% block content %}
-  <div id="order-list" class="claim-list">
 
-    {% render_table table %}
-
-  </div>
+	{% if perms.claims.edit_claims %}
+		<aside id="createOrderAside">
+     		<a href="{% url 'claim_add' %}" class="btn btn-primary btn-default">Create Claim</a>
+   		</aside>
+	{% endif %}
+	
+	<div id="order-list" class="claim-list">
+    	{% render_table table %}
+	</div>
 {% endblock %}
