@@ -21,32 +21,24 @@ DATEPICKER_OPTIONS = {"format":"YYYY-MM-DD", "pickTime": False}
 
 class ClaimForm(forms.ModelForm):
 
-  customer = AutoCompleteSelectField('customer', required=False)
-  order_ref = AutoCompleteSelectField('order', required=False)
+    customer = AutoCompleteSelectField('customer', required=False)
+    order_ref = AutoCompleteSelectField('order', required=False)
 
-  def __init__(self, *args, **kwargs):
-    super(ClaimForm, self).__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super(ClaimForm, self).__init__(*args, **kwargs)
+
+        self.fields['claim_date'].label = "Claim Date"
+        self.fields['claim_date'].widget = DateTimePicker(options=DATEPICKER_OPTIONS)
+
+        self.fields['delivery_date'].label = "Delivery Date"
+        self.fields['delivery_date'].widget = DateTimePicker(options=DATEPICKER_OPTIONS)
+
+        self.fields['order_invoice_num'].label = "Order/invoice #"
+        self.fields['order_ref'].label = "Order"
     
-    self.fields['claim_date'].label = "Claim Date"
-    self.fields['claim_date'].widget = DateTimePicker(options=DATEPICKER_OPTIONS)
-    
-    self.fields['delivery_date'].label = "Delivery Date"
-    self.fields['delivery_date'].widget = DateTimePicker(options=DATEPICKER_OPTIONS)
-    
-    
-#     claim_desc = models.CharField(blank=True, null=True, max_length=250)
-#     item_origin = models.CharField(null=False, blank=False, choices=CLAIM_VENDORS, max_length=128)
-#     vendor_claim_no = models.CharField(null=True, blank=True, max_length=128)
-#     customer =  models.ForeignKey(Customer, default=None, blank=True, null=True)
-#     order_ref = models.ForeignKey(Order, default=None, blank=True, null=True)
-#     order_invoice_num = models.CharField(null=True, blank=True, max_length=250)
-#     amount = models.FloatField(blank=True, default=0.0)
-#     paid_by = models.CharField(null=True, blank=True, choices=PAID_BY_CHOICES, max_length=128)
-#     repair_tech = models.CharField(null=True, blank=True, max_length=128)
-    
-  class Meta:
-    model = Claim
-    fields = "__all__" 
+    class Meta:
+        model = Claim
+        fields = "__all__"
 
 
 class ClaimStatusForm(forms.ModelForm):

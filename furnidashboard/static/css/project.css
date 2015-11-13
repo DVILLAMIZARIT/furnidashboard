@@ -181,7 +181,7 @@ a.delete-row-tr {
   margin-bottom:5px;
   padding: .2em .5em;
 }
-#orderIssuesTable a.add-row, #claimStatusTable a.add-row {
+#orderIssuesTable a.add-row {
   float: right;
   font-size: 20px;
   margin:10px 0;
@@ -197,5 +197,15 @@ a.delete-row-tr {
 }
 #photos-fieldset a.delete-row {
 	bottom:0;
+}
+#claimStatusTable .claim-status-desc {
+  display:inline-block;
+}
+#claimStatusTable a.add-row {
+  float: right;
+}
+#claimStatusTable a.deleteStatusRow-tr{
+  color:red;
+  padding:.2em .5em;
 }
 /* CLAIMS END */

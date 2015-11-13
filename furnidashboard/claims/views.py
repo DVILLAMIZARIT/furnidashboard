@@ -6,10 +6,11 @@ from django_tables2 import RequestConfig, SingleTableView
 from django.contrib import messages
 from core.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.http import HttpResponseRedirect
-
+from django.utils import timezone
 from claims.models import Claim, ClaimStatus, ClaimPhoto
 from claims.tables import ClaimsTable
 import claims.forms as claim_forms
+from datetime import datetime
 
 class ClaimsTableView(LoginRequiredMixin, SingleTableView):
   model = Claim
@@ -41,12 +42,20 @@ class ClaimCreateView(PermissionRequiredMixin, CreateView):
         Handle GET requests and instantiate blank version of the form
         and it's inline formsets
         """
+
+        cur_date = timezone.make_aware(datetime.now(), timezone.get_current_timezone())
         self.object = None
         form_class = self.get_form_class()
         form = self.get_form(form_class)
-        
+        form.fields['claim_date'].initial = cur_date
+
+        status_initial = [{
+            'date': cur_date,
+            'status': 'NEW',
+            'status_desc': 'New claim entered'
+        }]
         ClaimStatusFormSet = claim_forms.get_claim_status_formset(extra=1)
-        claim_status_formset = ClaimStatusFormSet(prefix="status")
+        claim_status_formset = ClaimStatusFormSet(prefix="status", initial=status_initial)
         
         ClaimPhotoFormSet = claim_forms.get_claim_photos_formset(extra = 1)
         claim_photos_formset = ClaimPhotoFormSet(prefix="photos")

@@ -72,7 +72,7 @@ class ClaimStatus(TimeStampedModel, AuthStampedModel):
 
     def __unicode__(self):
         return "Claim Status: %s, date=%s, claim #%s" % (
-            self.get_status_display(), formats.date_format(self.date, 'j F, Y'), self.claim.pk)
+            self.get_status_display(), formats.date_format(self.date, 'DATE_FORMAT_SHORT'), self.claim.pk)
 
     class Meta:
         db_table = "claim_status"

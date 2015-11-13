@@ -170,15 +170,34 @@
                 //PATCH: commented 2 lines above to prevent colspan b/c DataTables library does not support cells with colspans
                 //instead, adding empty cells
                 var buttonRowStr = '<tr>';
-                for (var i = 0; i < numCols-1; ++i) {
+                var colStartInd = 0;
+
+                // PATCH: add new option variable to specify whether add button
+                // will display at the leftmost column
+                if (options.addButtonAtLeft) {
+                    colStartInd = 1;
+                    buttonRowStr += '<td><a class="' + options.addCssClass + '" href="javascript:void(0)">' + options.addText + '</a></td></tr>';
+                }
+                for (var i = colStartInd; i < numCols-1; ++i) {
                     buttonRowStr += '<td></td>';
                 }
-                buttonRowStr += '<td><a class="' + options.addCssClass + '" href="javascript:void(0)">' + options.addText + '</a></td></tr>';
+
+                //position the Add button at the rightmost column
+                if (!options.addButtonAtLeft) {
+                    buttonRowStr += '<td><a class="' + options.addCssClass + '" href="javascript:void(0)">' + options.addText + '</a></td></tr>';
+                }
+
                 var buttonRow = $(buttonRowStr).addClass(options.formCssClass + '-add');
 
-                // PATCH preveny addButton being appended to thead
+                // PATCH prevent addButton being appended to "thead"
                 //$$.parent().append(buttonRow);
-                $$.parent('tbody').append(buttonRow);
+                // PATCH: add new option variable to specify whether add button
+                // will display at the top or at the bottom
+                if (options.addButtonOnTop) {
+                    $$.parent('tbody').prepend(buttonRow);
+                } else {
+                    $$.parent('tbody').append(buttonRow);
+                }
 
                 if (hideAddButton) buttonRow.hide();
                 addButton = buttonRow.find('a');
@@ -221,7 +240,9 @@
         extraClasses: [],                // Additional CSS classes, which will be applied to each form in turn
         keepFieldValues: '',             // jQuery selector for fields whose values should be kept when the form is cloned
         added: null,                     // Function called each time a new form is added
-        removed: null                    // Function called each time a form is deleted
+        removed: null,                   // Function called each time a form is deleted
+        addButtonAtLeft: false,
+        addButtonOnTop: false
     };
 })(jQuery);
 

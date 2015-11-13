@@ -36,7 +36,7 @@
 			      	prefix: '{{status_formset.prefix}}',
 			      	addCssClass: 'btn btn-default add-row',
 			      	addText: 'Add <span class="glyphicon glyphicon-plus-sign"></span>',
-			      	deleteCssClass: 'delete-row-tr',
+			      	deleteCssClass: 'deleteStatusRow-tr',
 			      	added: function($form) {
 			        	
 			        	console.log('New Claim Status is created');
@@ -48,6 +48,7 @@
 		                  $(this).removeData('DateTimePicker')
 		                  $(this).datetimepicker(FurnFormHelper.dateTimePickerOptions);
 		                });
+                        $('select', $form).val('');
 			      	}
 	  			});
 	  			
@@ -110,7 +111,7 @@
 	              {{ status_formset.non_field_errors }}  
 	              {% bootstrap_formset_errors status_formset %}  
 	
-	              <table id="claimStatusTable" class="display table" cellspacing="0" width="100%">
+	              <table id="claimStatusTable" class="table table-condensed" cellspacing="0" width="100%">
 	                <thead>
 	                  <tr class="">
 	                    <th>Status Date</th>
@@ -123,7 +124,7 @@
 	
 	                  {% for form in status_formset %}
 	                    <tr class="status_form form-row" id="{{ status_formset.prefix }}-{{forloop.counter}}-row">
-	                      <td class="col-md-3">
+	                      <td class="col-md-2">
 	                        {% bootstrap_field form.date show_label=False %}
 	                      </td>
 	                      <td>
@@ -168,18 +169,19 @@
         </div>
         
         <div class="row">
-          <div class="col-md-3">
-            {% bootstrap_field form.order_invoice_num %}
-          </div>
-        </div>
-        
-        <div class="row">
-          <div class="col-md-3">
-            {% bootstrap_field form.amount %}
-          </div>
-          <div class="col-md-3">
-            {% bootstrap_field form.paid_by %}
-          </div>
+            <div class="col-md-3">
+                {% bootstrap_field form.order_invoice_num %}
+            </div>
+            <div class="col-md-3">
+                {% bootstrap_label "Order (FurniCloud)"  %}
+                {% bootstrap_field form.order_ref show_label=False %}
+            </div>
+            <div class="col-md-3">
+                {% bootstrap_field form.amount %}
+            </div>
+            <div class="col-md-3">
+                {% bootstrap_field form.paid_by %}
+            </div>
         </div>
 
         <hr/>
@@ -188,10 +190,6 @@
             <div class="col-md-3">
                 {% bootstrap_label "Select Customer"  %}
                 {% bootstrap_field form.customer show_label=False %}
-            </div>
-            <div class="col-md-3">
-                {% bootstrap_label "Order (FurniCloud"  %}
-                {% bootstrap_field form.order_ref show_label=False %}
             </div>
         </div>
 
@@ -213,18 +211,6 @@
 		        				{% bootstrap_form photos_form layout='inline'%}
 		        				{{ photos_form.id }}
 		        			</div>
-		        			
-		        			
-		        			{% comment %}
-		        			{% bootstrap_field photos_form.file %}
-		        			{% bootstrap_field photos_form.description %}
-		        			
-			        		{% if photos_formset.can_delete %}
-			                  {{ photos_form.DELETE }}
-			                {% endif %}
-			
-			                {{ photos_form.id }}
-			                {% endcomment %}
 			             
 			             </div>   
 		             </div>  
