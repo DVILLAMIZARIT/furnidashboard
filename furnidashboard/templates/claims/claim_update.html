@@ -32,6 +32,9 @@
 	<script type="text/javascript">
  		$(function() {
     		$(document).ready(function() {  
+
+				var warnBeforeExit = true; 
+
 	  			$('#claimStatusTable tr').formset({
 			      	prefix: '{{status_formset.prefix}}',
 			      	addCssClass: 'btn btn-default add-row',
@@ -64,7 +67,18 @@
 	  	              $(this).datetimepicker(FurnFormHelper.dateTimePickerOptions);
 	  	            });
 	  	          }
-	  	      });
+				});
+
+				//disable warning message if Submit button was clicked
+			    $("#submitButton").on('click', function () { warnBeforeExit = false; });
+			    $("#orderForm").on('submit', function () { warnBeforeExit = false; });
+
+				//show warning if page is about to be closed.
+				window.onbeforeunload = function() {
+					if (warnBeforeExit) {
+						return "Are you sure you want to close this page? All unsaved changes might be lost.";
+					}
+				}
 	  			
     		});
  		});
@@ -204,7 +218,9 @@
         	
         	{% for photos_form in photos_formset %}
         		
-        		<div class="row">
+				{% if forloop.counter|divisibleby:"2" %}
+					<div class="row">
+				{% endif %}
 	        		<div class="col-md-6">
 		        		<div class=" photos-form form-row" id="{{ photos_form.prefix }}-row"> <!-- panel panel-default -->
 		        			<div>
@@ -214,7 +230,9 @@
 			             
 			             </div>   
 		             </div>  
-                </div>
+				 {% if forloop.counter|divisibleby:"2" %}
+					</div>
+				{% endif %}
                 
         	{% endfor %}
         	

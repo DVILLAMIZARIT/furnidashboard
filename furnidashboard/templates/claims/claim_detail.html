@@ -121,7 +121,7 @@
 
     <div class="panel panel-default">
         <div class="panel-body">
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <h4>Claim Photos:</h4>
                 {% if claim.claimphoto_set.count %}
                     <table id="order-photo-table" class="table table-striped">
@@ -133,7 +133,7 @@
                             {% for photo in claim.claimphoto_set.all %}
                                 <tr>
                                     <td><a href="{{ MEDIA_URL }}{{photo.file}}"  target="_blank">
-                                        <img src="{{ MEDIA_URL }}{{photo.file}}" width="100" alt="{{ photo.filename }}"/> {{ photo.filename }}</a></td>
+                                        <img src="{{ MEDIA_URL }}{{photo.file}}" width="250" alt="{{ photo.filename }}"/> {{ photo.filename }}</a></td>
                                     <td> {{ photo.description}}</td>
                                 </tr>
                             {% endfor %}

@@ -253,10 +253,17 @@ LOGGING = {
             'level': 'ERROR',
             'class': 'logging.NullHandler',
          },
+		'applogfile': {
+			'level':'DEBUG',
+			'class':'logging.handlers.RotatingFileHandler',
+			'filename': normpath(join(SITE_ROOT, 'logs/error.log')),
+			'maxBytes': 1024*1024*15, # 15MB
+			'backupCount': 10,
+		},
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['mail_admins', 'applogfile'],
             'level': 'ERROR',
             'propagate': True,
         },
@@ -369,3 +376,4 @@ ORDER_FORMAT_DESC = '<"SO" or "SR" or "DR">-<5 digits>. Examples: SO-10009 or SR
 
 #Date FOrmat
 DATE_FORMAT_SHORT = 'j F, Y'
+DATE_FORMAT_STANDARD = 'm/d/Y'
