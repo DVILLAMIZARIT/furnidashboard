@@ -224,7 +224,11 @@ urlpatterns = patterns('',
         view = claims_views.ClaimCreateView.as_view(), 
         name="claim_add"
     ),
-       
+    url(
+        regex = r'claims/print/$',
+        view = claims_views.claim_print,
+        name="claim_print"
+    ),
 
     url(r'^ajax_select/', include('ajax_select.urls')),
 

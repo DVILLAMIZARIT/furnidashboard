@@ -11,6 +11,8 @@ from claims.models import Claim, ClaimStatus, ClaimPhoto
 from claims.tables import ClaimsTable
 import claims.forms as claim_forms
 from datetime import datetime
+from django.http import HttpResponse
+from pdf import pdf
 
 class ClaimsTableView(LoginRequiredMixin, SingleTableView):
   model = Claim
@@ -246,5 +248,28 @@ class ClaimUpdateView(PermissionRequiredMixin, UpdateView):
   
 class ClaimDeleteView(LoginRequiredMixin, DeleteView):
   model = Claim
-  success_url = reverse_lazy("claim_list")    
+  success_url = reverse_lazy("claim_list")
 
+
+def claim_print(request, template_name='pdf/Natuzzi_service_request_form.pdf', **kwargs):
+    context = {
+        'FirstName': 'Emil',
+        'LastName': 'Akhmirov',
+        'ClaimDate': '11/14/2015',
+        'AddressLine1': '5270 Auburn Blvd',
+        'AddressLine2': 'Sacramento, CA 95841',
+        'ChkRevive': '1',
+        'Model1':'Re-Vive chair',
+        'Version1': 'Leather',
+        'Style1': 'style 1',
+        'Description1': 'Damaged chair',
+    }
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = \
+        'attachment; filename=Natuzzi_service_request_form.pdf'
+
+    template = pdf.get_template(template_name)
+    response.write(template.render(context))
+
+    return response
