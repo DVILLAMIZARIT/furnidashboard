@@ -6,7 +6,7 @@ from django_tables2 import SingleTableView
 from orders.models import OrderDelivery
 from orders.tables import DeliveriesTable
 import orders.forms as order_forms
-import orders.utils as order_utils
+import core.utils as core_utils
 from core.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
 class DeliveriesTableView(LoginRequiredMixin, SingleTableView):
@@ -24,9 +24,9 @@ class DeliveriesTableView(LoginRequiredMixin, SingleTableView):
     date_range = ""
     try:
       date_range = self.request.GET['date_range']
-      self.from_date, self.to_date = order_utils.get_date_range(date_range, self.request)    
+      self.from_date, self.to_date = core_utils.get_date_range(date_range, self.request)
     except KeyError, e:
-      self.from_date, self.to_date = order_utils.get_date_range('week', self.request);
+      self.from_date, self.to_date = core_utils.get_date_range('week', self.request);
     
     lookup_kwargs = {
       '%s__gte' % 'scheduled_delivery_date': self.from_date,

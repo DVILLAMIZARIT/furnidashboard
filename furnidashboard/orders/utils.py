@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from django.conf import settings
-from django.contrib import messages
 from django.utils import timezone
 from orders.models import Order, OrderItem
 import re
@@ -173,40 +172,6 @@ def is_duplicate_order_exists(number, instance):
 
   except Exception :
     return False
-    
-def get_date_range(range_str, request):
-  
-  to_date = datetime.now()
-  if range_str == 'week':
-    from_date = to_date - timedelta(days=to_date.weekday())
-    from_date = from_date.replace(hour=0, minute=0, second=0)
-  if range_str == 'last-week':
-    to_date = to_date - timedelta(days=to_date.weekday())
-    to_date = to_date.replace(hour=0, minute=0, second=0)
-    from_date = to_date - timedelta(days=7)
-  elif range_str == 'month':
-    from_date = datetime(to_date.year, to_date.month, 1)
-  elif range_str == 'last-month':
-    to_date = datetime(to_date.year, to_date.month, 1)
-    from_date = to_date - timedelta(days=1)
-    from_date = datetime(from_date.year, from_date.month, 1)
-  elif range_str == 'year':
-    from_date = datetime(to_date.year, 1, 1)
-  elif range_str == 'custom':
-    try:
-      from_date = datetime.strptime(request.GET['range_from'], "%Y-%m-%d")
-      to_date = datetime.strptime(request.GET['range_to'], "%Y-%m-%d")
-      to_date = to_date.replace(hour=23, minute=59, second=59)
-    except (KeyError, ValueError) as e:
-      #raise ValueError("Incorrect date format, should be YYYY-MM-DD")
-      messages.add_message(request, messages.ERROR, "Incorrect date format, should be YYYY-MM-DD", extra_tags="alert alert-danger")
-      from_date = to_date - timedelta(days=to_date.weekday())
-      from_date = from_date.replace(hour=0, minute=0, second=0)
-  else: #default
-    from_date = to_date - timedelta(days=to_date.weekday())
-    from_date = from_date.replace(hour=0, minute=0, second=0)
-  
-  return (from_date, to_date)
 
 def get_order_associates(order): 
   assoc_list = []

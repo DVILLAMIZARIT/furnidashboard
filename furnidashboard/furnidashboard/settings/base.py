@@ -324,25 +324,46 @@ LOGIN_REDIRECT_URL = "/"
 LOGGING = {
 	'version': 1,
 	'disable_existing_loggers': False,
+	'filters': {
+		'require_debug_false': {
+			'()': 'django.utils.log.RequireDebugFalse'
+		}
+	},
 	'handlers': {
-		'file': {
+		'mail_admins': {
+			'level': 'ERROR',
+			'filters': ['require_debug_false'],
+			'class': 'django.utils.log.AdminEmailHandler'
+		},
+		'null': {
+			'level': 'ERROR',
+			'class': 'logging.NullHandler',
+		},
+		'applogfile': {
 			'level': 'DEBUG',
-			'class': 'logging.FileHandler',
-			'filename': normpath(join(SITE_ROOT, 'logs/debug.log')),
+			'class': 'logging.handlers.RotatingFileHandler',
+			'filename': normpath(join(SITE_ROOT, 'logs/error.log')),
+			'maxBytes': 1024 * 1024 * 15,  # 15MB
+			'backupCount': 10,
 		},
 	},
 	'loggers': {
 		'django.request': {
-			'handlers': ['file'],
-			'level': 'DEBUG',
+			'handlers': ['mail_admins', 'applogfile'],
+			'level': 'ERROR',
 			'propagate': True,
+		},
+		'django.security.DisallowedHost': {
+			'handlers': ['null'],
+			'level': 'ERROR',
+			'propagate': False,
 		},
 		'furnicloud': {
-			'handlers': ['file'],
+			'handlers': ['applogfile'],
 			'level': 'DEBUG',
 			'propagate': True,
 		},
-	},
+	}
 }
 ########## END LOGGING CONFIGURATION
 

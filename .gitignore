@@ -25,3 +25,6 @@ media
 
 #pyCharms files
 .idea
+
+#logs
+furnidashboard/logs

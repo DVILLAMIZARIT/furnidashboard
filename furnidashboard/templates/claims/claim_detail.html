@@ -102,7 +102,7 @@
             </div>
 
             <div class="col-md-2">
-                <h4>Order/Invoice #:</h4>
+                <h4>Vendor Order/Invoice #:</h4>
                 {{claim.order_invoice_num}}
             </div>
 
@@ -130,11 +130,20 @@
                             <th>Description</th>
                         </thead>
                         <tbody>
-                            {% for photo in claim.claimphoto_set.all %}
+                            {% for file in claim.claimphoto_set.all %}
                                 <tr>
-                                    <td><a href="{{ MEDIA_URL }}{{photo.file}}"  target="_blank">
-                                        <img src="{{ MEDIA_URL }}{{photo.file}}" width="250" alt="{{ photo.filename }}"/> {{ photo.filename }}</a></td>
-                                    <td> {{ photo.description}}</td>
+                                    <td>
+                                        <a href="{{ MEDIA_URL }}{{file.file}}"  target="_blank">
+
+                                            {% if file.file_extension in "jpg png jpeg" %}
+                                                <img src="{{ MEDIA_URL }}{{file.file}}" width="250" alt="{{ file.filename }}"/> {{ file.filename }}
+                                            {% else %}
+                                                {{ file.filename }}
+                                            {% endif %}
+                                        </a>
+                                    </td>
+
+                                    <td> {{ file.description}} </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -142,6 +151,40 @@
                 {% else %}
                     <p>No status entered.</p>
                 {% endif %}
+
+            </div>
+
+
+        </div>
+    </div>
+
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="col-md-12">
+                <h4>Vendor Claim Request Forms:</h4>
+                {% if claim.vendorclaimrequest_set.count %}
+                    <table id="order-photo-table" class="table table-striped">
+                        <tbody>
+                            {% for request_form in claim.vendorclaimrequest_set.all %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ MEDIA_URL }}{{request_form.file}}"  target="_blank">
+                                                {{ request_form.filename }}
+                                        </a>
+                                        {{ request_form.pk }}
+                                    </td>
+
+                                    <td> {{ request_form.data_fields}} </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No status entered.</p>
+                {% endif %}
+
+                <a href="{% url 'claim_vendor_form_add' claim_pk=claim.pk %}" title="New Vendor Claim Request" class="btn btn-primary">New Vendor Claim Request</a>
 
             </div>
 

@@ -12,7 +12,6 @@ from orders.tables import OrderTable, SalesByAssociateTable, SalesTotalsTable, S
 from orders.filters import OrderFilter
 import orders.forms as order_forms
 import orders.utils as order_utils
-from customers.models import Customer
 import core.utils as utils
 from core.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
@@ -207,7 +206,7 @@ class SalesStandingsMonthTableView(PermissionRequiredMixin, ListView):
     except KeyError, e:
       pass
     
-    self.from_date, self.to_date = order_utils.get_date_range(date_range, self.request);   
+    self.from_date, self.to_date = utils.get_date_range_from_string(date_range, self.request);
     
     qs = Order.objects.get_dated_qs(self.from_date, self.to_date)
     

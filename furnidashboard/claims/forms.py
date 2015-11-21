@@ -1,9 +1,11 @@
-from claims.models import Claim, ClaimStatus, ClaimPhoto
+from django.utils import formats
+
+from claims.models import Claim, ClaimStatus, ClaimPhoto, VendorClaimRequest
 from django import forms
 from django.forms.models import inlineformset_factory, modelformset_factory
 from django.forms.utils import ErrorList
 from bootstrap3_datetime.widgets import DateTimePicker
-from django.forms.widgets import Select
+from django.forms.widgets import Select, HiddenInput
 from django.contrib.auth import get_user_model
 from django.utils.functional import curry
 from django.conf import settings
@@ -33,8 +35,8 @@ class ClaimForm(forms.ModelForm):
         self.fields['delivery_date'].label = "Delivery Date"
         self.fields['delivery_date'].widget = DateTimePicker(options=DATEPICKER_OPTIONS)
 
-        self.fields['order_invoice_num'].label = "Order/invoice #"
-        self.fields['order_ref'].label = "Order"
+        self.fields['order_invoice_num'].label = "Vendor Order/invoice #"
+        self.fields['order_ref'].label = "FurniCloud Order"
     
     class Meta:
         model = Claim
@@ -59,10 +61,76 @@ class ClaimStatusForm(forms.ModelForm):
 class ClaimPhotoForm(forms.ModelForm):
 
     pass
-    
+
     class Meta:
         model = ClaimPhoto
-        fields = "__all__" 
+        fields = "__all__"
+
+
+class NatuzziClaimVendorRequestForm(forms.ModelForm):
+
+    NTZ_BRAND_CHOICES = (
+        ('NTZ', 'Natuzzi Italia'),
+        ('EDITIONS', 'Natuzzi Editions'),
+        ('REVIVE', 'Natuzzi Re-Vive'),
+        ('SOFTALY', 'Softaly'),
+    )
+
+    first_name = forms.CharField(label="Customer First Name", required=False)
+    last_name = forms.CharField(label="Customer Last Name", required=False)
+    claim_date = forms.CharField(label="Claim Date", required=False)
+    address_line_1 = forms.CharField(label="Address Line 1", required=False)
+    address_line_2 = forms.CharField(label="Address Line 2", required=False)
+    chk_revive = forms.BooleanField(label="Re-Vive", initial=False, required=False)
+    chk_italia = forms.BooleanField(label="Natuzzi Italia", initial=False, required=False)
+    chk_editions = forms.BooleanField(label="Natuzzi Editions", initial=False, required=False)
+    chk_softaly = forms.BooleanField(label="Softaly", initial=False, required=False)
+    model_1 = forms.CharField(label="Item 1 - Model", required=False)
+    version_1 = forms.CharField(label="Item 1 - Version", required=False)
+    style_1 = forms.CharField(label="Item 1 - Style", required=False)
+    descr_1 = forms.CharField(label="Item 1 - Description", required=False)
+
+    def get_data_fields_dict(self):
+        pdf_fields = {}
+
+        if self.cleaned_data:
+            if self.cleaned_data['first_name']:
+                pdf_fields['FirstName'] = self.cleaned_data['first_name']
+            if self.cleaned_data['last_name']:
+                pdf_fields['LastName'] = self.cleaned_data['last_name']
+            if self.cleaned_data['claim_date']:
+                pdf_fields['ClaimDate'] = self.cleaned_data['claim_date'] #formats.date_format(self.cleaned_data['claim'].claim_date, 'DATE_FORMAT_SHORT')
+            if self.cleaned_data['address_line_1']:
+                pdf_fields['AddressLine1'] = self.cleaned_data['address_line_1']
+            if self.cleaned_data['address_line_2']:
+                pdf_fields['AddressLine2'] = self.cleaned_data['address_line_2']
+            if self.cleaned_data['chk_revive']:
+                pdf_fields['ChkRevive'] = '1'
+            if self.cleaned_data['chk_italia']:
+                pdf_fields['ChkItalia'] = '1'
+            if self.cleaned_data['chk_editions']:
+                pdf_fields['ChkEditions'] = '1'
+            if self.cleaned_data['chk_softaly']:
+                pdf_fields['ChkSoftaly'] = '1'
+            if self.cleaned_data['model_1']:
+                pdf_fields['Model1'] = self.cleaned_data['model_1']
+            if self.cleaned_data['version_1']:
+                pdf_fields['Version1'] = self.cleaned_data['version_1']
+            if self.cleaned_data['style_1']:
+                pdf_fields['Style1'] = self.cleaned_data['style_1']
+            if self.cleaned_data['descr_1']:
+                pdf_fields['Description1'] = self.cleaned_data['descr_1']
+
+        return pdf_fields
+
+    class Meta:
+        model = VendorClaimRequest
+        widgets = {
+            #'file': HiddenInput,
+            #'data_fields': HiddenInput,
+            #'claim': HiddenInput,
+        }
+        fields = "__all__"
 
 #---------------------------------------------------
 #   Form Sets

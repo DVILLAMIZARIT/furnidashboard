@@ -225,10 +225,15 @@ urlpatterns = patterns('',
         name="claim_add"
     ),
     url(
-        regex = r'claims/print/$',
-        view = claims_views.claim_print,
-        name="claim_print"
+      regex = r'^claims/(?P<claim_pk>\d+)/vendor-form/new$',
+      view=claims_views.VendorClaimRequestCreateView.as_view(),
+      name="claim_vendor_form_add",
     ),
+    # url(
+    #     regex = r'claims/print/$',
+    #     view = claims_views.claim_print,
+    #     name="claim_print"
+    # ),
 
     url(r'^ajax_select/', include('ajax_select.urls')),
 

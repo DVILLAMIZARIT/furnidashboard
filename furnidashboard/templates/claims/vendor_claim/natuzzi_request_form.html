@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% load bootstrap3 %}
+{% load crispy_forms_tags %}
+{% load staticfiles %}
+
+{% block title %}
+  {% if page_title %} 
+    {{ page_title }}
+  {% else %}
+    Generate Natuzzi Claim Request Form
+  {% endif %}
+{% endblock %}
+
+{% block page_title %}
+    Generate Natuzzi Claim Request Form
+{% endblock page_title %}
+
+{% block extra_js %}
+  {{ form.media }}
+
+	<script type="text/javascript">
+ 		$(function() {
+    		$(document).ready(function() {
+	  			
+    		});
+ 		});
+  </script>
+{% endblock extra_js %}
+
+{% block extra_css %}
+  <style type="text/css">
+      .delete-row {
+          margin-left:5px;
+      }   
+  </style>
+{% endblock %}
+
+{% block content %}
+
+    <form action="" method="POST" enctype="multipart/form-data" id="orderForm" role="form" class="form">
+        {% csrf_token %}
+	    {{ form.non_field_errors }}
+	    {{ form.management_form }}
+
+        {%  bootstrap_form form %}
+
+        <input type="submit" id="submitButton" class="btn btn-primary btn-large" value="Save"/>
+
+    </form>
+
+{% endblock content %}
