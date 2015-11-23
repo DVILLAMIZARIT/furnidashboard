@@ -135,7 +135,7 @@
                                     <td>
                                         <a href="{{ MEDIA_URL }}{{file.file}}"  target="_blank">
 
-                                            {% if file.file_extension in "jpg png jpeg" %}
+                                            {% if file.file_extension in "jpg png jpeg gif JPG JPEG PNG GIF" %}
                                                 <img src="{{ MEDIA_URL }}{{file.file}}" width="250" alt="{{ file.filename }}"/> {{ file.filename }}
                                             {% else %}
                                                 {{ file.filename }}
@@ -170,7 +170,7 @@
                                 <tr>
                                     <td>
                                         <a href="{{ MEDIA_URL }}{{request_form.file}}"  target="_blank">
-                                                {{ request_form.filename }}
+                                                {{ request_form.file.name }}
                                         </a>
                                         {{ request_form.pk }}
                                     </td>
@@ -181,7 +181,7 @@
                         </tbody>
                     </table>
                 {% else %}
-                    <p>No status entered.</p>
+                    <p>No vendor claims were created.</p>
                 {% endif %}
 
                 <a href="{% url 'claim_vendor_form_add' claim_pk=claim.pk %}" title="New Vendor Claim Request" class="btn btn-primary">New Vendor Claim Request</a>

@@ -199,7 +199,7 @@ TEMPLATES = [
 	},
 ]
 
-PDFTK_BIN = '/usr/local/bin/pdftk'  # normpath(join(SITE_ROOT, 'pdf', 'fdfgen'))
+PDFTK_BIN = '/usr/bin/pdftk'  # normpath(join(SITE_ROOT, 'pdf', 'fdfgen'))
 
 ########## END TEMPLATE CONFIGURATION
 

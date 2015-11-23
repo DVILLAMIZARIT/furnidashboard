@@ -1,5 +1,6 @@
 from django.core.files import File
-from django.core.files.temp import TemporaryFile
+#from django.core.files.temp import TemporaryFile
+from tempfile import TemporaryFile
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView
 from django.views.generic.edit import CreateView
@@ -283,28 +284,28 @@ class ClaimDeleteView(LoginRequiredMixin, DeleteView):
 	success_url = reverse_lazy("claim_list")
 
 
-# def claim_print(request, template_name='pdf/Natuzzi_service_request_form.pdf', **kwargs):
-# 	context = {
-# 		'FirstName': 'Emil',
-# 		'LastName': 'Akhmirov',
-# 		'ClaimDate': '11/14/2015',
-# 		'AddressLine1': '5270 Auburn Blvd',
-# 		'AddressLine2': 'Sacramento, CA 95841',
-# 		'ChkRevive': '1',
-# 		'Model1': 'Re-Vive chair',
-# 		'Version1': 'Leather',
-# 		'Style1': 'style 1',
-# 		'Description1': 'Damaged chair',
-# 	}
-#
-# 	response = HttpResponse(content_type='application/pdf')
-# 	response['Content-Disposition'] = \
-# 		'attachment; filename=Natuzzi_service_request_form.pdf'
-#
-# 	template = pdf.get_template(template_name)
-# 	response.write(template.render(context))
-#
-# 	return response
+def claim_print(request, template_name='pdf/Natuzzi_service_request_form.pdf', **kwargs):
+	context = {
+		'FirstName': 'Emil',
+		'LastName': 'Akhmirov',
+		'ClaimDate': '11/14/2015',
+		'AddressLine1': '5270 Auburn Blvd',
+		'AddressLine2': 'Sacramento, CA 95841',
+		'ChkRevive': '1',
+		'Model1': 'Re-Vive chair',
+		'Version1': 'Leather',
+		'Style1': 'style 1',
+		'Description1': 'Damaged chair',
+	}
+
+	response = HttpResponse(content_type='application/pdf')
+	response['Content-Disposition'] = \
+		'attachment; filename=Natuzzi_service_request_form.pdf'
+
+	template = pdf.get_template(template_name)
+	response.write(template.render(context))
+
+	return response
 
 
 class VendorClaimRequestCreateView(PermissionRequiredMixin, CreateView):
@@ -399,11 +400,12 @@ class VendorClaimRequestCreateView(PermissionRequiredMixin, CreateView):
 
 		# generate PDF claim request file and save to model instance field
 		pdf_template = self.get_pdf_template_name()
-		#template = pdf.get_template(pdf_template)
+		template = pdf.get_template(pdf_template)
 		context = form.get_data_fields_dict()
 		with TemporaryFile(mode="w+b") as f: #open('', 'wb') as f:
-			#f.write(template.render(context))
-			f.write(json.dumps(context))
+			pdf_contents = template.render(context) 
+			f.write(pdf_contents)
+			#f.write(json.dumps(context))
 			f.seek(0) # go to beginning of file
 			#reopen = open('/tmp/claim.pdf', 'rb')
 			claim_file = File(f)
@@ -412,6 +414,13 @@ class VendorClaimRequestCreateView(PermissionRequiredMixin, CreateView):
 
 		# save order
 		self.object.save()
+
+		#response = HttpResponse(content_type='application/pdf')
+		#response['Content-Disposition'] = \
+		#	'attachment; filename=Natuzzi_service_request_form.pdf'
+
+		#response.write(pdf_contents)
+		#return response
 
 		return HttpResponseRedirect(self.get_success_url())
 
