@@ -1,6 +1,7 @@
 """Common settings and globals."""
 
 from os.path import abspath, basename, dirname, join, normpath
+from os import environ
 from sys import path
 
 ########## PATH CONFIGURATION
@@ -199,7 +200,7 @@ TEMPLATES = [
 	},
 ]
 
-PDFTK_BIN = '/usr/bin/pdftk'  # normpath(join(SITE_ROOT, 'pdf', 'fdfgen'))
+PDFTK_BIN = environ.get('PDFTK_BIN', '/usr/bin/pdftk')  # normpath(join(SITE_ROOT, 'pdf', 'fdfgen'))
 
 ########## END TEMPLATE CONFIGURATION
 

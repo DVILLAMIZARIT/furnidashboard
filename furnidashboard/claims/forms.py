@@ -89,41 +89,79 @@ class NatuzziClaimVendorRequestForm(forms.ModelForm):
     chk_revive = forms.BooleanField(label="Re-Vive", initial=False, required=False)
     chk_softaly = forms.BooleanField(label="Softaly", initial=False, required=False)
     chk_italia = forms.BooleanField(label="Natuzzi Italia", initial=False, required=False)
+
     model_1 = forms.CharField(label="Item 1 - Model", required=False)
     version_1 = forms.CharField(label="Item 1 - Version", required=False)
     style_1 = forms.CharField(label="Item 1 - Style", required=False)
     leather_fabric_1 = forms.CharField(label="Leather/Fabric #", required=False)
-    descr_1 = forms.CharField(label="Item 1 - Description", required=False)
+    id_num_1 = forms.CharField(label="ID Number", required=False)
+
     model_2 = forms.CharField(label="Item 2 - Model", required=False)
     version_2 = forms.CharField(label="Item 2 - Version", required=False)
     style_2 = forms.CharField(label="Item 2 - Style", required=False)
     leather_fabric_2 = forms.CharField(label="Leather/Fabric #", required=False)
-    descr_2 = forms.CharField(label="Item 2 - Description", required=False)
+    id_num_2 = forms.CharField(label="ID Number", required=False)
+
     model_3 = forms.CharField(label="Item 3 - Model", required=False)
     version_3 = forms.CharField(label="Item 3 - Version", required=False)
     style_3 = forms.CharField(label="Item 3 - Style", required=False)
     leather_fabric_3 = forms.CharField(label="Leather/Fabric #", required=False)
-    descr_3 = forms.CharField(label="Item 3 - Description", required=False)
+    id_num_3 = forms.CharField(label="ID Number", required=False)
+
     model_4 = forms.CharField(label="Item 4 - Model", required=False)
     version_4 = forms.CharField(label="Item 4 - Version", required=False)
     style_4 = forms.CharField(label="Item 4 - Style", required=False)
     leather_fabric_4 = forms.CharField(label="Leather/Fabric #", required=False)
+    id_num_4 = forms.CharField(label="ID Number", required=False)
+
+    delivery_date = forms.CharField(label="Delivery Date", required=False)
+
+    descr_1 = forms.CharField(label="Item 1 - Description", required=False)
+    warranty_1 = forms.CharField(label="Warranty Info", required=False)
+    parts_1 = forms.CharField(label="Part", required=False)
+    labor_1 = forms.CharField(label="Labor", required=False)
+
+    descr_2 = forms.CharField(label="Item 2 - Description", required=False)
+    warranty_2 = forms.CharField(label="Warranty Info", required=False)
+    parts_2 = forms.CharField(label="Part", required=False)
+    labor_2 = forms.CharField(label="Labor", required=False)
+
+    descr_3 = forms.CharField(label="Item 3 - Description", required=False)
+    warranty_3 = forms.CharField(label="Warranty Info", required=False)
+    parts_3 = forms.CharField(label="Part", required=False)
+    labor_3 = forms.CharField(label="Labor", required=False)
+
     descr_4 = forms.CharField(label="Item 4 - Description", required=False)
+    warranty_4 = forms.CharField(label="Warranty Info", required=False)
+    parts_4 = forms.CharField(label="Part", required=False)
+    labor_4 = forms.CharField(label="Labor", required=False)
+
+    descr_5 = forms.CharField(label="Item 5 - Description", required=False)
+    warranty_5 = forms.CharField(label="Warranty Info", required=False)
+    parts_5 = forms.CharField(label="Part", required=False)
+    labor_5 = forms.CharField(label="Labor", required=False)
 
     def get_data_fields_dict(self):
         pdf_fields = {}
 
         if self.cleaned_data:
+            if self.cleaned_data['claim_date']:
+                pdf_fields['ClaimDate'] = self.cleaned_data['claim_date'] #formats.date_format(self.cleaned_data['claim'].claim_date, 'DATE_FORMAT_SHORT')
+            if self.cleaned_data['reference_no']:
+                pdf_fields['RefInfo'] = self.cleaned_data['reference_no']
             if self.cleaned_data['first_name']:
                 pdf_fields['FirstName'] = self.cleaned_data['first_name']
             if self.cleaned_data['last_name']:
                 pdf_fields['LastName'] = self.cleaned_data['last_name']
-            if self.cleaned_data['claim_date']:
-                pdf_fields['ClaimDate'] = self.cleaned_data['claim_date'] #formats.date_format(self.cleaned_data['claim'].claim_date, 'DATE_FORMAT_SHORT')
             if self.cleaned_data['address_line_1']:
                 pdf_fields['AddressLine1'] = self.cleaned_data['address_line_1']
             if self.cleaned_data['address_line_2']:
                 pdf_fields['AddressLine2'] = self.cleaned_data['address_line_2']
+
+            pdf_fields['PhoneNumPhone'] = self.cleaned_data.get('phone_num_home', '')
+            pdf_fields['PhoneNumberWork'] = self.cleaned_data.get('phone_num_work', '')
+            pdf_fields['Email'] = self.cleaned_data.get('email', '')
+
             if self.cleaned_data['chk_revive']:
                 pdf_fields['ChkRevive'] = '1'
             if self.cleaned_data['chk_italia']:
@@ -132,16 +170,71 @@ class NatuzziClaimVendorRequestForm(forms.ModelForm):
                 pdf_fields['ChkEditions'] = '1'
             if self.cleaned_data['chk_softaly']:
                 pdf_fields['ChkSoftaly'] = '1'
-            if self.cleaned_data['model_1']:
-                pdf_fields['Model1'] = self.cleaned_data['model_1']
-            if self.cleaned_data['version_1']:
-                pdf_fields['Version1'] = self.cleaned_data['version_1']
-            if self.cleaned_data['style_1']:
-                pdf_fields['Style1'] = self.cleaned_data['style_1']
-            if self.cleaned_data['descr_1']:
-                pdf_fields['Description1'] = self.cleaned_data['descr_1']
+
+            pdf_fields['Model1'] = self.cleaned_data.get('model_1', '')
+            pdf_fields['Model2'] = self.cleaned_data.get('model_2', '')
+            pdf_fields['Model3'] = self.cleaned_data.get('model_3', '')
+            pdf_fields['Model4'] = self.cleaned_data.get('model_4', '')
+            pdf_fields['Version1'] = self.cleaned_data.get('version_1', '')
+            pdf_fields['Version2'] = self.cleaned_data.get('version_2', '')
+            pdf_fields['Version3'] = self.cleaned_data.get('version_3', '')
+            pdf_fields['Version4'] = self.cleaned_data.get('version_4', '')
+            pdf_fields['Style1'] = self.cleaned_data.get('style_1', '')
+            pdf_fields['Style2'] = self.cleaned_data.get('style_2', '')
+            pdf_fields['Style3'] = self.cleaned_data.get('style_3', '')
+            pdf_fields['Style4'] = self.cleaned_data.get('style_4', '')
+            pdf_fields['LeatherFabric1'] = self.cleaned_data.get('leather_fabric_1', '')
+            pdf_fields['LeatherFabric2'] = self.cleaned_data.get('leather_fabric_2', '')
+            pdf_fields['LeatherFabric3'] = self.cleaned_data.get('leather_fabric_3', '')
+            pdf_fields['LeatherFabric4'] = self.cleaned_data.get('leather_fabric_4', '')
+            pdf_fields['IdNum1'] = self.cleaned_data.get('id_num_1', '')
+            pdf_fields['IdNum2'] = self.cleaned_data.get('id_num_2', '')
+            pdf_fields['IdNum3'] = self.cleaned_data.get('id_num_3', '')
+            pdf_fields['IdNum4'] = self.cleaned_data.get('id_num_4', '')
+
+            pdf_fields['DeliveryDate'] = self.cleaned_data.get('delivery_date', '')
+
+            pdf_fields['Description1'] = self.cleaned_data.get('descr_1', '')
+            pdf_fields['Description2'] = self.cleaned_data.get('descr_2', '')
+            pdf_fields['Description3'] = self.cleaned_data.get('descr_3', '')
+            pdf_fields['Description4'] = self.cleaned_data.get('descr_4', '')
+            pdf_fields['Description5'] = self.cleaned_data.get('descr_5', '')
+            pdf_fields['Warranty1'] = self.cleaned_data.get('warranty_1', '')
+            pdf_fields['Warranty2'] = self.cleaned_data.get('warranty_2', '')
+            pdf_fields['Warranty3'] = self.cleaned_data.get('warranty_3', '')
+            pdf_fields['Warranty4'] = self.cleaned_data.get('warranty_4', '')
+            pdf_fields['Warranty5'] = self.cleaned_data.get('warranty_5', '')
+            pdf_fields['PartsRow1'] = self.cleaned_data.get('parts_1', '')
+            pdf_fields['PartsRow2'] = self.cleaned_data.get('parts_2', '')
+            pdf_fields['PartsRow3'] = self.cleaned_data.get('parts_3', '')
+            pdf_fields['PartsRow4'] = self.cleaned_data.get('parts_4', '')
+            pdf_fields['PartsRow5'] = self.cleaned_data.get('parts_5', '')
+            pdf_fields['LaborRow1'] = self.cleaned_data.get('labor_1', '')
+            pdf_fields['LaborRow2'] = self.cleaned_data.get('labor_2', '')
+            pdf_fields['LaborRow3'] = self.cleaned_data.get('labor_3', '')
+            pdf_fields['LaborRow4'] = self.cleaned_data.get('labor_4', '')
+            pdf_fields['LaborRow5'] = self.cleaned_data.get('labor_5', '')
+
 
         return pdf_fields
+
+    def __init__(self, *args, **kwargs):
+        super(NatuzziClaimVendorRequestForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.form_tag = False
+        self.disable_csrf = True
+        #self.helper.form_class = 'form-inline'
+        #self.helper.field_template = 'bootstrap3/layout/inline_field.html'
+        self.helper.layout = Layout(
+            Div(
+                'claim_date',
+                'reference_no',
+                'first_name',
+                'last_name',
+              css_class = 'well'
+            )
+        )
 
     class Meta:
         model = VendorClaimRequest
