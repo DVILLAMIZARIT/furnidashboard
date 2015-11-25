@@ -1,23 +1,14 @@
+from django.forms import HiddenInput
 from django.utils import formats
 
 from claims.models import Claim, ClaimStatus, ClaimPhoto, VendorClaimRequest
 from django import forms
 from django.forms.models import inlineformset_factory, modelformset_factory
-from django.forms.utils import ErrorList
 from bootstrap3_datetime.widgets import DateTimePicker
-from django.forms.widgets import Select, HiddenInput
-from django.contrib.auth import get_user_model
-from django.utils.functional import curry
-from django.conf import settings
 from ajax_select.fields import AutoCompleteSelectField
-from bootstrap_toolkit.widgets import BootstrapDateInput, BootstrapTextInput
-from core.mixins import DisabledFieldsMixin
-from django.db.models import Q
-import core.utils as utils
-import orders.utils as order_utils
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, Submit, Div, Field, HTML
-from crispy_forms.bootstrap import AppendedText, InlineField
+from crispy_forms.layout import Layout, Fieldset, Submit, Div, Field, HTML, Hidden
+from crispy_forms.bootstrap import AppendedText, InlineRadios, InlineField
 
 DATEPICKER_OPTIONS = {"format":"YYYY-MM-DD", "pickTime": False}
 
@@ -159,17 +150,17 @@ class NatuzziClaimVendorRequestForm(forms.ModelForm):
                 pdf_fields['AddressLine2'] = self.cleaned_data['address_line_2']
 
             pdf_fields['PhoneNumPhone'] = self.cleaned_data.get('phone_num_home', '')
-            pdf_fields['PhoneNumberWork'] = self.cleaned_data.get('phone_num_work', '')
+            pdf_fields['PhoneNumWork'] = self.cleaned_data.get('phone_num_work', '')
             pdf_fields['Email'] = self.cleaned_data.get('email', '')
 
             if self.cleaned_data['chk_revive']:
-                pdf_fields['ChkRevive'] = '1'
+                pdf_fields['ChkRevive'] = 1
             if self.cleaned_data['chk_italia']:
-                pdf_fields['ChkItalia'] = '1'
+                pdf_fields['ChkItalia'] = 1
             if self.cleaned_data['chk_editions']:
-                pdf_fields['ChkEditions'] = '1'
+                pdf_fields['ChkEditions'] = 1
             if self.cleaned_data['chk_softaly']:
-                pdf_fields['ChkSoftaly'] = '1'
+                pdf_fields['ChkSoftaly'] = 1
 
             pdf_fields['Model1'] = self.cleaned_data.get('model_1', '')
             pdf_fields['Model2'] = self.cleaned_data.get('model_2', '')
@@ -224,80 +215,139 @@ class NatuzziClaimVendorRequestForm(forms.ModelForm):
         self.helper = FormHelper()
         self.form_tag = False
         self.disable_csrf = True
-        #self.helper.form_class = 'form-inline'
-        #self.helper.field_template = 'bootstrap3/layout/inline_field.html'
         self.helper.layout = Layout(
-            Div(
+            Fieldset(
+                'Natuzzi Claim Request Form',
                 Div(
-                    Field('claim_date', wrapper_class='col-md-2'),
-                    Field('reference_no', wrapper_class='col-md-2'),
+                    Field('claim_date', wrapper_class='field-wrapper col-md-2 pull-left'),
+                    Field('reference_no', wrapper_class='field-wrapper col-md-2 pull-left'),
                     css_class='row'
                 ),
                 Div(
-                    Field('first_name', wrapper_class='field-wrapper inline'),
-                    Field('last_name', wrapper_class='field-wrapper inline'),
+                    Field('first_name', wrapper_class='field-wrapper col-md-2'),
+                    Field('last_name', wrapper_class='field-wrapper col-md-2'),
                     css_class='row'
                 ),
                 Div(
-                    Div(
-                        Field('address_line_1', wrapper_class='col-md-4'),
-                        Field('address_line_2', wrapper_class='col-md-4'),
-                        css_class='row',
-                    ),
-                    Div(
-                        Field('phone_num_home', wrapper_class='field-wrapper inline'),
-                        Field('phone_num_work', wrapper_class='field-wrapper inline'),
-                        Field('email', wrapper_class='field-wrapper inline'),
-                        css_class='row',
-                    ),
-                    css_class='row',
-                ),
-
-                Div(
-                    Field('chk_editions', wrapper_class='field-wrapper inline'),
-                    Field('chk_revive', wrapper_class='field-wrapper inline'),
-                    Field('chk_softaly', wrapper_class='field-wrapper inline'),
-                    Field('chk_italia', wrapper_class='field-wrapper inline'),
+                    Field('address_line_1', wrapper_class='field-wrapper col-md-4'),
+                    Field('address_line_2', wrapper_class='field-wrapper col-md-4'),
                     css_class='row',
                 ),
                 Div(
-                    HTML('<span class="col-md-3>Model</span>'),
-                    HTML('<span class="col-md-2>Version</span>'),
-                    HTML('<span class="col-md-2>Style</span>'),
-                    HTML('<span class="col-md-2>Leather/Fabric #</span>'),
-                    HTML('<span class="col-md-2>ID Number</span>'),
+                    Field('phone_num_home', wrapper_class='field-wrapper col-md-2'),
+                    Field('phone_num_work', wrapper_class='field-wrapper col-md-2'),
+                    Field('email', wrapper_class='field-wrapper col-md-2'),
+                    css_class='row',
+                ),
+                HTML('<hr/>'),
+                Div(
+                    HTML('<h4>Select Item Brand</h4>'),
+                    InlineField('chk_editions', wrapper_class='col-md-2 checkbox-inline', template='partial/inline_field.html'),
+                    InlineField('chk_revive', wrapper_class='col-md-2 checkbox-inline', template='partial/inline_field.html'),
+                    InlineField('chk_softaly', wrapper_class='col-md-2 checkbox-inline', template='partial/inline_field.html'),
+                    InlineField('chk_italia', wrapper_class='col-md-2 checkbox-inline', template='partial/inline_field.html'),
+                    css_class="row checkbox"
+                ),
+                HTML('<hr/>'),
+                Div(
+                    HTML('<h4 class="col-md-3">Model</h4> '),
+                    HTML('<h4 class="col-md-2">Version</h4> '),
+                    HTML('<h4 class="col-md-2">Style</h4> '),
+                    HTML('<h4 class="col-md-2">Leather/Fabric #</h4> '),
+                    HTML('<h4 class="col-md-2">ID Number</h4>'),
                     css_class='row',
                 ),
                 Div(
-                    Field('model_1', wrapper_class='field-wrapper inline col-md-3'),
-                    Field('version_1', wrapper_class='field-wrapper inline col-md2'),
-                    Field('style_1', wrapper_class='field-wrapper inline col-md-2'),
-                    Field('leather_fabric_1', wrapper_class='field-wrapper inline col-md2'),
-                    Field('id_num_1', wrapper_class='field-wrapper inline col-md-2'),
-                    css_class='row',
+                    Field('model_1', wrapper_class='col-md-3', template='partial/inline_field.html'),
+                    Field('version_1', wrapper_class='col-md-2', template='partial/inline_field.html'),
+                    Field('style_1', wrapper_class='col-md-2', template='partial/inline_field.html'),
+                    Field('leather_fabric_1', wrapper_class='col-md-2', template='partial/inline_field.html'),
+                    Field('id_num_1', wrapper_class='col-md-2', template='partial/inline_field.html'),
+                    css_class="row"
+                ),
+                Div(
+                    Field('model_2', wrapper_class='col-md-3', template='partial/inline_field.html'),
+                    Field('version_2', wrapper_class='col-md-2', template='partial/inline_field.html'),
+                    Field('style_2', wrapper_class='col-md-2', template='partial/inline_field.html'),
+                    Field('leather_fabric_2', wrapper_class='col-md-2', template='partial/inline_field.html'),
+                    Field('id_num_2', wrapper_class='col-md-2', template='partial/inline_field.html'),
+                    css_class="row"
+                ),
+                Div(
+                    Field('model_3', wrapper_class='col-md-3', template='partial/inline_field.html'),
+                    Field('version_3', wrapper_class='col-md-2', template='partial/inline_field.html'),
+                    Field('style_3', wrapper_class='col-md-2', template='partial/inline_field.html'),
+                    Field('leather_fabric_3', wrapper_class='col-md-2', template='partial/inline_field.html'),
+                    Field('id_num_3', wrapper_class='col-md-2', template='partial/inline_field.html'),
+                    css_class="row"
+                ),
+                Div(
+                    Field('model_4', wrapper_class='col-md-3', template='partial/inline_field.html'),
+                    Field('version_4', wrapper_class='col-md-2', template='partial/inline_field.html'),
+                    Field('style_4', wrapper_class='col-md-2', template='partial/inline_field.html'),
+                    Field('leather_fabric_4', wrapper_class='col-md-2', template='partial/inline_field.html'),
+                    Field('id_num_4', wrapper_class='col-md-2', template='partial/inline_field.html'),
+                    css_class="row"
                 ),
                 Div(
                     Field('delivery_date', wrapper_class='col-md-2'),
                     css_class='row',
                 ),
                 Div(
-                    Field('descr_1', wrapper_class='field-wrapper inline'),
-                    Field('warranty_1', wrapper_class='field-wrapper inline'),
-                    Field('parts_1', wrapper_class='field-wrapper inline'),
-                    Field('labor_1', wrapper_class='field-wrapper inline'),
+                    HTML('<h4 class="col-md-6">Description of Product Issue</h4> '),
+                    HTML('<h4 class="col-md-3">Warranty That Applies</h4> '),
+                    HTML('<h4 class="col-md-1">Parts</h4> '),
+                    HTML('<h4 class="col-md-1">Labor</h4> '),
                     css_class='row',
                 ),
-
-              css_class = ''
+                Div(
+                    Field('descr_1', wrapper_class='col-md-6', template='partial/inline_field.html'),
+                    Field('warranty_1', wrapper_class='col-md-3', template='partial/inline_field.html'),
+                    Field('parts_1', wrapper_class='col-md-1', template='partial/inline_field.html'),
+                    Field('labor_1', wrapper_class='col-md-1', template='partial/inline_field.html'),
+                    css_class='row',
+                ),
+                Div(
+                    Field('descr_2', wrapper_class='col-md-6', template='partial/inline_field.html'),
+                    Field('warranty_2', wrapper_class='col-md-3', template='partial/inline_field.html'),
+                    Field('parts_2', wrapper_class='col-md-1', template='partial/inline_field.html'),
+                    Field('labor_2', wrapper_class='col-md-1', template='partial/inline_field.html'),
+                    css_class='row',
+                ),
+                Div(
+                    Field('descr_3', wrapper_class='col-md-6', template='partial/inline_field.html'),
+                    Field('warranty_3', wrapper_class='col-md-3', template='partial/inline_field.html'),
+                    Field('parts_3', wrapper_class='col-md-1', template='partial/inline_field.html'),
+                    Field('labor_3', wrapper_class='col-md-1', template='partial/inline_field.html'),
+                    css_class='row',
+                ),
+                Div(
+                    Field('descr_4', wrapper_class='col-md-6', template='partial/inline_field.html'),
+                    Field('warranty_4', wrapper_class='col-md-3', template='partial/inline_field.html'),
+                    Field('parts_4', wrapper_class='col-md-1', template='partial/inline_field.html'),
+                    Field('labor_4', wrapper_class='col-md-1', template='partial/inline_field.html'),
+                    css_class='row',
+                ),
+                Div(
+                    Field('descr_5', wrapper_class='col-md-6', template='partial/inline_field.html'),
+                    Field('warranty_5', wrapper_class='col-md-3', template='partial/inline_field.html'),
+                    Field('parts_5', wrapper_class='col-md-1', template='partial/inline_field.html'),
+                    Field('labor_5', wrapper_class='col-md-1', template='partial/inline_field.html'),
+                    css_class='row',
+                ),
+                Field('file'),
+                Field('claim_fields'),
+                Field('claim'),
+                Submit('submit', 'Create Claim', css_class='btn btn-primary btn-large'),
             )
         )
 
     class Meta:
         model = VendorClaimRequest
         widgets = {
-            #'file': HiddenInput,
-            #'data_fields': HiddenInput,
-            #'claim': HiddenInput,
+            'file': HiddenInput,
+            'data_fields': HiddenInput,
+            'claim': HiddenInput,
         }
         fields = "__all__"
 

@@ -44,12 +44,13 @@
 	    {{ form.management_form }}
 
         {% comment %}
-        {%  bootstrap_form form %}
+            {%  bootstrap_form form %}
+            <input type="submit" id="submitButton" class="btn btn-primary btn-large" value="Save"/>
         {% endcomment %}
 
         {% crispy form form.helper %}
 
-        <input type="submit" id="submitButton" class="btn btn-primary btn-large" value="Save"/>
+
 
     </form>
 
