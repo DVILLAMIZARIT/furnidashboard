@@ -228,11 +228,67 @@ class NatuzziClaimVendorRequestForm(forms.ModelForm):
         #self.helper.field_template = 'bootstrap3/layout/inline_field.html'
         self.helper.layout = Layout(
             Div(
-                'claim_date',
-                'reference_no',
-                'first_name',
-                'last_name',
-              css_class = 'well'
+                Div(
+                    Field('claim_date', wrapper_class='col-md-2'),
+                    Field('reference_no', wrapper_class='col-md-2'),
+                    css_class='row'
+                ),
+                Div(
+                    Field('first_name', wrapper_class='field-wrapper inline'),
+                    Field('last_name', wrapper_class='field-wrapper inline'),
+                    css_class='row'
+                ),
+                Div(
+                    Div(
+                        Field('address_line_1', wrapper_class='col-md-4'),
+                        Field('address_line_2', wrapper_class='col-md-4'),
+                        css_class='row',
+                    ),
+                    Div(
+                        Field('phone_num_home', wrapper_class='field-wrapper inline'),
+                        Field('phone_num_work', wrapper_class='field-wrapper inline'),
+                        Field('email', wrapper_class='field-wrapper inline'),
+                        css_class='row',
+                    ),
+                    css_class='row',
+                ),
+
+                Div(
+                    Field('chk_editions', wrapper_class='field-wrapper inline'),
+                    Field('chk_revive', wrapper_class='field-wrapper inline'),
+                    Field('chk_softaly', wrapper_class='field-wrapper inline'),
+                    Field('chk_italia', wrapper_class='field-wrapper inline'),
+                    css_class='row',
+                ),
+                Div(
+                    HTML('<span class="col-md-3>Model</span>'),
+                    HTML('<span class="col-md-2>Version</span>'),
+                    HTML('<span class="col-md-2>Style</span>'),
+                    HTML('<span class="col-md-2>Leather/Fabric #</span>'),
+                    HTML('<span class="col-md-2>ID Number</span>'),
+                    css_class='row',
+                ),
+                Div(
+                    Field('model_1', wrapper_class='field-wrapper inline col-md-3'),
+                    Field('version_1', wrapper_class='field-wrapper inline col-md2'),
+                    Field('style_1', wrapper_class='field-wrapper inline col-md-2'),
+                    Field('leather_fabric_1', wrapper_class='field-wrapper inline col-md2'),
+                    Field('id_num_1', wrapper_class='field-wrapper inline col-md-2'),
+                    css_class='row',
+                ),
+                Div(
+                    Field('delivery_date', wrapper_class='col-md-2'),
+                    css_class='row',
+                ),
+                Div(
+                    Field('descr_1', wrapper_class='field-wrapper inline'),
+                    Field('warranty_1', wrapper_class='field-wrapper inline'),
+                    Field('parts_1', wrapper_class='field-wrapper inline'),
+                    Field('labor_1', wrapper_class='field-wrapper inline'),
+                    css_class='row',
+                ),
+
+              css_class = ''
             )
         )
 
