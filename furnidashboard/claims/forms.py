@@ -138,7 +138,7 @@ class NatuzziClaimVendorRequestForm(forms.ModelForm):
         if self.cleaned_data:
             pdf_fields['ClaimDate'] = self.cleaned_data.get('claim_date', '')
             pdf_fields['RefInfo'] = self.cleaned_data.get('reference_no', '')
-            pdf_fields['FirstName'] = self.cleaned_dataget('first_name', '')
+            pdf_fields['FirstName'] = self.cleaned_data.get('first_name', '')
             pdf_fields['LastName'] = self.cleaned_data.get('last_name', '')
             pdf_fields['AddressLine1'] = self.cleaned_data.get('address_line_1', '')
             pdf_fields['AddressLine2'] = self.cleaned_data.get('address_line_2', '')

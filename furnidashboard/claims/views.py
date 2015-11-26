@@ -347,6 +347,11 @@ class VendorClaimRequestCreateView(PermissionRequiredMixin, CreateView):
 
 		form = self.get_form(self.get_form_class())
 
+		if self.claim.delivery_date :
+			delivery_dt =self.claim.delivery_date.strftime('%m/%d/%Y')
+		else :
+			delivery_dt = ''
+
 		form.initial = {
 			'claim': self.claim,
 			'first_name': self.claim.customer.first_name or '',
@@ -359,7 +364,7 @@ class VendorClaimRequestCreateView(PermissionRequiredMixin, CreateView):
 			'chk_revive': self.claim.item_origin == 'REVIVE',
 			'chk_softaly': self.claim.item_origin == 'SOFTALY',
 			'chk_italia': self.claim.item_origin == 'NTZ',
-			'delivery_date': self.claim.delivery_date.strftime('%m/%d/%Y') or '',
+			'delivery_date': delivery_dt, 
 			'descr_1': self.claim.claim_desc,
 		}
 
