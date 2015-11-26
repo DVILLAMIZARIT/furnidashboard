@@ -225,9 +225,14 @@ urlpatterns = patterns('',
         name="claim_add"
     ),
     url(
-      regex = r'^claims/(?P<claim_pk>\d+)/vendor-form/new$',
+      regex = r'^claims/(?P<claim_pk>\d+)/vendor-form/new/$',
       view=claims_views.VendorClaimRequestCreateView.as_view(),
       name="claim_vendor_form_add",
+    ),
+    url(
+      regex = r'^claims/(?P<claim_pk>\d+)/vendor-form/(?P<pk>\d+)/delete/$',
+      view=claims_views.VendorClaimRequestDeleteView.as_view(),
+      name="claim_request_delete",
     ),
     url(
          regex = r'claims/print/$',

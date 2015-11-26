@@ -18,23 +18,7 @@
 
 {% block extra_js %}
   {{ form.media }}
-
-	<script type="text/javascript">
- 		$(function() {
-    		$(document).ready(function() {
-	  			
-    		});
- 		});
-  </script>
 {% endblock extra_js %}
-
-{% block extra_css %}
-  <style type="text/css">
-      .delete-row {
-          margin-left:5px;
-      }   
-  </style>
-{% endblock %}
 
 {% block content %}
 
@@ -43,14 +27,7 @@
 	    {{ form.non_field_errors }}
 	    {{ form.management_form }}
 
-        {% comment %}
-            {%  bootstrap_form form %}
-            <input type="submit" id="submitButton" class="btn btn-primary btn-large" value="Save"/>
-        {% endcomment %}
-
         {% crispy form form.helper %}
-
-
 
     </form>
 

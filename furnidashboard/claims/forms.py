@@ -136,19 +136,12 @@ class NatuzziClaimVendorRequestForm(forms.ModelForm):
         pdf_fields = {}
 
         if self.cleaned_data:
-            if self.cleaned_data['claim_date']:
-                pdf_fields['ClaimDate'] = self.cleaned_data['claim_date'] #formats.date_format(self.cleaned_data['claim'].claim_date, 'DATE_FORMAT_SHORT')
-            if self.cleaned_data['reference_no']:
-                pdf_fields['RefInfo'] = self.cleaned_data['reference_no']
-            if self.cleaned_data['first_name']:
-                pdf_fields['FirstName'] = self.cleaned_data['first_name']
-            if self.cleaned_data['last_name']:
-                pdf_fields['LastName'] = self.cleaned_data['last_name']
-            if self.cleaned_data['address_line_1']:
-                pdf_fields['AddressLine1'] = self.cleaned_data['address_line_1']
-            if self.cleaned_data['address_line_2']:
-                pdf_fields['AddressLine2'] = self.cleaned_data['address_line_2']
-
+            pdf_fields['ClaimDate'] = self.cleaned_data.get('claim_date', '')
+            pdf_fields['RefInfo'] = self.cleaned_data.get('reference_no', '')
+            pdf_fields['FirstName'] = self.cleaned_dataget('first_name', '')
+            pdf_fields['LastName'] = self.cleaned_data.get('last_name', '')
+            pdf_fields['AddressLine1'] = self.cleaned_data.get('address_line_1', '')
+            pdf_fields['AddressLine2'] = self.cleaned_data.get('address_line_2', '')
             pdf_fields['PhoneNumPhone'] = self.cleaned_data.get('phone_num_home', '')
             pdf_fields['PhoneNumWork'] = self.cleaned_data.get('phone_num_work', '')
             pdf_fields['Email'] = self.cleaned_data.get('email', '')

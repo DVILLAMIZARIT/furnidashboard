@@ -170,12 +170,16 @@
                                 <tr>
                                     <td>
                                         <a href="{{ MEDIA_URL }}{{request_form.file}}"  target="_blank">
-                                                {{ request_form.file.name }}
+                                            {{ request_form.file.name }} - Download
                                         </a>
-                                        {{ request_form.pk }}
+                                        ID:#{{ request_form.pk }}
                                     </td>
 
-                                    <td> {{ request_form.data_fields}} </td>
+                                    <td>
+                                        <a href="{% url 'claim_request_delete' claim_pk=request_form.claim.pk pk=request_form.pk %}" >
+                                            Delete
+                                        </a>
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>

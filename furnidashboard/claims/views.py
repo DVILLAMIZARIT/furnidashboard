@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.files import File
 #from django.core.files.temp import TemporaryFile
 from tempfile import TemporaryFile
@@ -348,6 +349,18 @@ class VendorClaimRequestCreateView(PermissionRequiredMixin, CreateView):
 
 		form.initial = {
 			'claim': self.claim,
+			'first_name': self.claim.customer.first_name or '',
+			'last_name': self.claim.customer.last_name or '',
+			'claim_date': self.claim.claim_date.strftime('%m/%d/%Y') or '',
+			'address_line_1': self.claim.customer.shipping_address or '',
+			'phone_num_home': self.claim.customer.phone or '',
+			'email': self.claim.customer.email or '',
+			'chk_editions': self.claim.item_origin == 'EDITIONS',
+			'chk_revive': self.claim.item_origin == 'REVIVE',
+			'chk_softaly': self.claim.item_origin == 'SOFTALY',
+			'chk_italia': self.claim.item_origin == 'NTZ',
+			'delivery_date': self.claim.delivery_date.strftime('%m/%d/%Y') or '',
+			'descr_1': self.claim.claim_desc,
 		}
 
 		extra_forms = {
@@ -426,3 +439,10 @@ class VendorClaimRequestCreateView(PermissionRequiredMixin, CreateView):
 
 	def get_success_url(self):
 		return reverse('claim_detail', kwargs={'pk': self.object.claim.pk})
+
+
+class VendorClaimRequestDeleteView(LoginRequiredMixin, DeleteView):
+	model = VendorClaimRequest
+
+	def get_success_url(self):
+		return reverse("claim_detail", kwargs={'pk':self.object.claim_id})

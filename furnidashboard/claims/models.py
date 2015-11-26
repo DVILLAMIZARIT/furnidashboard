@@ -22,6 +22,7 @@ class Claim(TimeStampedModel, AuthStampedModel):
         ('NTZ', 'Natuzzi Italia'),
         ('EDITIONS', 'Natuzzi Editions'),
         ('REVIVE', "Natuzzi Re-Vive"),
+        ('SOFTALY', "Softaly"),
     )
 
     claim_date = models.DateTimeField(null=False)
@@ -120,7 +121,7 @@ class VendorClaimRequest(models.Model):
     data_fields = models.TextField(null=False, blank=True, default='')
 
     def __unicode__(self):
-        return "Vendor Claim Request form #%d, claim #" % self.pk, self.claim.pk
+        return "Vendor Claim Request form #%d, claim #%d" % (self.pk, self.claim_id)
 
     class Meta:
         db_table = "claim_vendor_requests"
