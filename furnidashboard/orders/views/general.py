@@ -234,7 +234,7 @@ class SalesStandingsMonthTableView(PermissionRequiredMixin, ListView):
 
 		# total sales table
 		sales_by_assoc_table = SalesByAssociateTable(sales_by_assoc_data)
-		RequestConfig(self.request).configure(sales_by_assoc_table)
+		RequestConfig(self.request, paginate=False).configure(sales_by_assoc_table)
 		context['sales_by_associate'] = sales_by_assoc_table
 
 		# prepare expanded sales tables per each associate
@@ -248,7 +248,7 @@ class SalesStandingsMonthTableView(PermissionRequiredMixin, ListView):
 
 		# sales by stores table
 		store_totals_table = _get_sales_totals(orders)
-		RequestConfig(self.request).configure(store_totals_table)
+		RequestConfig(self.request, paginate=False).configure(store_totals_table)
 		context['store_totals_table'] = store_totals_table
 
 		# employee of the month
@@ -258,7 +258,7 @@ class SalesStandingsMonthTableView(PermissionRequiredMixin, ListView):
 		last_month_sales = sorted(last_month_sales, key=lambda a: a['sales'], reverse=True)
 		try:
 			context['employee_of_the_month'] = last_month_sales[0]['associate']
-			context['employee_of_the_month_period'] = last_month_begin.strftime("%b %Y")
+			context['employee_of_the_month_period'] = last_month_begin.strftime("%b, %Y")
 		except (KeyError, IndexError):
 			context['employee_of_the_month_period'] = context['employee_of_the_month'] = ''
 

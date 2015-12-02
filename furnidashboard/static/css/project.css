@@ -87,6 +87,7 @@ input.order-item-desc {
 }
 #totals-ytd {
   margin-top:50px;
+  clear: left;
 }
 #monthly-bonus-report {
   float:left;
