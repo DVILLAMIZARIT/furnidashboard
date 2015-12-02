@@ -330,6 +330,14 @@ LOGGING = {
 			'()': 'django.utils.log.RequireDebugFalse'
 		}
 	},
+	'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
 	'handlers': {
 		'mail_admins': {
 			'level': 'ERROR',
@@ -346,6 +354,7 @@ LOGGING = {
 			'filename': normpath(join(SITE_ROOT, 'logs/error.log')),
 			'maxBytes': 1024 * 1024 * 15,  # 15MB
 			'backupCount': 10,
+			'formatter': 'verbose',
 		},
 	},
 	'loggers': {

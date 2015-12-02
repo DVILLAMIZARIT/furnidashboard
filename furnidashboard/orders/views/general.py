@@ -259,7 +259,7 @@ class SalesStandingsMonthTableView(PermissionRequiredMixin, ListView):
 		try:
 			context['employee_of_the_month'] = last_month_sales[0]['associate']
 			context['employee_of_the_month_period'] = last_month_begin.strftime("%b %Y")
-		except KeyError:
+		except (KeyError, IndexError):
 			context['employee_of_the_month_period'] = context['employee_of_the_month'] = ''
 
 		# sales_by_assoc_data_ytd = order_utils._calc_sales_assoc_by_orders(self.queryset)

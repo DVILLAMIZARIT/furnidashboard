@@ -55,7 +55,7 @@ class SalesByAssociateTable(tables.Table):
 
   class Meta:
     order_by='-sales'
-    attrs = {"class":"paleblue"}
+    attrs = {"class":"paleblue sales-table"}
 
 class SalesByAssocSalesTable(tables.Table):
   order_number = tables.Column(verbose_name="Order #")

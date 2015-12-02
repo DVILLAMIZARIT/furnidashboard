@@ -172,7 +172,7 @@ table.dashed-table th,
 }
 #month-employee-container h3 {
   position: absolute;
-  top: 25px;
+  top: 30px;
   width: 271px;
   font-family: Georgia, serif;
   text-transform: uppercase;
@@ -180,27 +180,23 @@ table.dashed-table th,
 }
 #month-employee-container span.line1 {
   display: block;
-  font-size: 1.4em;
+  font-size: 1.2em;
   text-align: center;
-  letter-spacing: -2px;
-}
-#month-employee-container span.line2 {
-    display: block;
-    text-align: center;
-    margin-top: 7px;
+  /* letter-spacing: -2px; */
 }
 #month-employee-container span.line3 {
   display: block;
   text-align: center;
-  font-size: 1.4em;
+  font-size: 1.3em;
 }
 #month-employee-container span.line4 {
-    margin-top: 7px;
-    display: block;
+  margin-top: 10px;
+  display: block;
+  font-style: italic;
 }
 #month-employee-container div {
   position: absolute;
-  bottom: 140px;
+  bottom: 150px;
   width: 271px;
   text-align: center;
   font-family: Georgia, serif;
@@ -209,11 +205,12 @@ table.dashed-table th,
   text-transform: uppercase;
   color: #E7585B;
 }
-table tr:nth-child(1) td.associate:before {
-    content: url("/static/images/add.png");
+table.sales-table tr:nth-child(1) td.associate:before {
+    content: url("/static/images/star.png");
+    margin-right: 2px;
 }
-table tr:nth-child(1) td.associate {
-    color: red;
+table.sales-table tr:nth-child(1) td.associate {
+    font-weight:700;
 }
 /* \ORDER REPORTS */
 

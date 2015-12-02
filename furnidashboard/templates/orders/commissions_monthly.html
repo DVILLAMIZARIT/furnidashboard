@@ -26,7 +26,7 @@
 
     $(document).ready(function() {
         
-      $('#tabs a').click(function (e) {
+      $('#tabs').find('a').click(function (e) {
         e.preventDefault();
         $(this).tab('show');
       });
@@ -86,7 +86,7 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
 
 <style>
-.bar {
+/*.bar {
   fill:"steelblue";
 }
 
@@ -107,8 +107,7 @@
 
 .x.axis path {
   display: none;
-}
-
+}*/
 </style>
 
 {% endblock %}
@@ -134,7 +133,7 @@
     <aside id="month-employee-container">
 
         <img src="{{ STATIC_URL }}images/employee-of-the-month-logo.png" alt="Employee of the month"/>
-        <h3> <span class="line1">Employee</span><span class=""line2">of the</span><span class="line3">month</span><span class="line4">{{ employee_of_the_month_period }}</span></h3>
+        <h3> <span class="line1">Employee</span><span class="line2">of the</span><span class="line3">month</span><span class="line4">{{ employee_of_the_month_period }}</span></h3>
         <div>{{ employee_of_the_month }}</div>
     </aside>
 
@@ -160,6 +159,7 @@
           </fieldset>
         </div>
       {% endfor %}
+    </div>
   </div>
 
 {% endblock content %}
