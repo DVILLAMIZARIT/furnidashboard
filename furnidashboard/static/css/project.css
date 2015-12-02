@@ -150,17 +150,70 @@ table.dashed-table th,
 /* \ORDER DETAIL */
 
 /* ORDER REPORTS */
+#dateRangeFilter {
+   width: 750px;
+}
 #dateRangeFilter .control-group {
   display:inline-block;
   margin-left:15px;
 }
 .slice text {
  font-size: 16pt;
- font-family: Arial;
+ font-family: Arial, sans-serif;
 }   
 #totals-ytd td.total {
   font-weight:bold;
   font-size: larger;
+}
+#month-employee-container {
+  position: absolute;
+  right: 100px;
+  top: 100px;
+}
+#month-employee-container h3 {
+  position: absolute;
+  top: 25px;
+  width: 271px;
+  font-family: Georgia, serif;
+  text-transform: uppercase;
+  text-align: center;
+}
+#month-employee-container span.line1 {
+  display: block;
+  font-size: 1.4em;
+  text-align: center;
+  letter-spacing: -2px;
+}
+#month-employee-container span.line2 {
+    display: block;
+    text-align: center;
+    margin-top: 7px;
+}
+#month-employee-container span.line3 {
+  display: block;
+  text-align: center;
+  font-size: 1.4em;
+}
+#month-employee-container span.line4 {
+    margin-top: 7px;
+    display: block;
+}
+#month-employee-container div {
+  position: absolute;
+  bottom: 140px;
+  width: 271px;
+  text-align: center;
+  font-family: Georgia, serif;
+  font-size: 2em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #E7585B;
+}
+table tr:nth-child(1) td.associate:before {
+    content: url("/static/images/add.png");
+}
+table tr:nth-child(1) td.associate {
+    color: red;
 }
 /* \ORDER REPORTS */
 

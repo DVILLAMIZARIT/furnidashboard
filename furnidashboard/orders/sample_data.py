@@ -7,7 +7,7 @@ from orders.models import Order, OrderItem, OrderDelivery
 from customers.models import Customer
 from stores.models import Store
 from commissions.models import Commission
-from orders.utils import _calc_sales_assoc_by_orders
+from orders.utils import get_sales_data_from_orders
 
 def create_sample_data():
 

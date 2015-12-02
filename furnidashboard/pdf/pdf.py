@@ -60,7 +60,8 @@ class PdfTemplate(object):
     def fill_form(self, fields, src, pdftk_bin=None):
         fdf_stream = forge_fdf(fdf_data_strings=fields)
 
-        cmd = [self.pdftk_bin, src, 'fill_form', '-', 'output', '-', 'flatten']
+        #cmd = [self.pdftk_bin, src, 'fill_form', '-', 'output', '-', 'flatten']
+        cmd = [self.pdftk_bin, src, 'fill_form', '-', 'output', '-']
         cmd = ' '.join(cmd)
 
         return self.run_cmd(cmd, fdf_stream)

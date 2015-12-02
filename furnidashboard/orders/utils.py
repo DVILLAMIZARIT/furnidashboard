@@ -40,7 +40,7 @@ def calc_commissions_for_order(order):
   return coms
 
 
-def _calc_sales_assoc_by_orders(order_list, **kwargs):
+def get_sales_data_from_orders(order_list, **kwargs):
   # returns a list of commissions data stored as key-val pair
 
   res = {}

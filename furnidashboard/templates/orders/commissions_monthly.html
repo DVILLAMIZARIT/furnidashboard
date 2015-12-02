@@ -8,7 +8,7 @@
 {% block page_title %}Sales Standings Report{% endblock page_title %}
 
 {% block header_bottom %}
-  <ul class="nav nav-pills">
+    <ul class="nav nav-pills" xmlns="http://www.w3.org/1999/html">
     <li class="active">
       <a href="{% url 'sales_standings_cur' %}">Sales Report</a>
     </li>
@@ -123,14 +123,20 @@
       <h3>Sales Totals - by Associates </h3>
       <h4>Date range: {{ dates_caption }}</h4>
       {% render_table sales_by_associate %}
-
     </div>
 
     <div id="totals-ytd">
       <h4>Sales by Stores</h4>
       {% render_table store_totals_table %}
     </div>
-  </div>  
+  </div>
+
+    <aside id="month-employee-container">
+
+        <img src="{{ STATIC_URL }}images/employee-of-the-month-logo.png" alt="Employee of the month"/>
+        <h3> <span class="line1">Employee</span><span class=""line2">of the</span><span class="line3">month</span><span class="line4">{{ employee_of_the_month_period }}</span></h3>
+        <div>{{ employee_of_the_month }}</div>
+    </aside>
 
   <div id="associate-order-tabs" class="tabbable tabs">
   

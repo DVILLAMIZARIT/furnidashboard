@@ -46,7 +46,7 @@ class BonusMonthlyReportView(PermissionRequiredMixin, ListView):
     if self.from_date < datetime(2015, 02, 01): #new bonus start date - 02/01/2015!!!
       attrs['old_bonus'] = True
 
-    sales_by_assoc_data, tmp_res = order_utils._calc_sales_assoc_by_orders(orders, **attrs)
+    sales_by_assoc_data, tmp_res = order_utils.get_sales_data_from_orders(orders, **attrs)
     sales_by_assoc = SalesByAssociateWithBonusTable(sales_by_assoc_data)
 
     RequestConfig(self.request).configure(sales_by_assoc)

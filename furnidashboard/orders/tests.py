@@ -35,7 +35,7 @@ class TestOrdersView(TestCase):
     o = Order.objects.get(number='SO-01-0001')
     self.assertNotEqual(o, None)
 
-    comm_data = order_utils._calc_sales_assoc_by_orders([o], False)
+    comm_data = order_utils.get_sales_data_from_orders([o], False)
     self.assertEqual(len(comm_data), 1)
     self.assertEqual(comm_data[0]['associate'], o.commission_set.all()[0].associate.first_name)
     self.assertEqual(float(comm_data[0]['commissions_due']), 0)
@@ -52,7 +52,7 @@ class TestOrdersView(TestCase):
     self.assertNotEqual(o, None)
     order_associates = [c.associate.first_name for c in o.commission_set.all()]
 
-    comm_data = order_utils._calc_sales_assoc_by_orders([o], False)
+    comm_data = order_utils.get_sales_data_from_orders([o], False)
     self.assertEqual(len(comm_data), 2)
     self.assertTrue(all([com['associate'] in order_associates for com in comm_data])) 
     self.assertEqual(float(comm_data[0]['commissions_due']), 0)

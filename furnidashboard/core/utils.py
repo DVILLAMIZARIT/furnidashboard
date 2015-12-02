@@ -76,7 +76,6 @@ def get_current_month_date_range():
 
 	return get_month_date_range(to_date.month, to_date.year)
 
-
 def get_date_range_from_string(range_str, request):
 	to_date = datetime.now()
 	if range_str == 'week':
