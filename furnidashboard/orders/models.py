@@ -28,7 +28,7 @@ class Order(TimeStampedModel, AuthStampedModel):
     ('NO', 'Not Referred'),
     ('RVL', 'Roseville Store'),
     ('CST', 'Referred by existing Furnitalia customer'), 
-    ('REF', 'Referred by friends/relatives/acquintance'),
+    ('REF', 'Referred by friends/relatives/acquaintances'),
     ('WEB', 'Website'),
     ('EBL', 'E-mail (or Eblast)'),
     ('MAG', 'Magazine'),
