@@ -9,7 +9,7 @@ def run_unplaced_orders_cron():
     msg = []
     report_is_blank = True
 
-    msg.append("<strong>*** FurniCloud Order Alerts Notification *** </strong>")
+    msg.append("<strong>-------- FurniCloud Order Alerts Notification --------- </strong>")
     msg.append("<br/>")
 
     #-----------------------------------
@@ -17,19 +17,19 @@ def run_unplaced_orders_cron():
     #-----------------------------------
     unplaced = order_utils.list_unplaced_orders()  # Order.objects.unplaced_orders()
     if len(unplaced):
-        msg.append("<strong>*** UNPLACED orders: {0}</strong>".format(len(unplaced)))
+        msg.append("<strong>UNPLACED orders: {0}</strong>".format(len(unplaced)))
         msg.append("The following orders are missing PO numbers:")
         report_is_blank = False
 
-        msg.append("<table border=\"1\">")
-        msg.append("<th>Order #</th><th>Order Date</th><th>Link</th>")
         items = []
+        items.append("<table border=\"1\">")
+        items.append("<thead><th>Order #</th><th>Order Date</th><th>Link</th></thead><tbody>")
         for counter, o in enumerate(unplaced):
             items.append(
                 "<tr><td>{0}</td><td>{1}</td><td>http://cloud.furnitalia.com{2}</td></tr>".format(o.number, o.order_date.strftime("%m-%d-%Y"),
                                                                                                 o.get_absolute_url()))
+        items.append("</tbody></table>")
         msg.append("".join(items))
-        msg.append("</table>")
 
     if len(unplaced):
         msg.append("<br/>")
@@ -39,19 +39,19 @@ def run_unplaced_orders_cron():
     #-----------------------------------
     orders_no_ack_no = order_utils.list_unconfirmed_orders()  # Order.objects.ordered_not_acknowledged()
     if len(orders_no_ack_no) > 0:
-        msg.append("<strong>*** UNCONFIRMED orders: {0} </strong>".format(
+        msg.append("<strong>UNCONFIRMED orders: {0} </strong>".format(
             len(orders_no_ack_no)))
         msg.append("The following orders are missing acknowledgement # from vendor:")
         report_is_blank = False
 
-        msg.append("<table border=\"1\">")
-        msg.append("<th>Order #</th><th>Order Date</th><th>Link</th>")
         items = []
+        items.append("<table border=\"1\">")
+        items.append("<thead><th>Order #</th><th>Order Date</th><th>Link</th></thead><tbody>")
         for counter, o in enumerate(orders_no_ack_no):
              items.append("<tr><td>{0}</td><td>{1}</td><td>http://cloud.furnitalia.com{2}</td></tr>".format(o.number, o.order_date.strftime("%m-%d-%Y"),
                                                                                                 o.get_absolute_url()))
+        items.append("</tbody></table>")
         msg.append("".join(items))
-        msg.append("</table>")
 
     if len(orders_no_ack_no):
         msg.append("<br/>")
@@ -61,18 +61,18 @@ def run_unplaced_orders_cron():
     #-----------------------------------
     orders_protection_plan_missing = Order.objects.protection_plan_inactive()
     if (len(orders_protection_plan_missing)):
-        msg.append("<strong>*** Missing CRYPTON protection plan Confirmation Numbers: {0} Orders </strong>".format(
+        msg.append("<strong>Missing CRYPTON protection plan Confirmation Numbers: {0} Orders </strong>".format(
             len(orders_protection_plan_missing)))
         report_is_blank = False
 
-        msg.append("<table border=\"1\">")
-        msg.append("<th>Order #</th><th>Order Date</th><th>Link</th>")
         items = []
+        items.append("<table border=\"1\">")
+        items.append("<thead><th>Order #</th><th>Order Date</th><th>Link</th></thead><tbody>")
         for counter, o in enumerate(orders_protection_plan_missing):
              items.append("<tr><td>{0}</td><td>{1}</td><td>http://cloud.furnitalia.com{2}</td></tr>".format(o.number, o.order_date.strftime("%m-%d-%Y"),
                                                                                                 o.get_absolute_url()))
+        items.append("</tbody></table>")
         msg.append("".join(items))
-        msg.append("</table>")
 
     if len(orders_protection_plan_missing):
         msg.append("<br/>")
@@ -82,18 +82,18 @@ def run_unplaced_orders_cron():
     #-----------------------------------
     orders_financing_missing = Order.objects.financing_unactivated()
     if (len(orders_financing_missing)):
-        msg.append("<strong>*** Missing FINANCING Confirmation Numbers: {0} Orders </strong>".format(
+        msg.append("<strong>Missing FINANCING Confirmation Numbers: {0} Orders </strong>".format(
             len(orders_financing_missing)))
         report_is_blank = False
 
-        msg.append("<table border=\"1\">")
-        msg.append("<th>Order #</th><th>Order Date</th><th>Link</th>")
         items = []
+        items.append("<table border=\"1\">")
+        items.append("<thead><th>Order #</th><th>Order Date</th><th>Link</th></thead><tbody>")
         for counter, o in enumerate(orders_financing_missing):
              items.append("<tr><td>{0}</td><td>{1}</td><td>http://cloud.furnitalia.com{2}</td></tr>".format(o.number, o.order_date.strftime("%m-%d-%Y"),
                                                                                                 o.get_absolute_url()))
+        items.append("</tbody></table>")
         msg.append("".join(items))
-        msg.append("</table>")
 
     if len(orders_financing_missing):
         msg.append("<br/>")
@@ -101,13 +101,11 @@ def run_unplaced_orders_cron():
     # report_is_blank = True
     # send email notifications
     if not report_is_blank:
-        pass
-        print "\r\n".join(msg)
-        # cron_utils.send_emails (
-        #     to=['pearl@furnitalia.com', 'd.aks@furnitalia.com', 'admin@furnitalia.com'],
-        #     subject="FurniCloud Order Alerts",
-        #     message="<br/>".join(msg)
-        # )
+        cron_utils.send_emails (
+            to=['pearl@furnitalia.com', 'd.aks@furnitalia.com', 'admin@furnitalia.com'],
+            subject="FurniCloud Order Alerts",
+            message="<br/>".join(msg)
+        )
 
 
 def run_unplaced_orders_by_assoc_cron():
