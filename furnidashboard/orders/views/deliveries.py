@@ -24,9 +24,9 @@ class DeliveriesTableView(LoginRequiredMixin, SingleTableView):
     date_range = ""
     try:
       date_range = self.request.GET['date_range']
-      self.from_date, self.to_date = core_utils.get_date_range(date_range, self.request)
+      self.from_date, self.to_date = core_utils.get_date_range_from_string(date_range, self.request)
     except KeyError, e:
-      self.from_date, self.to_date = core_utils.get_date_range('week', self.request);
+      self.from_date, self.to_date = core_utils.get_date_range_from_string('week', self.request)
     
     lookup_kwargs = {
       '%s__gte' % 'scheduled_delivery_date': self.from_date,
@@ -39,11 +39,11 @@ class DeliveriesTableView(LoginRequiredMixin, SingleTableView):
   def get_context_data(self, **kwargs):
     context = super(DeliveriesTableView, self).get_context_data(**kwargs)
 
-    context['date_range_filter'] = order_forms.DateRangeForm(self.request.GET)
-    
-    date_range = ""
+    date_range = 'month'
     if self.request.GET.has_key("date_range"):
-      date_range = self.request.GET['date_range']
+        context['date_range_filter'] = order_forms.DateRangeForm(self.request.GET)
+    else:
+        context['date_range_filter'] = order_forms.DateRangeForm(initial={'date_range': date_range})
 
     if self.from_date and self.to_date:
       context['dates_caption'] = "{0} - {1}".format(self.from_date.strftime("%Y-%m-%d"), self.to_date.strftime("%Y-%m-%d"))

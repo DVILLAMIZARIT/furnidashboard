@@ -255,13 +255,13 @@ class DateRangeForm(forms.Form):
     ("year", "Year-to-date"),
     ("custom", "Select date range"),
   )
-  date_range = forms.ChoiceField(label="Filter by Date Range", required=False, choices=REPORT_FILTER_CHOICES)
+  date_range = forms.ChoiceField(label="Filter by Date Range", required=False, choices=REPORT_FILTER_CHOICES) #choices=REPORT_FILTER_CHOICES, initial="custom")
   range_from = forms.DateField(label="From", required=False, widget=BootstrapDateInput())
   range_to = forms.DateField(label="To", required=False, widget=BootstrapDateInput())
   
   def __init__(self, *args, **kwargs):
     super(DateRangeForm, self).__init__(*args, **kwargs)
-    self.fields['date_range'].initial = 'week'  #default selection
+    #self.initial['date_range'] = 'custom'  #default selection
 
     self.helper = FormHelper()
     self.form_tag = False
