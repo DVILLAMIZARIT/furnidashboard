@@ -147,6 +147,27 @@ class OrderMonthArchiveTableView(PermissionRequiredMixin, FilteredTableMixin, Mo
 
 # -----------------------------------------------------------------------
 
+class AllOrdersTableView(PermissionRequiredMixin, FilteredTableMixin, ListView):
+    model = Order
+    table_paginate_by = 50
+    context_object_name = 'order_list'
+    template_name = "orders/order_filtered_list.html"
+    required_permissions = (
+        'orders.view_orders',
+    )
+    queryset = Order.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super(AllOrdersTableView, self).get_context_data(**kwargs)
+        table = self.get_table(data=context[self.context_object_name])
+        context[self.context_table_name] = table
+        context[self.context_filter_name] = self.filter
+        context['list_label'] = 'All Orders List'
+        return context
+
+
+# -----------------------------------------------------------------------
+
 class ActiveOrdersTableView(PermissionRequiredMixin, FilteredTableMixin, ListView):
     model = Order
     table_paginate_by = 50
@@ -206,7 +227,7 @@ class SalesStandingsMonthTableView(PermissionRequiredMixin, ListView):
 
     def get_queryset(self, **kwargs):
         # qs = super(FilteredTableMixin, self).get_queryset(**kwargs)
-        date_range = "month" #default
+        date_range = "month"  # default
         try:
             date_range = self.request.GET['date_range']
         except KeyError, e:

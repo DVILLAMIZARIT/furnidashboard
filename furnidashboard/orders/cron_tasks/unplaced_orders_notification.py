@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from orders.models import Order
 from django.db.models import Q
 import orders.utils as order_utils
@@ -115,7 +117,7 @@ def run_unplaced_orders_by_assoc_cron():
     for associate in associates:
         report_is_blank = True
         msg = []
-        if len(associate.email):
+        if len(associate.email) and associate.email in settings.CRON_EMAIL_NOTIFICATION_LIST:
             # process the following for each associate
 
             #-----------------------------------

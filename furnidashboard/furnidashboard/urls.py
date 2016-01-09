@@ -40,6 +40,11 @@ urlpatterns = patterns('',
       name="order_list",
     ),
     url(
+      regex = r'^all-orders/$',
+      view = general_views.AllOrdersTableView.as_view(),
+      name = "all_orders",
+    ),
+    url(
       regex = r'^active-orders/$',
       view = general_views.ActiveOrdersTableView.as_view(),
       name = "active_orders",

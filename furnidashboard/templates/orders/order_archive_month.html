@@ -24,12 +24,16 @@
   <div id="order-list" class="monthly-orders">
     
     <ul class="breadcrumb">
-      <li> {{ month|date:'Y' }}:</li>
+      <li> {{ month|date:"Y" }}:</li>
       {% for month, link in order_months_links %} 
-	  <li><a href="{{ link }}" class="-btn">{{ month}}</a>  <!--<span class="divider">/</span>--></li>
+	    <li><a href="{{ link }}" class="-btn">{{ month}}</a>  <!--<span class="divider">/</span>--></li>
       {% endfor %}      
       {% url 'active_orders' as active_orders %}
-      <li class="pull-right"><a href={{ active_orders}}>View all active orders</a></li>
+      {% url 'all_orders' as all_orders_url %}
+      <li class="pull-right">
+          <a href="{{ active_orders }}" class="btn btn-default" style="position: relative;bottom: 7px;">All Open Orders</a> &nbsp;
+          <a href="{{ all_orders_url }}" class="btn btn-default" style="position: relative;bottom: 7px;">All Orders</a>
+      </li>
     </ul>
     
     {% if previous_year_links %}
@@ -41,14 +45,16 @@
       </ul>
     {% endif %}
 
-    {% if months_2013 %}
-      <ul class="breadcrumb">
-        <li> 2013: </li>
-        {% for month, link in months_2013 %} 
-		<li><a href="{{ link }}" class="-btn">{{ month}}</a>   <!--<span class="divider">/</span>--></li>
-        {% endfor %}
-      </ul>
-    {% endif %}
+    {% comment %}
+        {% if months_2013 %}
+          <ul class="breadcrumb">
+            <li> 2013: </li>
+            {% for month, link in months_2013 %}
+            <li><a href="{{ link }}" class="-btn">{{ month}}</a>   <!--<span class="divider">/</span>--></li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+    {% endcomment %}
 
     {% comment %}
     <fieldset class="well">

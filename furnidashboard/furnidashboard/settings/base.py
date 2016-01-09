@@ -397,11 +397,14 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'  # django crispy forms
 
 CRON_EMAIL_NOTIFICATION_LIST = [
 	'emil@furnitalia.com',
-	'lana@furnitalia.com',
+	#'lana@furnitalia.com',
 	'd.aks@furnitalia.com',
 	'pearl@furnitalia.com',
 	'ruth@furnitalia.com',
 	'jenn@furnitalia.com',
+	'kurt@furnitalia.com',
+	'david@furnitalia.com',
+	'audrey@furnitalia.com',
 ]
 
 KRONOS_POSTFIX = '> /dev/null 2>&1'
